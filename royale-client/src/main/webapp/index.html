@@ -1,0 +1,67 @@
+<html>
+    <head>
+        <title>Infringe Royale</title>
+        <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+        <link rel='icon' href='img/home/icon.png'>
+        <link rel='stylesheet' type='text/css' href='css/home.css'>
+        <link rel='stylesheet' type='text/css' href='css/spinner.css'>
+    </head>
+    
+    <body id='body' style='display: none;'>
+      <!-- Warning -->
+      <div id='warn' class='warn'></div>
+      
+      <!-- Error -->
+      <div id='error' class='container-center'>
+        <div id ='error-message' class='error'></div>
+      </div>
+      
+      
+      <!-- Loading Screen -->
+      <div id='load' class='container-center'>
+        <div id='loader'></div>
+      </div>
+      
+      <!-- Main Menu -->
+      <div id='main' class='container-center'>
+        <div class='title'>Infringe Royale</div>
+        <div class='container-launch'>
+          <span id ='main-launch' class='launch'>Play Now!</span>
+          <span class='players'><span id='main-number' class='player-number'>##</span> Online</span>
+        </div>
+      </div>
+      
+      <!-- Enter Name -->
+      <div id='name' class='container-center'>
+        <div class='name'><input id='name-input' type='text' class='name-input' placeholder='Name'/></div>
+          <div class='container-launch'>
+          <span id ='name-launch' class='launch'>Go!</span>
+        </div>
+      </div>
+      
+      <!-- Game -->
+      <div id='game' class='container-game'>
+      </div>
+      
+      <!-- Libs -->
+      <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
+      
+      <!-- Menus -->
+      <script src='js/app/menu.js'></script>
+      <script src='js/app/menu/menu-warn.js'></script>
+      <script src='js/app/menu/menu-error.js'></script>
+      <script src='js/app/menu/menu-load.js'></script>
+      <script src='js/app/menu/menu-main.js'></script>
+      <script src='js/app/menu/menu-name.js'></script>
+      <script src='js/app/menu/menu-game.js'></script>
+      
+      <!-- Game Core -->
+      <script src='js/app/net/network.js'></script>
+      <script src='js/app/net/state-login.js'></script>
+      <script src='js/app/net/state-game.js'></script>
+      <script src='js/app/game/game.js'></script>
+      
+      <!-- Main Exec -->
+      <script src='js/app/app.js'></script>
+    </body>        
+</html>
