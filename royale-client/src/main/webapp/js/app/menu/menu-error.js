@@ -9,6 +9,7 @@ function MenuError() {
 MenuError.prototype.show = function(message) {
   app.menu.hideAll();
   app.menu.navigation("error", "error");
+  app.menu.background("b");
   this.error.innerHTML = message;
   console.warn("##ERROR## " + message);
   this.element.style.display = "block";

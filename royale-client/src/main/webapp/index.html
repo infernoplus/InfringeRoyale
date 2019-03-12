@@ -40,11 +40,18 @@
       </div>
       
       <!-- Game -->
-      <div id='game' class='container-game'>
+      <div id='game' class='fullscreen'>
+          <canvas id="game-canvas" width="320" height="240">
+            Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.
+          </canvas>
       </div>
       
       <!-- Libs -->
       <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
+      
+      <!-- Util -->
+      <script src='js/app/util/util.js'></script>
+      <script src='js/app/util/frame.js'></script>
       
       <!-- Menus -->
       <script src='js/app/menu.js'></script>
@@ -59,6 +66,9 @@
       <script src='js/app/net/network.js'></script>
       <script src='js/app/net/state-login.js'></script>
       <script src='js/app/net/state-game.js'></script>
+      <script src='js/app/game/input.js'></script>
+      <script src='js/app/game/display/camera.js'></script>
+      <script src='js/app/game/display.js'></script>
       <script src='js/app/game/game.js'></script>
       
       <!-- Main Exec -->

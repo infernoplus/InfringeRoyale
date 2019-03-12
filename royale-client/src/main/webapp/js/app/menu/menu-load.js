@@ -7,6 +7,7 @@ function MenuLoad() {
 
 MenuLoad.prototype.show = function() {
   app.menu.hideAll();
+  app.menu.background("a");
   this.element.style.display = "block";
 };
 

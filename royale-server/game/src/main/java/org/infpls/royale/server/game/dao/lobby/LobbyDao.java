@@ -13,7 +13,6 @@ public class LobbyDao {
   }
   
   public GameLobby createLobby() throws IOException {
-    cleanUp();
     GameLobby lobby = new OfficialLobby();
     lobbies.add(lobby);
     lobby.start();
@@ -21,9 +20,14 @@ public class LobbyDao {
   }
   
   /* Returns a lobby with open space for a player to join. */
-  public GameLobby findLobby() {
+  public GameLobby findLobby() throws IOException {
     cleanUp();
-    return null;
+    for(int i=0;i<lobbies.size();i++) {
+      final GameLobby lobby = lobbies.get(i);
+      if(!lobby.isFull()) { return lobby; }
+    }
+    final GameLobby lobby = createLobby();
+    return lobby;
   }
  
   /* This method deletes any user created lobbies that are flagged as closed. */

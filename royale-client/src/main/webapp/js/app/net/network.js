@@ -84,7 +84,6 @@ Network.prototype.send = function(packet){
 
 /* This should never be called directly, only network.js should call this. Use main.close() instead. */
 Network.prototype.close = function(){
-  if(this.webSocket !== undefined) {
-    this.webSocket.close();
-  }
+  if(this.webSocket !== undefined) { this.webSocket.close(); }
+  if(app.ingame()) { app.game.destroy(); }
 };

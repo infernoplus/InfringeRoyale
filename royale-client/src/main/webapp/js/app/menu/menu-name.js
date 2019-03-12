@@ -18,6 +18,7 @@ MenuName.prototype.launch = function() {
 MenuName.prototype.show = function() {
   app.menu.hideAll();
   app.menu.navigation("name", "name");
+  app.menu.background("a");
   this.element.style.display = "block";
 };
 

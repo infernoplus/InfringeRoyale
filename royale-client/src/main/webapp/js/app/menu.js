@@ -3,6 +3,7 @@
 
 function Menu() {
   
+  this.body = document.getElementById("body");
   window.history.pushState({html:"index.html", pageTitle:"Infringe Royale"}, "", "#");
   
   /* Register all menu classes here*/
@@ -35,13 +36,29 @@ function Menu() {
   };
   
   this.hideAll();
-  document.getElementById('body').style.display = "block";
+  this.background('a');
+  this.body.style.display = "block";
 };
 
 Menu.prototype.hideAll = function() {
   for(var i=1;i<this.menus.length;i++) { /* Skip first element because it's non-exclusive */
     this.menus[i].hide();
   }
+};
+
+/* Changes class of body in order to set background visuals */
+Menu.prototype.background = function(bid) {
+  if(bid === this.bid) { return; }
+  var toset;
+  switch(bid) {
+    case 'b' : { toset = "background-b"; break; }
+    case 'c' : { toset = "background-c"; break; }
+    default : { toset = "background-a"; break; }
+  }
+  this.body.classList.remove("background-a");
+  this.body.classList.remove("background-b");
+  this.body.classList.remove("background-c");
+  this.body.classList.add(toset);
 };
 
 /* Pushes menu changes into history state. */

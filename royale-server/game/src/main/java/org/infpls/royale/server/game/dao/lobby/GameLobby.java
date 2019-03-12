@@ -2,12 +2,11 @@ package org.infpls.royale.server.game.dao.lobby;
 
 import java.io.IOException;
 import java.util.*;
+import org.infpls.royale.server.game.game.RoyaleGame;
 
-import org.infpls.royale.server.game.session.Packet;
-import org.infpls.royale.server.game.session.RoyaleSession;
-import org.infpls.royale.server.game.session.game.PacketG06;
-import org.infpls.royale.server.util.Key;
-import org.infpls.royale.server.util.Oak;
+import org.infpls.royale.server.game.session.*;
+import org.infpls.royale.server.game.session.game.*;
+import org.infpls.royale.server.util.*;
 
 public abstract class GameLobby {
   protected final String lid; //Lobby ID
@@ -16,12 +15,11 @@ public abstract class GameLobby {
   protected final List<RoyaleSession> players, loading;
   
   private final GameLoop loop; /* Seperate timer thread to trigger game steps */
-  protected Object game; /* The actual game object */
+  protected final RoyaleGame game; /* The actual game object */
   
   private final InputSync inputs; /* Packets that the game must handle are stored until a gamestep happens. This is for synchronization. */
-  //private final EventSync events; /* Second verse same as the first. */
+  private final EventSync events; /* Second verse same as the first. */
   
-  private int gameCount;    // Number of times the game has ended and restarted
   protected boolean closed; // Clean this shit up!
   public GameLobby() throws IOException {
     lid = Key.generate32();
@@ -32,26 +30,25 @@ public abstract class GameLobby {
     loading = new ArrayList();
     
     inputs = new InputSync();
-    //events = new EventSync();
+    events = new EventSync();
     
-    gameCount = 0;
     closed = false;
     
-    newGame();
+    game = new RoyaleGame();
 
     loop = new GameLoop(this);
   }
   
   /* It's apparently dangerous to start the thread in the constructor because ********REASONS********* so here we are! */
   public void start() { loop.start(); }
-  
-  private void newGame() throws IOException {
-    game = new Object();
-  }
 
   public void step(final long tick) {
     try {
+      handleEvents();
       
+      game.input(inputs.pop());
+      game.step();
+      game.update();
     }
     catch(Exception ex) {
       Oak.log(Oak.Level.CRIT, "Game step exception ??? <INFO>", ex);
@@ -68,6 +65,39 @@ public abstract class GameLobby {
     }
   }
   
+  private void handleEvents() {
+    final List<SessionEvent> evts = events.pop();
+    for(int i=0;i<evts.size();i++) {
+      final SessionEvent evt = evts.get(i);
+      switch(evt.type) {
+        case JOIN : { joinEvent(evt.session); break; }
+        case READY : { readyEvent(evt.session); break; }
+        case DISCONNECT : { disconnectEvent(evt.session); break; }
+      }
+    }
+  }
+  
+  private void joinEvent(RoyaleSession session) {
+    try { if(isClosed() || loading.contains(session) || players.contains(session)) { session.close("Error joining lobby."); return; } }
+    catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during player disconnect.", ioex); return; }
+    loading.add(session);
+    sendPacket(new PacketG01(), session);
+  }
+  
+  private void readyEvent(RoyaleSession session) {
+    loading.remove(session);
+    try { if(isClosed() || players.contains(session)) { session.close("Error joining lobby."); return; } }
+    catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during player disconnect.", ioex); return; }
+    players.add(session);
+    game.join(session);
+  }
+  
+  private void disconnectEvent(RoyaleSession session) {
+    loading.remove(session);
+    players.remove(session);
+    game.leave(session);
+  }
+  
   protected void close(final String message) throws IOException {
     sendPacket(new PacketG06(message));
     close();
@@ -78,7 +108,7 @@ public abstract class GameLobby {
     for(int i=0;i<players.size();i++) {
       players.get(i).close();
     }
-    /* game.close(); @TODO */
+    game.destroy();
   }
   
   /* Send a packet to everyone in the lobby */
@@ -105,10 +135,11 @@ public abstract class GameLobby {
     player.sendPacket(p);
   }
   
-  public void pushInput(final String sid, final String data) { inputs.push(new InputData(sid, data)); }
-  //public void pushEvent(final SessionEvent evt) { events.push(evt); }
+  public void pushInput(final RoyaleSession session, final String data) { inputs.push(new InputData(session, data)); }
+  public void pushEvent(final SessionEvent evt) { events.push(evt); }
   
   public String getLid() { return lid; }
+  public boolean isFull() { return loading.size() + players.size() >= maxPlayers; }
   public boolean isClosed() { return closed; }
   
   /* @FIXME This might be the worst way to do this in the universe. It might be fine. No way to know really. 
@@ -173,35 +204,36 @@ public abstract class GameLobby {
     }
   }
   
-//  private class EventSync {
-//    private List<SessionEvent> sessionEvents;
-//    public EventSync() { sessionEvents = new ArrayList(); }
-//
-//    public void push(final SessionEvent evt) { syncEventAccess(false, evt); }
-//    public List<SessionEvent> pop() { return syncEventAccess(true, null); }
-//
-//    /* SessionEvent handling methods 
-//     - syncAccess.s == true / pop
-//     - syncAccess.s == false / push
-//    */
-//    private synchronized List<SessionEvent> syncEventAccess(final boolean s, final SessionEvent evt) {
-//      if(s) {
-//        List<SessionEvent> evts = sessionEvents;
-//        sessionEvents = new ArrayList();
-//        return evts;
-//      }
-//      else {
-//        if(evt == null) { return null; }
-//        sessionEvents.add(evt);
-//        return null;
-//      }
-//    }
-//  }
+  private class EventSync {
+    private List<SessionEvent> sessionEvents;
+    public EventSync() { sessionEvents = new ArrayList(); }
+
+    public void push(final SessionEvent evt) { syncEventAccess(false, evt); }
+    public List<SessionEvent> pop() { return syncEventAccess(true, null); }
+
+    /* SessionEvent handling methods 
+     - syncAccess.s == true / pop
+     - syncAccess.s == false / push
+    */
+    private synchronized List<SessionEvent> syncEventAccess(final boolean s, final SessionEvent evt) {
+      if(s) {
+        List<SessionEvent> evts = sessionEvents;
+        sessionEvents = new ArrayList();
+        return evts;
+      }
+      else {
+        if(evt == null) { return null; }
+        sessionEvents.add(evt);
+        return null;
+      }
+    }
+  }
   
   public class InputData {
-    public final String sid, data;
-    public InputData(final String sid, final String data) {
-      this.sid = sid;
+    public final RoyaleSession session;
+    public final String data;
+    public InputData(final RoyaleSession session, final String data) {
+      this.session = session;
       this.data = data;
     }
   }

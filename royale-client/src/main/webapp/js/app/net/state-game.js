@@ -10,24 +10,26 @@ function StateGame() {
 
 StateGame.prototype.handlePacket = function(packet) {
   switch(packet.type) {
-    case "g00" : { this.gameData(packet); return true; }
+    case "g01" : { this.loadMap(packet); return true; }
     case "g06" : { this.globalWarn(packet); return true; }
     case "g21" : { this.recievePing(packet); return true; }
-    default : { return false; }
+    default : { return app.ingame() ? app.game.handlePacket(packet) : false; }
   }
 };
 
 StateGame.prototype.ready = function() {
   app.menu.warn.show("GameState Ready");
+  this.send({type: "g00"});
 };
 
-// G00
-StateGame.prototype.gameData = function(p) {
+// G01
+StateGame.prototype.loadMap = function(p) {
   app.menu.warn.show("Do loading...");
-  this.send({type: "g01"});
+  app.game = new Game(p.map);
+  this.send({type: "g03"});
 };
 
-// G00
+// G06
 StateGame.prototype.globalWarn = function(p) {
   app.menu.warn.show(p.message);
 };

@@ -18,6 +18,7 @@ MenuMain.prototype.launch = function() {
 MenuMain.prototype.show = function(number) {
   app.menu.hideAll();
   app.menu.navigation("main", "main");
+  app.menu.background("a");
   if(number) { this.number.innerHTML = number; }
   this.element.style.display = "block";
 };

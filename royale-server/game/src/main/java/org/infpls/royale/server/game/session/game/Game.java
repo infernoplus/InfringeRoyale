@@ -20,13 +20,16 @@ public class Game extends SessionState {
     this.lobby = lobby;
     
     sendPacket(new PacketS00('g'));
-    sendGameData();
   }
   
   /* Packet Info [ < outgoing | > incoming ]
-    < g00 game data (loading screen)
-    > g01 client ready (load done)
+    > g00 ready to join
+    < g01 what to load (from lobby)
+    > g03 loaddone, ready
     < g06 lobby global warning
+    < g10 gamestate initial (on join)
+    < g11 gamestate update
+    < g12 player list update (when someone joins)
     = g21 ping
   */
   
@@ -37,13 +40,14 @@ public class Game extends SessionState {
       Packet p = gson.fromJson(data, Packet.class);
       if(p.getType() == null) { close("Invalid data: NULL TYPE"); return; } //Switch statements throw NullPointer if this happens.
       switch(p.getType()) {
-        /* Session Type Packets g0x */
-        case "g01" : { clientReady(gson.fromJson(data, PacketG01.class)); break; }
+        /* Session Type Packets gxx */
+        case "g00" : { clientJoin(gson.fromJson(data, PacketG01.class)); break; }
         case "g02" : { close(); break; }
+        case "g03" : { clientReady(gson.fromJson(data, PacketG03.class)); break; }
         case "g21" : { ping(gson.fromJson(data, PacketG21.class)); break; }
-        /* Ingame Type Packets gxx */
         
-        /* Input Type Packets ixx */
+        /* Input Type Packets nxx */
+        case "n00" : { input(gson.fromJson(data, PacketN00.class)); break; }
         
         default : { close("Invalid data: " + p.getType()); break; }
       }
@@ -53,12 +57,16 @@ public class Game extends SessionState {
     }
   }
   
-  private void sendGameData() throws IOException {
-    sendPacket(new PacketG00());
+  private void clientJoin(PacketG01 p) throws IOException {
+    lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.JOIN));
   }
   
-  private void clientReady(PacketG01 p) throws IOException {
-    /* joiny */
+  private void clientReady(PacketG03 p) throws IOException {
+    lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.READY));
+  }
+  
+  private void input(PacketN00 p) throws IOException {
+    lobby.pushInput(session, "");
   }
   
   private void ping(PacketG21 p) throws IOException { sendPacket(p); }

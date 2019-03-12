@@ -8,6 +8,7 @@ function MenuGame() {
 MenuGame.prototype.show = function() {
   app.menu.hideAll();
   app.menu.navigation("game", "game");
+  app.menu.background("c");
   this.element.style.display = "block";
 };
 
