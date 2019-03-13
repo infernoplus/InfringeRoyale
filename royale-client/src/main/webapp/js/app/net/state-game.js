@@ -10,7 +10,7 @@ function StateGame() {
 
 StateGame.prototype.handlePacket = function(packet) {
   switch(packet.type) {
-    case "g01" : { this.loadMap(packet); return true; }
+    case "g01" : { this.load(packet); return true; }
     case "g06" : { this.globalWarn(packet); return true; }
     case "g21" : { this.recievePing(packet); return true; }
     default : { return app.ingame() ? app.game.handlePacket(packet) : false; }
@@ -23,10 +23,27 @@ StateGame.prototype.ready = function() {
 };
 
 // G01
-StateGame.prototype.loadMap = function(p) {
-  app.menu.warn.show("Do loading...");
-  app.game = new Game(p.map);
-  this.send({type: "g03"});
+StateGame.prototype.load = function(p) {
+  if(app.ingame()) { app.menu.error.show("State error while loading game."); return; }
+  
+  var address = window.location.host;
+  var that = this;
+  
+  app.menu.warn.show("Downloading map file...");
+  $.ajax({
+    url: "http://" + address + "/royale/game/" + p.game,
+    type: 'GET',
+    timeout: 5000,
+    success: function(data) {
+      app.menu.warn.show("Loading game...");
+      app.game = new Game(data);
+      app.menu.warn.show("Load done...");
+      that.send({type: "g03"});
+    },
+    error: function() {
+      app.menu.error.show("Server returned FNF(404) for game file: " + p.game);
+    }
+  });
 };
 
 // G06

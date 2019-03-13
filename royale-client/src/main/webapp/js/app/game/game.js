@@ -3,14 +3,17 @@
 /* global util */
 /* global requestAnimFrameFunc, cancelAnimFrameFunc */
 
-function Game(map) {
+// Air 30 00000000000000000000000000011110
+// Block 98306 00000000000000011000000000000010
+
+function Game(data) {  
   this.container = document.getElementById("game");
   this.canvas = document.getElementById("game-canvas");
   
   this.input = new Input(this, this.canvas);
-  this.display = new Display(this, this.container, this.canvas);
+  this.display = new Display(this, this.container, this.canvas, data.resource);
 
-  this.load(map);
+  this.load(data);
   
   this.frame = 0;
   this.delta = util.time.now();
@@ -26,8 +29,9 @@ Game.TICK_RATE = 33;
 Game.FDLC_TARGET = 3;
 Game.FDLC_MAX = Game.FDLC_TARGET+2;
 
-Game.prototype.load = function(map) {
+Game.prototype.load = function(data) {
   app.menu.load.show();
+  this.world = new World(data);
 };
 
 /* Returns false if the packet is not of a type that we know how to handle */
@@ -81,6 +85,28 @@ Game.prototype.doStep = function() {
 /* Push players state to the server */
 Game.prototype.doPush = function() {
   
+};
+
+/* Returns the player object that this client controls. Or undefined if one doesnt exist. */
+Game.prototype.getPlayer = function() {
+  return undefined;
+};
+
+/* Returns the zone our character is in, or the last one we were in when we died, or the starting point. */
+Game.prototype.getZone = function() {
+  /* Where are character is */
+  var player = this.getPlayer();
+  if(player) {
+    // Do stuff
+  }
+  
+  /* Last valid location */
+  if(this.lastZone) { return this.world.levels[this.lastZone[0]].zones[this.lastZone[1]]; }
+  
+  /* Starting location */
+  var level = this.world.levels[this.world.initial];
+  this.lastZone = [this.world.initial, level.initial];
+  return level.zones[level.initial];
 };
 
 Game.prototype.draw = function() {

@@ -9,6 +9,8 @@ import org.infpls.royale.server.game.session.game.*;
 import org.infpls.royale.server.util.*;
 
 public abstract class GameLobby {
+  private final static String GAME_ID = "smb";
+  
   protected final String lid; //Lobby ID
   
   protected final int maxPlayers;
@@ -81,7 +83,7 @@ public abstract class GameLobby {
     try { if(isClosed() || loading.contains(session) || players.contains(session)) { session.close("Error joining lobby."); return; } }
     catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during player disconnect.", ioex); return; }
     loading.add(session);
-    sendPacket(new PacketG01(), session);
+    sendPacket(new PacketG01(GAME_ID), session);
   }
   
   private void readyEvent(RoyaleSession session) {

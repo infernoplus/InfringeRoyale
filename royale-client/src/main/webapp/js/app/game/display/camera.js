@@ -1,7 +1,7 @@
 "use strict";
-/* global util */
+/* global util, vec2 */
 
 function Camera() {
-  this.pos = util.vec2.create();  // Camera position
-  this.zoom = 32;                 // The exact amount of pixels we devote to each tile
+  this.pos = vec2.make(0,0);  // Camera position
+  this.zoom = 1.0;            // How large we draw each tile. At 1.0 we draw tiles at their native resolution defined by Display.TEXRES.
 }
