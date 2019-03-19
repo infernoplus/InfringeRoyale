@@ -1,5 +1,5 @@
 "use strict";
-/* global util, shor2, td32 */
+/* global util, vec2, shor2, td32 */
 
 function World(data) {
   this.initial = data.initial; // ID for the first level of this world.
@@ -9,6 +9,10 @@ function World(data) {
     this.levels.push(new Level(data.world[i]));
   }
 }
+
+World.prototype.getInitial = function() {
+  return this.levels[this.initial];
+};
 
 /* ========================================================================== */
 
@@ -23,6 +27,10 @@ function Level(data) {
   }
 }
 
+Level.prototype.getInitial = function() {
+  return this.zones[this.initial];
+};
+
 /* ========================================================================== */
 
 function Zone(data) {
@@ -34,3 +42,8 @@ function Zone(data) {
   this.obj = [];
   this.warp = data.warps; // Copied by reference!
 }
+
+/* Returns width and height of the zone in tiles. */
+Zone.prototype.dimensions = function() {
+  return vec2.make(this.data[0].length, this.data.length);
+};

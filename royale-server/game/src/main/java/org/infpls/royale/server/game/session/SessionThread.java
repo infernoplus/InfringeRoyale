@@ -1,6 +1,7 @@
 package org.infpls.royale.server.game.session;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import org.infpls.royale.server.util.Oak;
 
@@ -9,16 +10,18 @@ import org.infpls.royale.server.util.Oak;
 /* If a websocket is blocked for more than 15 seconds on sending a packet it will initiate a force close on it */
 public class SessionThread extends Thread {
   private final RoyaleSession session;
-  private List<Packet> out;              // Outgoing packet queue
+  private List<Packet> pout;              // Outgoing packet queue
+  private List<ByteBuffer> bout;              // Outgoing packet queue
   
-  private static final int SEND_TIMEOUT = 450, CLOSE_WAIT_TIMEOUT = 150;
+  private static final int SEND_TIMEOUT = 3000, CLOSE_WAIT_TIMEOUT = 150;
   
   private long sendTime;                 // Time of last send start
   private boolean sending;               // Currently in the process of sending data to a client
   private boolean forceClose, safeClose, closed;
   public SessionThread(final RoyaleSession ns) {
     session = ns;
-    out = new ArrayList();
+    pout = new ArrayList();
+    bout = new ArrayList();
     
     sendTime = System.currentTimeMillis();
     sending = false;
@@ -30,17 +33,27 @@ public class SessionThread extends Thread {
   @Override
   public void run() {
     while(session.isOpen() && !forceClose && !safeClose) {
-      final List<Packet> paks = pop();
+      final List<Packet> paks = popPacket();
+      final List<ByteBuffer> bins = popBinary();
       try {
+        if(bins == null && paks == null) { doWait(); }
+        if(bins != null) {
+          sendTime = System.currentTimeMillis();
+          sending = true;
+          for(int i=0;i<bins.size();i++) {
+            final ByteBuffer bb = bins.get(i);
+            if(bb.capacity() > 0) { session.sendImmiediate(bb); }
+          }
+          sending = false;
+        }
         if(paks != null) {
           sendTime = System.currentTimeMillis();
           sending = true;
           session.sendImmiediate(new PacketS01(paks));
           sending = false;
         }
-        else { doWait(); }
       }
-      catch(IOException | IllegalStateException ex) {
+      catch(Exception ex) {
         Oak.log(Oak.Level.ERR, "Exception during SessionThread send for user: '" + session.getUser() + "'. Closing connection.", ex);
         forceClose();
       }
@@ -57,6 +70,8 @@ public class SessionThread extends Thread {
   private synchronized void doWait() { try { wait(); } catch(InterruptedException ex) { Oak.log(Oak.Level.ERR, "Interrupt Exception.", ex); } }
   private synchronized void doNotify() { notify(); }
   
+  /* Note: For whatever reason, sending an empty ByteBuffer through sendImmiedate() causes the thread to hang. */
+  /* Always check to make sure your ByteBuffer has data in it before sending! */
   public void checkTimeout() {
     final long now = System.currentTimeMillis();
     if(sending && ((now - sendTime) > SEND_TIMEOUT)) {
@@ -66,13 +81,26 @@ public class SessionThread extends Thread {
   }
   
   public void push(final Packet p) { if(forceClose || safeClose || closed) { return; } syncPacketAccess(false, p); checkTimeout(); doNotify(); }
-  private List<Packet> pop() { return syncPacketAccess(true, null); }
+  public void push(final ByteBuffer bb) { if(forceClose || safeClose || closed) { return; } syncBinaryAccess(false, bb); checkTimeout(); doNotify(); }
+  
+  private List<Packet> popPacket() { return syncPacketAccess(true, null); }
+  private List<ByteBuffer> popBinary() { return syncBinaryAccess(true, null); }
+  
   private synchronized List<Packet> syncPacketAccess(final boolean s, final Packet p) {
     if(s) {
-      if(out.size() > 0) { final List<Packet> popped = out; out = new ArrayList(); return popped; }
+      if(pout.size() > 0) { final List<Packet> popped = pout; pout = new ArrayList(); return popped; }
       else { return null; }
     }
-    out.add(p);
+    pout.add(p);
+    return null;
+  }
+  
+  private synchronized List<ByteBuffer> syncBinaryAccess(final boolean s, final ByteBuffer bb) {
+    if(s) {
+      if(bout.size() > 0) { final List<ByteBuffer> popped = bout; bout = new ArrayList(); return popped; }
+      else { return null; }
+    }
+    bout.add(bb);
     return null;
   }
   

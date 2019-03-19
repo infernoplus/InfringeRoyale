@@ -2,6 +2,7 @@ package org.infpls.royale.server.game.session.game;
 
 import com.google.gson.*;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.infpls.royale.server.game.dao.lobby.GameLobby;
 import org.infpls.royale.server.game.session.Packet;
@@ -47,7 +48,6 @@ public class Game extends SessionState {
         case "g21" : { ping(gson.fromJson(data, PacketG21.class)); break; }
         
         /* Input Type Packets nxx */
-        case "n00" : { input(gson.fromJson(data, PacketN00.class)); break; }
         
         default : { close("Invalid data: " + p.getType()); break; }
       }
@@ -55,6 +55,11 @@ public class Game extends SessionState {
       Oak.log(Oak.Level.WARN, "User: '" + session.getUser() + "' threw Unknown Exception", ex);
       close(ex);
     }
+  }
+  
+  @Override
+  public void handleBinary(final ByteBuffer data) throws IOException {
+    lobby.pushInput(session, data);
   }
   
   private void clientJoin(PacketG01 p) throws IOException {
@@ -65,12 +70,10 @@ public class Game extends SessionState {
     lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.READY));
   }
   
-  private void input(PacketN00 p) throws IOException {
-    lobby.pushInput(session, "");
-  }
-  
   private void ping(PacketG21 p) throws IOException { sendPacket(p); }
   
   @Override
-  public void destroy() throws IOException { }
+  public void destroy() throws IOException {
+    lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.DISCONNECT));
+  }
 }

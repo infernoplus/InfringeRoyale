@@ -1,6 +1,7 @@
 package org.infpls.royale.server.game.session;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public abstract class SessionState {
   
@@ -11,6 +12,7 @@ public abstract class SessionState {
   }
   
   public abstract void handlePacket(final String data) throws IOException;
+  public abstract void handleBinary(final ByteBuffer data) throws IOException;
   
   public final void sendPacket(final Packet p) throws IOException {
     session.sendPacket(p);

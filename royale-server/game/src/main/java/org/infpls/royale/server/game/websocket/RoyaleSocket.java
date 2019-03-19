@@ -36,6 +36,17 @@ public class RoyaleSocket extends TextWebSocketHandler {
         Oak.log(Oak.Level.ERR, "Exception thrown at Websocket top level.", ex);
       }
     }
+    
+    @Override
+    public void handleBinaryMessage(WebSocketSession webSocket, BinaryMessage data) {
+      try {
+        RoyaleSession session = (RoyaleSession)(webSocket.getAttributes().get("session"));
+        session.handleBinary(data.getPayload());
+      }
+      catch(Exception ex) {
+        Oak.log(Oak.Level.ERR, "Exception thrown at Websocket top level.", ex);
+      }
+    }
   
     @Override
     public void afterConnectionClosed(WebSocketSession webSocket, CloseStatus status) {

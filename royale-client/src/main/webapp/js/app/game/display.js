@@ -71,8 +71,23 @@ Display.prototype.drawMap = function(depth) {
 Display.prototype.drawObject = function() {
   var context = this.context; // Sanity
   
-  context.fillStyle = "#FFFFFF";
-  context.fillRect(0,0,32,32);
+  var zone = this.game.getZone();
+  var dimensions = zone.dimensions();
+  
+  var sprites = [];
+  for(var i=0;i<this.game.objects.length;i++) {
+    this.game.objects[i].draw(sprites);
+  }
+  
+  var tex = this.resource.getTexture("char");
+  
+  for(var i=0;i<sprites.length;i++) {
+    var sprite = sprites[i];
+    
+    var st = util.sprite.getSprite(tex, sprite.index);
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*sprite.pos.x, Display.TEXRES*(dimensions.y-sprite.pos.y), Display.TEXRES, Display.TEXRES);
+  }
+  
 };
 
 Display.prototype.drawUI = function() {

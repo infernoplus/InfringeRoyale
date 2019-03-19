@@ -2,6 +2,7 @@ package org.infpls.royale.server.game.session.login;
 
 import com.google.gson.*;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import org.infpls.royale.server.game.dao.lobby.GameLobby;
 
 import org.infpls.royale.server.game.dao.lobby.LobbyDao;
@@ -59,6 +60,11 @@ public class Login extends SessionState {
     
     /* Join Lobby */
     session.join(lobby);
+  }
+  
+  @Override
+  public void handleBinary(final ByteBuffer data) throws IOException {
+    throw new IOException("Recieved unknown binary data from client!");
   }
 
   @Override

@@ -17,6 +17,10 @@ StateGame.prototype.handlePacket = function(packet) {
   }
 };
 
+StateGame.prototype.handleBinary = function(data) {
+  if(app.ingame()) { app.game.handleBinary(data); }
+};
+
 StateGame.prototype.ready = function() {
   app.menu.warn.show("GameState Ready");
   this.send({type: "g00"});

@@ -1,6 +1,7 @@
 package org.infpls.royale.server.game.dao.lobby;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import org.infpls.royale.server.game.game.RoyaleGame;
 
@@ -49,7 +50,6 @@ public abstract class GameLobby {
       handleEvents();
       
       game.input(inputs.pop());
-      game.step();
       game.update();
     }
     catch(Exception ex) {
@@ -67,7 +67,7 @@ public abstract class GameLobby {
     }
   }
   
-  private void handleEvents() {
+  private void handleEvents() throws IOException {
     final List<SessionEvent> evts = events.pop();
     for(int i=0;i<evts.size();i++) {
       final SessionEvent evt = evts.get(i);
@@ -86,7 +86,7 @@ public abstract class GameLobby {
     sendPacket(new PacketG01(GAME_ID), session);
   }
   
-  private void readyEvent(RoyaleSession session) {
+  private void readyEvent(RoyaleSession session) throws IOException {
     loading.remove(session);
     try { if(isClosed() || players.contains(session)) { session.close("Error joining lobby."); return; } }
     catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during player disconnect.", ioex); return; }
@@ -137,7 +137,7 @@ public abstract class GameLobby {
     player.sendPacket(p);
   }
   
-  public void pushInput(final RoyaleSession session, final String data) { inputs.push(new InputData(session, data)); }
+  public void pushInput(final RoyaleSession session, final ByteBuffer data) { inputs.push(new InputData(session, data)); }
   public void pushEvent(final SessionEvent evt) { events.push(evt); }
   
   public String getLid() { return lid; }
@@ -233,8 +233,8 @@ public abstract class GameLobby {
   
   public class InputData {
     public final RoyaleSession session;
-    public final String data;
-    public InputData(final RoyaleSession session, final String data) {
+    public final ByteBuffer data;
+    public InputData(final RoyaleSession session, final ByteBuffer data) {
       this.session = session;
       this.data = data;
     }

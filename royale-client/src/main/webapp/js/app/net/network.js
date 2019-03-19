@@ -1,6 +1,7 @@
 "use strict";
 /* global app */
 /* global WebSocket */
+/* global ArrayBuffer */
 
 function Network() {
   
@@ -23,6 +24,7 @@ Network.prototype.connect = function(name){
   }
 
   this.webSocket = new WebSocket("ws://" + address + "/royale/ws");
+  this.webSocket.binaryType = 'arraybuffer';
   app.menu.warn.show("Connecting @" + address, 0);
 
   this.webSocket.onopen = function(event) {
@@ -33,7 +35,8 @@ Network.prototype.connect = function(name){
   };
 
   this.webSocket.onmessage = function(event) {
-    that.handlePacket(JSON.parse(event.data));
+    if(event.data instanceof ArrayBuffer) { that.handleBinary(new Uint8Array(event.data)); }
+    else { that.handlePacket(JSON.parse(event.data)); }
   };
 
   this.webSocket.onclose = function(event) {
@@ -58,6 +61,10 @@ Network.prototype.handlePacket = function(packet) {
   }
 };
 
+Network.prototype.handleBinary = function(data) {
+  this.state.handleBinary(data);
+};
+
 Network.prototype.handleBlob = function(packets) {
   for(var i=0;i<packets.length;i++) {
     this.handlePacket(packets[i]);
@@ -78,12 +85,19 @@ Network.prototype.setState = function(state) {
   this.state.ready();
 };
 
+/* Sends JSON packet */
 Network.prototype.send = function(packet){
   this.webSocket.send(JSON.stringify(packet));
+};
+
+/* Sends raw bytes */
+Network.prototype.sendBinary = function(/* Uint8Array */ data){
+  this.webSocket.send(data.buffer);
 };
 
 /* This should never be called directly, only network.js should call this. Use main.close() instead. */
 Network.prototype.close = function(){
   if(this.webSocket !== undefined) { this.webSocket.close(); }
   if(app.ingame()) { app.game.destroy(); }
+  app.menu.error.show("Connection Interrupted");
 };

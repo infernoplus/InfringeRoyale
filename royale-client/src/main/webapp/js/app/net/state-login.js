@@ -12,6 +12,10 @@ StateLogin.prototype.handlePacket = function(packet) {
   }
 };
 
+StateLogin.prototype.handleBinary = function(packet) {
+  app.menu.warn.show("Recieved unexpected binary data!");
+};
+
 StateLogin.prototype.ready = function() {
   this.send({type: "l00", name: app.net.prefName});
   app.menu.warn.show("LoginState Ready");

@@ -1,6 +1,7 @@
 package org.infpls.royale.server.game.session;
 import java.io.*;
 import com.google.gson.*;
+import java.nio.ByteBuffer;
 import org.springframework.web.socket.*;
 
  
@@ -38,15 +39,30 @@ public final class RoyaleSession {
     sessionState.handlePacket(data);
   }
   
+  public void handleBinary(final ByteBuffer data) throws IOException {
+    sessionState.handleBinary(data);
+  }
+  
   public void sendPacket(final Packet p) {
     sessionThread.push(p);
   }
   
-  /* Sends data over websocket on immiediate thread. Should only be called by this.sessionThread.run() */
+  public void sendBinary(final ByteBuffer bb) {
+    sessionThread.push(bb);
+  }
+  
+  /* Sends data over websocket on immiediate thread. Should only be called by SessionThread.run() */
   public void sendImmiediate(final Packet p) throws IOException, IllegalStateException {
     if(isOpen()) {
       final Gson gson = new GsonBuilder().create();
       webSocket.sendMessage(new TextMessage(gson.toJson(p)));
+    }
+  }
+  
+  /* Sends data over websocket on immiediate thread. Should only be called by SessionThread.run() */
+  public void sendImmiediate(final ByteBuffer bb) throws IOException, IllegalStateException {
+    if(isOpen()) {
+      webSocket.sendMessage(new BinaryMessage(bb));
     }
   }
   
@@ -91,7 +107,7 @@ public final class RoyaleSession {
   
   /* Foricbly removes player from the game they are in. Used in event of critical connection error. */
   public void eject() throws IOException {
-    
+    close();
   }
   
   public void destroy() throws IOException {
