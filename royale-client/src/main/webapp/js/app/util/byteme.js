@@ -36,17 +36,29 @@ td32.decode16 = function(/* td32 */ a) {
 
 td32.decode = function(/* td32 */ a) {
   var i = (a >> 16) & 0xFF;
-  var def = !td32.TILE_DEF[i]?td32.TILE_DEF[30]:td32.TILE_DEF[i];
+  var def = !td32.TILE_PROPERTIES[i]?td32.TILE_PROPERTIES[0]:td32.TILE_PROPERTIES[i];
   return {index: a & 0x7FF, bump: (a >> 11) & 0xF, depth: ((a >> 15) & 0x1) === 1, definition: def, data: (a >> 24) & 0xFF};
+};
+
+td32.bump = function(/* td32 */ a, /*4bit unsigned integer*/ b ) {
+  return (a & 0b11111111111111111000011111111111) | ((b << 11) & 0b00000000000000000111100000000000);
 };
 
 td32.asArray = function(/* td32 */ a) {
   return [a & 0x7FF, (a >> 11) & 0xF, ((a >> 15) & 0x1) === 1, (a >> 16) & 0xFF, (a >> 24) & 0xFF];
 };
 
+td32.TRIGGER = {
+  TYPE: {
+    TOUCH: 0x00,
+    SMALL_BUMP: 0x10,
+    BIG_BUMP: 0x11
+  }
+};
+
 td32.TILE_PROPERTIES = {
   /* Nothing */
-  0: {
+  0x00: {
     COLLIDE: false,
     WATER: false,
     CLIMB: false,
@@ -56,10 +68,10 @@ td32.TILE_PROPERTIES = {
     PIPE: false,
     WARP: false,
     ASYNC: true,
-    TRIGGER: function(player, map, x, y) {}
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
   },
   /* Solid Standard */
-  1: {
+  0x01: {
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -69,7 +81,34 @@ td32.TILE_PROPERTIES = {
     PIPE: false,
     WARP: false,
     ASYNC: true,
-    TRIGGER: function(player, map, x, y) {}
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
+  },
+  /* Item Block */
+  0x51: {
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    BUMP: true,
+    BREAK: false,
+    PIPE: false,
+    WARP: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          game.world.levels[level].zones[zone].bump(x,y);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          game.world.levels[level].zones[zone].bump(x,y);
+          break;
+        }
+      }
+    }
   }
 };
 
@@ -87,6 +126,8 @@ NETX.decode = function(/* Uint8Array */ data) {
       case 0x10 : { de.push(NET010.decode(data.slice(i, i+=NET010.BYTES-1))); break; }
       case 0x11 : { de.push(NET011.decode(data.slice(i, i+=NET011.BYTES-1))); break; }
       case 0x12 : { de.push(NET012.decode(data.slice(i, i+=NET012.BYTES-1))); break; }
+      case 0x20 : { de.push(NET020.decode(data.slice(i, i+=NET020.BYTES-1))); break; }
+      case 0x30 : { de.push(NET030.decode(data.slice(i, i+=NET030.BYTES-1))); break; }
       default : { if(app) { app.menu.warn.show("Error decoding binary data!"); } return de; }
     }
   }
@@ -182,17 +223,18 @@ NET011.decode = function(/* NET011_SERV */ a) {
 var NET012 = {}; // UPDATE_PLAYER_OBJECT [0x12] // As Uint8Array
 /* ======================================================================================== */
 NET012.DESIGNATION = 0x12;
-NET012.BYTES = 14;
+NET012.BYTES = 15;
 
 /* Client->Server */
-NET012.encode = function(/* byte */ levelID, /* byte */ zoneID, /* vec2 */ pos, /* byte */ spriteID) {
+NET012.encode = function(/* byte */ levelID, /* byte */ zoneID, /* vec2 */ pos, /* byte */ spriteID, /* byte */ reverse) {
   var farr = new Float32Array([pos.x, pos.y]);
   var barr = new Uint8Array(farr.buffer);
   return new Uint8Array([
     NET012.DESIGNATION, levelID, zoneID,
     barr[3], barr[2], barr[1], barr[0],
     barr[7], barr[6], barr[5], barr[4],
-    spriteID
+    spriteID,
+    reverse
   ]);
 };
 
@@ -209,13 +251,65 @@ NET012.decode = function(/* NET012_SERV */ a) {
     level: a[2],
     zone: a[3],
     pos: vec2.make(v1.getFloat32(0), v2.getFloat32(0)),
-    sprite: a[12]
+    sprite: a[12],
+    reverse: a[13] !== 0
   };
 };
 
 
 
+var NET020 = {}; // OBJECT_EVENT_TRIGGER [0x20] // As Uint8Array
+/* ======================================================================================== */
+NET020.DESIGNATION = 0x20;
+NET020.BYTES = 8;
 
+/* Client->Server */
+NET020.encode = function(/* byte */ levelID, /* byte */ zoneID, /* int */ oid, /* byte */ type) {
+  return new Uint8Array([
+    NET020.DESIGNATION, levelID, zoneID,
+    (oid >> 24) & 0xFF, (oid >> 16) & 0xFF, (oid >> 8) & 0xFF, oid & 0xFF,
+    type
+  ]);
+};
+
+/* Server->>>Client */
+NET020.decode = function(/* NET020_SERV */ a) {
+  return {
+    designation: NET020.DESIGNATION,
+    level: a[0],
+    zone: a[1],
+    oid: (a[5] & 0xFF) | ((a[4] << 8) & 0xFF00) | ((a[3] << 16) & 0xFF0000) | ((a[2] << 24) & 0xFF0000),
+    type: a[6]
+  };
+};
+
+
+
+var NET030 = {}; // TILE_EVENT_TRIGGER [0x30] // As Uint8Array
+/* ======================================================================================== */
+NET030.DESIGNATION = 0x30;
+NET030.BYTES = 10;
+
+/* Client->Server */
+NET030.encode = function(/* byte */ levelID, /* byte */ zoneID, /* shor2 */ pos, /* byte */ type) {
+  return new Uint8Array([
+    NET030.DESIGNATION, levelID, zoneID,
+    (pos >> 24) & 0xFF, (pos >> 16) & 0xFF, (pos >> 8) & 0xFF, pos & 0xFF,
+    type
+  ]);
+};
+
+/* Server->/>Client */
+NET030.decode = function(/* NET030_SERV */ a) {
+  return {
+    designation: NET030.DESIGNATION,
+    pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
+    level: a[2],
+    zone: a[3],
+    pos: shor2.decode((a[7] & 0xFF) | ((a[6] << 8) & 0xFF00) | ((a[5] << 16) & 0xFF0000) | ((a[4] << 24) & 0xFF0000)),
+    type: a[8]
+  };
+};
 
 
 

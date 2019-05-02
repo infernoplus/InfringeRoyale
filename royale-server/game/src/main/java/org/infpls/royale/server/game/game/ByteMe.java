@@ -15,6 +15,8 @@ public class ByteMe {
         case 0x10 : { de.add(new NET010(pid, data)); break; }
         case 0x11 : { de.add(new NET011(pid, data)); break; }
         case 0x12 : { de.add(new NET012(pid, data)); break; }
+        case 0x20 : { de.add(new NET020(pid, data)); break; }
+        case 0x30 : { de.add(new NET030(pid, data)); break; }
         default : { throw new IOException("Invalid designation byte: " + designation); }
       }
     }
@@ -107,17 +109,19 @@ public class ByteMe {
     public final byte level, zone;
     public final Vec2 pos;             // Vec2
     public final byte sprite;
+    public final byte reverse;
     public NET012(short pid, ByteBuffer data) {
       super((byte)0x12, pid);
       level = data.get();
       zone = data.get();
       pos = new Vec2(data.getFloat(), data.getFloat());
       sprite = data.get();
+      reverse=data.get();
     }
     
     @Override
     public ByteBuffer encode() {
-      final ByteBuffer bb = ByteBuffer.allocate(14);
+      final ByteBuffer bb = ByteBuffer.allocate(15);
       bb.put(designation);
       bb.putShort(pid);
       bb.put(level);
@@ -125,6 +129,58 @@ public class ByteMe {
       bb.putFloat(pos.x);
       bb.putFloat(pos.y);
       bb.put(sprite);
+      bb.put(reverse);
+      return bb;
+    }
+  }
+  
+    public static class NET020 extends NETX {
+    public final byte level, zone;
+    public final int oid;
+    public final byte type;
+    
+    public NET020(short pid, ByteBuffer data) {
+      super((byte)0x20, pid);
+      level = data.get();
+      zone = data.get();
+      oid = data.getInt();
+      type = data.get();
+    }
+    
+    @Override
+    public ByteBuffer encode() {
+      final ByteBuffer bb = ByteBuffer.allocate(8);
+      bb.put(designation);
+      bb.put(level);
+      bb.put(zone);
+      bb.putInt(oid);
+      bb.put(type);
+      return bb;
+    }
+  }
+    
+    public static class NET030 extends NETX {
+    public final byte level, zone;
+    public final int pos;    //shor2
+    public final byte type;
+    
+    public NET030(short pid, ByteBuffer data) {
+      super((byte)0x30, pid);
+      level = data.get();
+      zone = data.get();
+      pos = data.getInt();
+      type = data.get();
+    }
+    
+    @Override
+    public ByteBuffer encode() {
+      final ByteBuffer bb = ByteBuffer.allocate(10);
+      bb.put(designation);
+      bb.putShort(pid);
+      bb.put(level);
+      bb.put(zone);
+      bb.putInt(pos);
+      bb.put(type);
       return bb;
     }
   }

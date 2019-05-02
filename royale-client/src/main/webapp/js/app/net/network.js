@@ -41,7 +41,7 @@ Network.prototype.connect = function(name){
 
   this.webSocket.onclose = function(event) {
     that.webSocket = undefined;
-    that.close();
+    app.menu.error.show("Connection Interrupted");
   };
 };
 
@@ -99,5 +99,4 @@ Network.prototype.sendBinary = function(/* Uint8Array */ data){
 Network.prototype.close = function(){
   if(this.webSocket !== undefined) { this.webSocket.close(); }
   if(app.ingame()) { app.game.destroy(); }
-  app.menu.error.show("Connection Interrupted");
 };

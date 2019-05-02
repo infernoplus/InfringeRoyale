@@ -14,11 +14,11 @@ function Game(data) {
   
   this.input = new Input(this, this.canvas);
   this.display = new Display(this, this.container, this.canvas, data.resource);
-
-  this.load(data);
   
   this.objects = [];
   this.pid = undefined; /* Unique player id for this client. Assigned during init packet. */
+  
+  this.load(data);
   
   this.frame = 0;
   this.delta = util.time.now();
@@ -38,7 +38,23 @@ Game.FDLC_MAX = Game.FDLC_TARGET+2;
 
 Game.prototype.load = function(data) {
   app.menu.load.show();
+  
+  /* Load world data */
   this.world = new World(data);
+  
+  /* Spawn objects from world obj params */
+  for(var i=0;i<this.world.levels.length;i++) {
+    var lvl = this.world.levels[i];
+    for(var j=0;j<lvl.zones.length;j++) {
+      var zn = lvl.zones[j];
+      for(var k=0;k<zn.obj.length;k++) {
+        var obj = zn.obj[k];
+        var pgen = [obj.pos]; // obj.pos here is a shor2, we use it as the oid for this object
+        for(var l=0;l<obj.param.length;l++) { pgen.push(obj.param[l]); }
+        this.createObject(obj.type, lvl.id, zn.id, shor2.decode(obj.pos), pgen);
+      }
+    }
+  }
 };
 
 /* Returns false if the packet is not of a type that we know how to handle */
@@ -80,6 +96,8 @@ Game.prototype.doUpdate = function(data) {
       case 0x10 : { this.doNET010(n); break; }
       case 0x11 : { this.doNET011(n); break; }
       case 0x12 : { this.doNET012(n); break; }
+      case 0x20 : { this.doNET020(n); break; }
+      case 0x30 : { this.doNET030(n); break; }
     }
   }
 };
@@ -110,11 +128,22 @@ Game.prototype.doNET012 = function(n) {
   if(n.pid === this.pid) { return; }
   var obj = this.getGhost(n.pid);
   if(!obj) { return; }
-  
-  obj.level = n.level;
-  obj.zone = n.zone;
-  obj.pos = n.pos;
-  obj.sprite = n.sprite;
+ 
+  obj.update(n);
+};
+
+/* OBJECT_EVENT_TRIGGER [0x20] */
+Game.prototype.doNET020 = function(n) {
+  var obj = this.getObject(n.level, n.zone, n.oid);
+  if(obj) {
+    obj.update(n.type);
+  }
+};
+
+/* TILE_EVENT_TRIGGER [0x30] */
+Game.prototype.doNET030 = function(n) {
+  if(n.pid === this.pid) { return; } // Toss out event if we were the ones who created it originally
+  this.world.getZone(n.level, n.zone).update(this, n.pid, n.level, n.zone, n.pos.x, n.pos.y, n.type);
 };
 
 /* Handle player input */
@@ -159,13 +188,16 @@ Game.prototype.doStep = function() {
     if(obj.garbage) { this.objects.splice(i--, 1); }
   }
   
+  /* Step world to update bumps & etc */
+  this.world.step();
+  
 };
 
 /* Push players state to the server */
 Game.prototype.doPush = function() {
   var obj = this.getPlayer(); // Our player object
-  if(obj) {
-    this.out.push(NET012.encode(obj.level, obj.zone, obj.pos, obj.sprite));
+  if(obj && !obj.dead) {
+    this.out.push(NET012.encode(obj.level, obj.zone, obj.pos, obj.sprite, obj.reverse));
   }
   
   var merge = MERGE_BYTE(this.out); // Merge all binary messages into a single Uint8Array
@@ -181,6 +213,16 @@ Game.prototype.createObject = function(id, level, zone, pos, param) {
   
   this.objects.push(obj);
   return obj;
+};
+
+Game.prototype.getObject = function(level, zone, oid) {
+  for(var i=0;i<this.objects.length;i++) {
+    var obj = this.objects[i];
+    if(obj.oid !== undefined && obj.level === level && obj.zone === zone && obj.oid === oid) {
+      return obj;
+    }
+  }
+  return undefined;
 };
 
 Game.prototype.getGhost = function(pid) {

@@ -19,7 +19,7 @@ function Display(game, container, canvas, resource) {
   context.imageSmoothingEnabled = false;
 }
 
-Display.TEXRES = 16; // Texture resolution. The resolution of a single sprite in a sprite sheet.
+Display.TEXRES = 16.; // Texture resolution. The resolution of a single sprite in a sprite sheet.
 
 /* Clears the canvas resizes it to fill the screen if nesscary. */
 Display.prototype.clear = function() {
@@ -63,7 +63,11 @@ Display.prototype.drawMap = function(depth) {
       if(td.depth !== depth) { continue; }
       
       var st = util.sprite.getSprite(tex, td.index);
-      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*j, Display.TEXRES*i, Display.TEXRES, Display.TEXRES);
+      var bmp = 0;
+      if(td.bump > 0) {
+        bmp = Math.sin((1.-(td.bump/15.))*Math.PI)*0.16;
+      }
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*j, Display.TEXRES*(i-bmp), Display.TEXRES, Display.TEXRES);
     }
   }
 };
@@ -72,7 +76,7 @@ Display.prototype.drawObject = function() {
   var context = this.context; // Sanity
   
   var zone = this.game.getZone();
-  var dimensions = zone.dimensions();
+  var dim = zone.dimensions();
   
   var sprites = [];
   for(var i=0;i<this.game.objects.length;i++) {
@@ -85,7 +89,15 @@ Display.prototype.drawObject = function() {
     var sprite = sprites[i];
     
     var st = util.sprite.getSprite(tex, sprite.index);
-    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*sprite.pos.x, Display.TEXRES*(dimensions.y-sprite.pos.y), Display.TEXRES, Display.TEXRES);
+    if(sprite.reverse) {
+      context.save();
+      context.scale(-1.,1.);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, (-1.*(Display.TEXRES*sprite.pos.x))-Display.TEXRES, Display.TEXRES*(dim.y-sprite.pos.y-1.), Display.TEXRES, Display.TEXRES);
+      context.restore();
+    }
+    else {
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*sprite.pos.x, Display.TEXRES*(dim.y-sprite.pos.y-1.), Display.TEXRES, Display.TEXRES);
+    }
   }
   
 };
