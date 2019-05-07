@@ -44,6 +44,10 @@ td32.bump = function(/* td32 */ a, /*4bit unsigned integer*/ b ) {
   return (a & 0b11111111111111111000011111111111) | ((b << 11) & 0b00000000000000000111100000000000);
 };
 
+td32.data = function(/* td32 */ a, /*1 byte uint*/ b) {
+  return (a & 0x00FFFFFF) | ((b << 24) & 0xFF000000);
+};
+
 td32.asArray = function(/* td32 */ a) {
   return [a & 0x7FF, (a >> 11) & 0xF, ((a >> 15) & 0x1) === 1, (a >> 16) & 0xFF, (a >> 24) & 0xFF];
 };
@@ -63,8 +67,6 @@ td32.TILE_PROPERTIES = {
     WATER: false,
     CLIMB: false,
     KILL: false,
-    BUMP: false,
-    BREAK: false,
     PIPE: false,
     WARP: false,
     ASYNC: true,
@@ -76,21 +78,17 @@ td32.TILE_PROPERTIES = {
     WATER: false,
     CLIMB: false,
     KILL: false,
-    BUMP: false,
-    BREAK: false,
     PIPE: false,
     WARP: false,
     ASYNC: true,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
   },
-  /* Item Block */
-  0x51: {
+  /* Solid Bumpable */
+  0x02: {
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
     KILL: false,
-    BUMP: true,
-    BREAK: false,
     PIPE: false,
     WARP: false,
     ASYNC: false,
@@ -99,12 +97,149 @@ td32.TILE_PROPERTIES = {
       switch(type) {
         /* Small bump */
         case 0x10 : {
-          game.world.levels[level].zones[zone].bump(x,y);
+          game.world.getZone(level, zone).bump(x,y);
           break;
         }
         /* Big bump */
         case 0x11 : {
-          game.world.levels[level].zones[zone].bump(x,y);
+          game.world.getZone(level, zone).bump(x,y);
+          break;
+        }
+      }
+    }
+  },
+  /* Solid Breakable Normal */
+  0x03: {
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          ggame.world.getZone(level, zone).bump(x,y);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          var rep = 30; // Replacement td32 data for broken tile.
+          game.world.getZone(level, zone).break(x,y,rep);
+          break;
+        }
+      }
+    }
+  },
+  /* Item Block Normal */
+  0x11: {
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+          break;
+        }
+      }
+    }
+  },
+  /* Coin Block Normal */
+  0x12: {
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.world.getZone(level, zone).coin(x,y+1);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.world.getZone(level, zone).coin(x,y+1);
+          break;
+        }
+      }
+    }
+  },
+  /* Coin Block Multi */
+  0x13: {
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          if(td.data > 0) {
+            var raw = game.world.getZone(level, zone).tile(x,y);
+            var rep = td32.data(raw, td.data-1);                      // Replacement td32 data for tile.
+            game.world.getZone(level, zone).zones[zone].replace(x,y,rep);
+            game.world.getZone(level, zone).bump(x,y);
+            game.world.getZone(level, zone).coin(x,y+1);
+          }
+          else {
+            var rep = 98307; // Replacement td32 data for tile.
+            game.world.getZone(level, zone).replace(x,y,rep);
+            game.world.getZone(level, zone).bump(x,y);
+            game.world.getZone(level, zone).coin(x,y+1);
+          }
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          if(td.data > 0) {
+            var raw = game.world.getZone(level, zone).tile(x,y);
+            var rep = td32.data(raw, td.data-1);                      // Replacement td32 data for tile.
+            game.world.getZone(level, zone).replace(x,y,rep);
+            game.world.getZone(level, zone).bump(x,y);
+            game.world.getZone(level, zone).coin(x,y+1);
+          }
+          else {
+            var rep = 98307; // Replacement td32 data for tile.
+            game.world.getZone(level, zone).replace(x,y,rep);
+            game.world.getZone(level, zone).bump(x,y);
+            game.world.getZone(level, zone).coin(x,y+1);
+          }
           break;
         }
       }

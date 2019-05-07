@@ -16,12 +16,38 @@ World.prototype.step = function() {
   }
 };
 
-World.prototype.getInitial = function() {
-  return this.levels[this.initial];
+World.prototype.getInitialLevel = function() {
+  return this.getLevel(this.initial);
+};
+
+World.prototype.getInitialZone = function() {
+  var lvl = this.getLevel(this.initial);
+  return this.getZone(lvl.id, lvl.initial);
+};
+
+World.prototype.getLevel = function(level) {
+  for(var i=0;i<this.levels.length;i++) {
+    var l = this.levels[i];
+    if(l.id === level) {
+      return l;
+    }
+  }
+  return undefined;
 };
 
 World.prototype.getZone = function(level, zone) {
-  return this.levels[level].zones[zone];
+  for(var i=0;i<this.levels.length;i++) {
+    var l = this.levels[i];
+    if(l.id === level) {
+      for(var j=0;j<l.zones.length;j++) {
+        var z = l.zones[j];
+        if(z.id === zone) {
+          return z;
+        }
+      }
+    }
+  }
+  return undefined;
 };
 
 /* ========================================================================== */
@@ -59,6 +85,7 @@ function Zone(data) {
   this.warp = data.warp; // Copied by reference!
   
   this.bumped = [];
+  this.effects = [];
 }
 
 Zone.prototype.update = function(game, pid, level, zone, x, y, type) {
@@ -78,12 +105,40 @@ Zone.prototype.step = function() {
       this.bumped.splice(i--,1);
     }
   }
+  for(var i=0;i<this.effects.length;i++) {
+    var fx = this.effects[i];
+    if(fx.garbage) { this.effects.splice(i--,1); }
+    else { fx.step(); }
+  }
+};
+
+/* returns raw data of tile (as an int) */
+Zone.prototype.tile = function(x,y) {
+  var yo = this.dimensions().y-1-y;
+  return this.data[yo][x];
 };
 
 Zone.prototype.bump = function(x,y) {
   var yo = this.dimensions().y-1-y;
   this.data[yo][x] = td32.bump(this.data[yo][x], 15);
   this.bumped.push({x: x, y: yo});
+};
+
+Zone.prototype.replace = function(x,y,td) {
+  var yo = this.dimensions().y-1-y;
+  this.data[yo][x] = td;
+};
+
+Zone.prototype.break = function(x,y,td) {
+  var yo = this.dimensions().y-1-y;
+  var orig = td32.decode16(this.data[yo][x]);
+  this.data[yo][x] = td;
+  this.effects.push(new BreakEffect(vec2.make(x,y), orig.index));
+};
+
+Zone.prototype.coin = function(x,y) {
+  var yo = this.dimensions().y-1-y;
+  this.effects.push(new CoinEffect(vec2.make(x,y)));
 };
 
 /* Returns width and height of the zone in tiles. */
@@ -114,4 +169,10 @@ Zone.prototype.getTiles = function(pos, dim) {
   }
   
   return tiles;
+};
+
+Zone.prototype.getEffects = function(fxs) {
+  for(var i=0;i<this.effects.length;i++) {
+    this.effects[i].draw(fxs);
+  }
 };

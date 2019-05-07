@@ -40,8 +40,8 @@ PlayerObject.ID = 0x01;
 PlayerObject.ANIMATION_RATE = 3;
 
 PlayerObject.DEAD_FREEZE_TIME = 5;
-PlayerObject.DEAD_UP_TIME = 13;
-PlayerObject.DEAD_DELETE_TIME = 45;
+PlayerObject.DEAD_UP_TIME = 9;
+PlayerObject.DEAD_DELETE_TIME = 30;
 PlayerObject.DEAD_MOVE = 0.35;
 
 PlayerObject.MOVE_SPEED_MAX = 0.225;

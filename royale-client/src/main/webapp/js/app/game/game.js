@@ -173,10 +173,10 @@ Game.prototype.doStep = function() {
   
   /* Create a player object if we don't have one. */
   if(!obj) {
-    var level = this.world.initial;
-    var zone = this.world.getInitial().initial;
-    var pos = this.world.getInitial().getInitial().initial; // shor2
-    this.createObject(PlayerObject.ID, level, zone, shor2.decode(pos), [this.pid]);
+    var level = this.world.getInitialLevel();
+    var zone = this.world.getInitialZone();
+    var pos = zone.initial; // shor2
+    this.createObject(PlayerObject.ID, level.id, zone.id, shor2.decode(pos), [this.pid]);
     this.out.push(NET010.encode(level, zone, pos));
     return;
   }
@@ -250,17 +250,13 @@ Game.prototype.getPlayer = function() {
 Game.prototype.getZone = function() {
   /* Where are character is */
   var player = this.getPlayer();
-  if(player) {
-    // Do stuff
-  }
+  if(player) { this.lastZone = this.world.getZone(player.level, player.zone); return this.lastZone; }
   
   /* Last valid location */
-  if(this.lastZone) { return this.world.levels[this.lastZone[0]].zones[this.lastZone[1]]; }
+  if(this.lastZone) { return this.lastZone; }
   
   /* Starting location */
-  var level = this.world.getInitial();
-  this.lastZone = [this.world.initial, level.initial];
-  return level.getInitial();
+  return this.world.getInitialZone();
 };
 
 Game.prototype.draw = function() {

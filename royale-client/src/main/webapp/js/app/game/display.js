@@ -46,6 +46,7 @@ Display.prototype.draw = function() {
   this.drawMap(false); // Render background
   this.drawObject();
   this.drawMap(true);  // Render foreground
+  this.drawEffect();
   this.drawUI();
 };
 
@@ -83,7 +84,7 @@ Display.prototype.drawObject = function() {
     this.game.objects[i].draw(sprites);
   }
   
-  var tex = this.resource.getTexture("char");
+  var tex = this.resource.getTexture("obj");
   
   for(var i=0;i<sprites.length;i++) {
     var sprite = sprites[i];
@@ -98,6 +99,41 @@ Display.prototype.drawObject = function() {
     else {
       context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*sprite.pos.x, Display.TEXRES*(dim.y-sprite.pos.y-1.), Display.TEXRES, Display.TEXRES);
     }
+  }
+};
+
+Display.prototype.drawEffect = function() {
+  var context = this.context; // Sanity
+  
+  var zone = this.game.getZone();
+  var dim = zone.dimensions();
+  
+  var texMap = this.resource.getTexture("map");
+  var texObj = this.resource.getTexture("obj");
+  
+  var fxs = [];
+  zone.getEffects(fxs);
+  
+  for(var i=0;i<fxs.length;i++) {
+    var fx = fxs[i];
+    
+    var tex;
+    switch(fx.tex) {
+      case "map" : { tex = texMap; break; }
+      case "obj" : { tex = texObj; break; }
+    }
+    
+    var st = util.sprite.getSprite(tex, fx.ind);
+    st[0] = parseInt(st[0] + (fx.sp.x * Display.TEXRES));
+    st[1] = parseInt(st[1] + (fx.sp.y * Display.TEXRES));
+    
+    context.save();
+    context.translate(parseInt(Display.TEXRES*fx.ss.x*.5), parseInt(Display.TEXRES*fx.ss.y*.5));
+    context.translate(Display.TEXRES*fx.pos.x, Display.TEXRES*(dim.y-fx.pos.y-1.));
+    context.rotate(fx.rot);
+    context.translate(-parseInt(Display.TEXRES*fx.ss.x*.5), -parseInt(Display.TEXRES*fx.ss.y*.5));
+    context.drawImage(tex, st[0], st[1], parseInt(Display.TEXRES*fx.ss.x), parseInt(Display.TEXRES*fx.ss.y), 0, 0, parseInt(Display.TEXRES*fx.ss.x), parseInt(Display.TEXRES*fx.ss.y));
+    context.restore();
   }
   
 };
