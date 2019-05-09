@@ -8,8 +8,8 @@ function GoombaObject(game, level, zone, pos, oid) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.state = GoombaObject.STATE.RUN.ID;
-  this.sprite = GoombaObject.STATE[this.state].SPRITE[0].INDEX;
+  this.state = GoombaObject.STATE.RUN;
+  this.sprite = this.state.SPRITE[0];
   
   /* Animation */
   this.anim = 0;
@@ -79,10 +79,10 @@ GoombaObject.prototype.update = function(event) {
 GoombaObject.prototype.step = function() {
   /* Anim */
   this.anim++;
-  this.sprite = GoombaObject.STATE[this.state].SPRITE[parseInt(this.anim/GoombaObject.ANIMATION_RATE) % GoombaObject.STATE[this.state].SPRITE.length].INDEX;
+  this.sprite = this.state.SPRITE[parseInt(this.anim/GoombaObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Dead */
-  if(this.state === GoombaObject.STATE.DEAD.ID) {
+  if(this.state === GoombaObject.STATE.DEAD) {
     if(this.deadTimer++ < GoombaObject.DEAD_TIME) { }
     else { this.destroy(); }
     return;
@@ -185,14 +185,14 @@ GoombaObject.prototype.destroy = function() {
 };
 
 GoombaObject.prototype.setState = function(STATE) {
-  if(STATE.ID === this.state) { return; }
-  this.state = STATE.ID;
-  this.sprite = STATE.SPRITE[0].INDEX;
+  if(STATE === this.state) { return; }
+  this.state = STATE;
+  this.sprite = STATE.SPRITE[0];
   this.anim = 0;
 };
 
 GoombaObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite});
+  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
 };
 
 /* Register object class */

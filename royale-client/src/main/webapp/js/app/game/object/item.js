@@ -56,7 +56,7 @@ ItemObject.prototype.update = function(event) {
 ItemObject.prototype.step = function() {
   /* Anim */
   this.anim++;
-  //this.sprite = ItemObject.STATE[this.state].SPRITE[parseInt(this.anim/ItemObject.ANIMATION_RATE) % ItemObject.STATE[this.state].SPRITE.length].INDEX;
+  this.sprite = this.state.SPRITE[parseInt(this.anim/ItemObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Normal Gameplay */
   this.control();
@@ -173,12 +173,12 @@ ItemObject.prototype.destroy = function() {
 };
 
 ItemObject.prototype.setState = function(STATE) {
-  if(STATE.ID === this.state) { return; }
-  this.state = STATE.ID;
-  this.sprite = STATE.SPRITE[0].INDEX;
+  if(STATE === this.state) { return; }
+  this.state = STATE;
+  this.sprite = STATE.SPRITE[0];
   this.anim = 0;
 };
 
 ItemObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite});
+  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
 };

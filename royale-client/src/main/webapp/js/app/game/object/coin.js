@@ -8,8 +8,8 @@ function CoinObject(game, level, zone, pos, oid) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.state = CoinObject.STATE.IDLE.ID;
-  this.sprite = CoinObject.STATE[this.state].SPRITE[0].INDEX;
+  this.state = CoinObject.STATE.IDLE;
+  this.sprite = this.state.SPRITE[0];
   
   /* Animation */
   this.anim = 0;
@@ -63,7 +63,7 @@ CoinObject.prototype.update = function(event) {
 CoinObject.prototype.step = function() {
   /* Anim */
   this.anim++;
-  this.sprite = CoinObject.STATE[this.state].SPRITE[parseInt(this.anim/CoinObject.ANIMATION_RATE) % CoinObject.STATE[this.state].SPRITE.length].INDEX;
+  this.sprite = this.state.SPRITE[parseInt(this.anim/CoinObject.ANIMATION_RATE) % this.state.SPRITE.length];
 };
 
 CoinObject.prototype.playerCollide = function(p) {
@@ -94,14 +94,14 @@ CoinObject.prototype.destroy = function() {
 };
 
 CoinObject.prototype.setState = function(STATE) {
-  if(STATE.ID === this.state) { return; }
-  this.state = STATE.ID;
-  this.sprite = STATE.SPRITE[0].INDEX;
+  if(STATE === this.state) { return; }
+  this.state = STATE;
+  this.sprite = STATE.SPRITE[0];
   this.anim = 0;
 };
 
 CoinObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite});
+  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
 };
 
 /* Register object class */

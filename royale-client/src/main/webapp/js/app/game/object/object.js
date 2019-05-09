@@ -10,8 +10,8 @@ function GameObject(game, level, zone, pos) {
   this.zone = zone;        // Zone ID
   this.pos = pos;          // Vec2 position
   
-  this.state = 0x00;       // Object state, usage varies.
-  this.sprite = 0x00;      // Sprite currently being drawn for this object.
+  this.state = undefined;  // Object state, usage varies.                   [ Reference to static object ]
+  this.sprite = undefined; // Sprite currently being drawn for this object. [ Reference to static object ]
   this.reverse = false;    // If true we flip the sprite on the horizontal axis.
   this.dead = false;       // Object is dead.
   this.garbage = false;    // Destroyed state, this object is ready to be deleted.

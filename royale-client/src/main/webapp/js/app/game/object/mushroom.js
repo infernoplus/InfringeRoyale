@@ -6,8 +6,8 @@
 function MushroomObject(game, level, zone, pos, oid) {
   ItemObject.call(this, game, level, zone, pos, oid);
   
-  this.state = MushroomObject.STATE.IDLE.ID;
-  this.sprite = MushroomObject.STATE[this.state].SPRITE[0].INDEX;
+  this.state = MushroomObject.STATE.IDLE;
+  this.sprite = this.state.SPRITE[0];
 }
 
 /* === STATIC =============================================================== */

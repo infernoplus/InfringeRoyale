@@ -8,8 +8,8 @@ function PlayerObject(game, level, zone, pos, pid) {
   
   this.pid = pid; // Unique Player ID
   
-  this.state = PlayerObject.STATE.STAND.ID;
-  this.sprite = PlayerObject.STATE[this.state].SPRITE[0].INDEX;
+  this.state = PlayerObject.STATE.STAND;
+  this.sprite = this.state.SPRITE[0];
   
   /* Animation */
   this.anim = 0;
@@ -105,27 +105,27 @@ PlayerObject.prototype.update = function(data) {
   if(this.dead || this.garbage) { return; } // Don't do ghost playback if character is dead
   
   /* Ghost playback update */
-  this.state = PlayerObject.STATE.GHOST.ID;
+  this.state = PlayerObject.STATE.GHOST;
   this.level = data.level;
   this.zone = data.zone;
   this.pos = data.pos;
-  this.sprite = data.sprite;
+  this.sprite = PlayerObject.SPRITE[data.sprite];
   this.reverse = data.reverse;
 };
 
 PlayerObject.prototype.step = function() {
   /* Ghost playback */
-  if(this.state === PlayerObject.STATE.GHOST.ID) { return; }
+  if(this.state === PlayerObject.STATE.GHOST) { return; }
   
   /* Player Hidden */
-  if(this.state === PlayerObject.STATE.HIDE.ID) { return; }
+  if(this.state === PlayerObject.STATE.HIDE) { return; }
   
   /* Anim */
   this.anim++;
-  this.sprite = PlayerObject.STATE[this.state].SPRITE[parseInt(this.anim/PlayerObject.ANIMATION_RATE) % PlayerObject.STATE[this.state].SPRITE.length].INDEX;
+  this.sprite = this.state.SPRITE[parseInt(this.anim/PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Dead */
-  if(this.state === PlayerObject.STATE.DEAD.ID) {
+  if(this.state === PlayerObject.STATE.DEAD) {
     if(this.deadFreezeTimer++ < PlayerObject.DEAD_FREEZE_TIME) { }
     else if(this.deadUpTimer++ < PlayerObject.DEAD_UP_TIME) { this.pos.y += PlayerObject.DEAD_MOVE; }
     else if(this.deadDeleteTimer++ < PlayerObject.DEAD_DELETE_TIME) { this.pos.y -= PlayerObject.DEAD_MOVE; }
@@ -134,12 +134,12 @@ PlayerObject.prototype.step = function() {
   }
   
   /* Warp Pipe */
-  if(this.pipeTimer > 0 && this.pipeWarp) {                       // Down
+  if(this.pipeTimer > 0 && this.pipeWarp) {                            // Down
     this.pipeTimer--; this.pos.y -= PlayerObject.PIPE_SPEED;
     if(this.pipeTimer < 1) { this.warp(this.pipeWarp); this.pipeWarp = undefined; this.pipeTimer = PlayerObject.PIPE_TIME; }
     return;
   }
-  else if(this.pipeTimer > 0 && !this.pipeWarp) {                       // Up
+  else if(this.pipeTimer > 0 && !this.pipeWarp) {                      // Up
     this.pipeTimer--; this.pos.y += PlayerObject.PIPE_SPEED;
     return;
   }
@@ -275,7 +275,7 @@ PlayerObject.prototype.physics = function() {
     }
   }
   /* Tile Down events */
-  if(this.state === PlayerObject.STATE.DOWN.ID && this.moveSpeed < 0.01) {
+  if(this.state === PlayerObject.STATE.DOWN && this.moveSpeed < 0.01) {
     for(var i=0;i<on.length;i++) {
       var tile = on[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.DOWN);
@@ -347,14 +347,14 @@ PlayerObject.prototype.destroy = function() {
 };
 
 PlayerObject.prototype.setState = function(STATE) {
-  if(STATE.ID === this.state) { return; }
-  this.state = STATE.ID;
-  this.sprite = STATE.SPRITE[0].INDEX;
+  if(STATE === this.state) { return; }
+  this.state = STATE;
+  this.sprite = STATE.SPRITE[0];
   this.anim = 0;
 };
 
 PlayerObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite});
+  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
 };
 
 /* Register object class */

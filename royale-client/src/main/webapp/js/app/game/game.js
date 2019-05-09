@@ -119,7 +119,7 @@ Game.prototype.doNET001 = function(n) {
 Game.prototype.doNET010 = function(n) {
   if(n.pid === this.pid) { return; }
   var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid]);
-  obj.state = PlayerObject.STATE.GHOST.ID;
+  obj.state = PlayerObject.STATE.GHOST;
 };
 
 /* KILL_PLAYER_OBJECT [0x11] */
@@ -216,7 +216,7 @@ Game.prototype.doStep = function() {
 Game.prototype.doPush = function() {
   var obj = this.getPlayer(); // Our player object
   if(obj && !obj.dead) {
-    this.out.push(NET012.encode(obj.level, obj.zone, obj.pos, obj.sprite, obj.reverse));
+    this.out.push(NET012.encode(obj.level, obj.zone, obj.pos, obj.sprite.ID, obj.reverse));
   }
   
   var merge = MERGE_BYTE(this.out); // Merge all binary messages into a single Uint8Array
