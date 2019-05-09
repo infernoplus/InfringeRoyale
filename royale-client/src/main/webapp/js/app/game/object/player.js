@@ -26,6 +26,9 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.jumping = -1;
   this.grounded = false;
   
+  this.pipeWarp = undefined; // Warp point the pipe we are using is linked to
+  this.pipeTimer = 0;        // Timer for going down a pipe
+  
   /* Control */
   this.btnD = [0,0]; // D-Pad
   this.btnA = false;
@@ -55,15 +58,20 @@ PlayerObject.JUMP_LENGTH_MIN = 2;
 PlayerObject.JUMP_LENGTH_MAX = 8;
 PlayerObject.JUMP_DECEL = 0.005;
 
+PlayerObject.PIPE_TIME = 30;
+PlayerObject.PIPE_SPEED = 0.06;
+
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [
   {NAME: "STAND", ID: 0x00, INDEX: 0x002D},
+  {NAME: "DOWN", ID: 0x00, INDEX: 0x002D},
   {NAME: "RUN0", ID: 0x01, INDEX: 0x002A},
   {NAME: "RUN1", ID: 0x02, INDEX: 0x002B},
   {NAME: "RUN2", ID: 0x03, INDEX: 0x002C},
   {NAME: "SLIDE", ID: 0x04, INDEX: 0x0029},
   {NAME: "FALL", ID: 0x05, INDEX: 0x0028},
-  {NAME: "DEAD", ID: 0x06, INDEX: 0x0020}
+  {NAME: "DEAD", ID: 0x06, INDEX: 0x0020},
+  {NAME: "HIDE", ID: 0x07, INDEX: 0x002E}
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */
@@ -75,10 +83,12 @@ for(var i=0;i<PlayerObject.SPRITE_LIST.length;i++) {
 PlayerObject.STATE = {};
 PlayerObject.STATE_LIST = [
   {NAME: "STAND", ID: 0x00, SPRITE: [PlayerObject.SPRITE.STAND]},
-  {NAME: "RUN", ID: 0x01, SPRITE: [PlayerObject.SPRITE.RUN0,PlayerObject.SPRITE.RUN1,PlayerObject.SPRITE.RUN2]},
-  {NAME: "SLIDE", ID: 0x02, SPRITE: [PlayerObject.SPRITE.SLIDE]},
+  {NAME: "DOWN", ID: 0x01, SPRITE: [PlayerObject.SPRITE.DOWN]},
+  {NAME: "RUN", ID: 0x02, SPRITE: [PlayerObject.SPRITE.RUN0,PlayerObject.SPRITE.RUN1,PlayerObject.SPRITE.RUN2]},
+  {NAME: "SLIDE", ID: 0x03, SPRITE: [PlayerObject.SPRITE.SLIDE]},
   {NAME: "FALL", ID: 0x10, SPRITE: [PlayerObject.SPRITE.FALL]},
   {NAME: "DEAD", ID: 0x50, SPRITE: [PlayerObject.SPRITE.DEAD]},
+  {NAME: "HIDE", ID: 0x60, SPRITE: [PlayerObject.SPRITE.HIDE]},
   {NAME: "GHOST", ID: 0xFF, SPRITE: []}
 ];
 
@@ -105,9 +115,10 @@ PlayerObject.prototype.update = function(data) {
 
 PlayerObject.prototype.step = function() {
   /* Ghost playback */
-  if(this.state === PlayerObject.STATE.GHOST.ID) {
-    return;
-  }
+  if(this.state === PlayerObject.STATE.GHOST.ID) { return; }
+  
+  /* Player Hidden */
+  if(this.state === PlayerObject.STATE.HIDE.ID) { return; }
   
   /* Anim */
   this.anim++;
@@ -119,6 +130,17 @@ PlayerObject.prototype.step = function() {
     else if(this.deadUpTimer++ < PlayerObject.DEAD_UP_TIME) { this.pos.y += PlayerObject.DEAD_MOVE; }
     else if(this.deadDeleteTimer++ < PlayerObject.DEAD_DELETE_TIME) { this.pos.y -= PlayerObject.DEAD_MOVE; }
     else { this.destroy(); }
+    return;
+  }
+  
+  /* Warp Pipe */
+  if(this.pipeTimer > 0 && this.pipeWarp) {                       // Down
+    this.pipeTimer--; this.pos.y -= PlayerObject.PIPE_SPEED;
+    if(this.pipeTimer < 1) { this.warp(this.pipeWarp); this.pipeWarp = undefined; this.pipeTimer = PlayerObject.PIPE_TIME; }
+    return;
+  }
+  else if(this.pipeTimer > 0 && !this.pipeWarp) {                       // Up
+    this.pipeTimer--; this.pos.y += PlayerObject.PIPE_SPEED;
     return;
   }
   
@@ -157,6 +179,9 @@ PlayerObject.prototype.control = function() {
     else {
       this.moveSpeed = 0;
       this.setState(PlayerObject.STATE.STAND);
+    }
+    if(this.btnD[1] === -1) {
+      this.setState(PlayerObject.STATE.DOWN);
     }
   }
   
@@ -198,6 +223,7 @@ PlayerObject.prototype.physics = function() {
   var tdim = vec2.make(1., 1.);
   
   this.grounded = false;
+  var on = [];              // Tiles we are directly standing on, if applicable
   for(var i=0;i<tiles.length;i++) {
     var tile = tiles[i];
     if(!tile.definition.COLLIDE) { continue; }
@@ -228,6 +254,7 @@ PlayerObject.prototype.physics = function() {
       if(this.pos.y >= tile.pos.y + tdim.y && movy.y < tile.pos.y + tdim.y) {
         movy.y = tile.pos.y + tdim.y;
         this.grounded = true;
+        on.push(tile);
       }
       else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
         movy.y = tile.pos.y - this.dim.y;
@@ -238,12 +265,29 @@ PlayerObject.prototype.physics = function() {
     }
   }
   this.pos = vec2.make(movx.x, movy.y);
+  
+  /* Tile Touch events */
+  for(var i=0;i<tiles.length;i++) {
+    var tile = tiles[i];
+    var hit = squar.intersection(tile.pos, tdim, this.pos, this.dim);
+    if(hit) {
+      tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.TOUCH);
+    }
+  }
+  /* Tile Down events */
+  if(this.state === PlayerObject.STATE.DOWN.ID && this.moveSpeed < 0.01) {
+    for(var i=0;i<on.length;i++) {
+      var tile = on[i];
+      tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.DOWN);
+    }
+  }
 };
 
 /* Checks if this object has touched or interacted with any other object */
 PlayerObject.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
+    if(obj === this) { continue; }
     if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) {
@@ -264,6 +308,29 @@ PlayerObject.prototype.interaction = function() {
       }
     }
   }
+};
+
+PlayerObject.prototype.warp = function(wid) {
+  var wrp = this.game.world.getLevel(this.level).getWarp(wid);
+  if(!wrp) { return; } /* Error */
+    
+  this.level = wrp.level;
+  this.zone = wrp.zone;
+  this.pos = wrp.pos;
+};
+
+PlayerObject.prototype.pipe = function(wid) {
+  this.pipeWarp = wid;
+  this.pipeTimer = PlayerObject.PIPE_TIME;
+};
+
+/* Make the player invisible, intangible, and frozen until show() is called. */
+PlayerObject.prototype.hide = function() {
+  this.setState(PlayerObject.STATE.HIDE);
+};
+
+PlayerObject.prototype.show = function() {
+  this.setState(PlayerObject.STATE.STAND);
 };
 
 PlayerObject.prototype.kill = function() {

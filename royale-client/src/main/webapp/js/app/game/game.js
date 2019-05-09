@@ -28,6 +28,10 @@ function Game(data) {
   
   this.ready = false;
   
+  /* Level Warp */
+  this.levelWarpTimer = 0;      // How long to show level name/lives screen.
+  this.levelWarpId = undefined; // Level to warp too
+  
   var that = this;
   this.frameReq = requestAnimFrameFunc.call(window, function() { that.draw(); }); // Javascript 🙄
 };
@@ -35,6 +39,8 @@ function Game(data) {
 Game.TICK_RATE = 33;
 Game.FDLC_TARGET = 3;
 Game.FDLC_MAX = Game.FDLC_TARGET+2;
+
+Game.LEVEL_WARP_TIME = 60;
 
 Game.prototype.load = function(data) {
   app.menu.load.show();
@@ -171,6 +177,19 @@ Game.prototype.doInput = function() {
 Game.prototype.doStep = function() {
   var obj = this.getPlayer(); // Our player object
   
+  /* Level Warp */
+  if(this.levelWarpId && this.levelWarpTimer > 0) {
+    if(--this.levelWarpTimer < 1) {
+      var p = this.getPlayer();
+      var z = this.world.getLevel(this.levelWarpId).getInitial();
+      p.level = z.level;
+      p.zone = z.id;
+      p.pos = shor2.decode(z.initial);
+      p.show();
+      this.levelWarpId = undefined;
+    }
+  }
+  
   /* Create a player object if we don't have one. */
   if(!obj) {
     var level = this.world.getInitialLevel();
@@ -257,6 +276,14 @@ Game.prototype.getZone = function() {
   
   /* Starting location */
   return this.world.getInitialZone();
+};
+
+/* Shows lives/level name screen then warps player to start of specified level. */
+/* Called when player reaches end of the level they are currently on. */
+Game.prototype.levelWarp = function(lid) {
+  this.levelWarpId = lid;
+  this.levelWarpTimer = Game.LEVEL_WARP_TIME;
+  this.getPlayer().hide();
 };
 
 Game.prototype.draw = function() {

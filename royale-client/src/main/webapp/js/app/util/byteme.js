@@ -55,6 +55,7 @@ td32.asArray = function(/* td32 */ a) {
 td32.TRIGGER = {
   TYPE: {
     TOUCH: 0x00,
+    DOWN: 0x01,
     SMALL_BUMP: 0x10,
     BIG_BUMP: 0x11
   }
@@ -122,7 +123,7 @@ td32.TILE_PROPERTIES = {
       switch(type) {
         /* Small bump */
         case 0x10 : {
-          ggame.world.getZone(level, zone).bump(x,y);
+          game.world.getZone(level, zone).bump(x,y);
           break;
         }
         /* Big bump */
@@ -213,7 +214,7 @@ td32.TILE_PROPERTIES = {
           if(td.data > 0) {
             var raw = game.world.getZone(level, zone).tile(x,y);
             var rep = td32.data(raw, td.data-1);                      // Replacement td32 data for tile.
-            game.world.getZone(level, zone).zones[zone].replace(x,y,rep);
+            game.world.getZone(level, zone).replace(x,y,rep);
             game.world.getZone(level, zone).bump(x,y);
             game.world.getZone(level, zone).coin(x,y+1);
           }
@@ -241,6 +242,66 @@ td32.TILE_PROPERTIES = {
             game.world.getZone(level, zone).coin(x,y+1);
           }
           break;
+        }
+      }
+    }
+  },
+  /* Warp Tile */
+  0x51: {
+    COLLIDE: false,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: true,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Touch */
+        case 0x00 : {
+          if(game.pid === pid) {
+            game.getPlayer().warp(td.data);
+          }
+        }
+      }
+    }
+  },
+  /* Warp Pipe */
+  0x52: {
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: true,
+    WARP: true,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Down */
+        case 0x01 : {
+          if(game.pid === pid) {
+            game.getPlayer().pipe(td.data);
+          }
+        }
+      }
+    }
+  },
+  /* End of Level Warp */
+  0x56: {
+    COLLIDE: false,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: true,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Touch */
+        case 0x00 : {
+          if(game.pid === pid) {
+            game.levelWarp(td.data);
+          }
         }
       }
     }

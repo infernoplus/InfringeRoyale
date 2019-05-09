@@ -81,7 +81,10 @@ Display.prototype.drawObject = function() {
   
   var sprites = [];
   for(var i=0;i<this.game.objects.length;i++) {
-    this.game.objects[i].draw(sprites);
+    var obj = this.game.objects[i];
+    if(obj.level === zone.level && obj.zone === zone.id) {
+      obj.draw(sprites);
+    }
   }
   
   var tex = this.resource.getTexture("obj");
@@ -140,5 +143,11 @@ Display.prototype.drawEffect = function() {
 
 Display.prototype.drawUI = function() {
   var context = this.context; // Sanity
-  
+  if(this.game.levelWarpId) {
+    context.beginPath();
+    context.lineWidth = "6";
+    context.strokeStyle = "red";
+    context.rect(25,25,100,100); //Test
+    context.stroke();
+  }
 };

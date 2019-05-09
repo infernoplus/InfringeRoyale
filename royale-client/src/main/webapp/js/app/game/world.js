@@ -59,7 +59,7 @@ function Level(data) {
   
   this.zones = [];
   for(var i=0;i<data.zone.length;i++) {
-    this.zones.push(new Zone(data.zone[i]));
+    this.zones.push(new Zone(this.id, data.zone[i]));
   }
 }
 
@@ -70,13 +70,29 @@ Level.prototype.step = function() {
 };
 
 Level.prototype.getInitial = function() {
-  return this.zones[this.initial];
+  for(var i=0;i<this.zones.length;i++) {
+    var zon = this.zones[i];
+    if(zon.id === this.initial) { return zon; }
+  }
+  return undefined;
+};
+
+Level.prototype.getWarp = function(wid) {
+  for(var j=0;j<this.zones.length;j++) {
+    var zon = this.zones[j];
+    for(var k=0;k<zon.warp.length;k++) {
+      var wrp = zon.warp[k];
+      if(wrp.id === wid) { return {level: this.id, zone: zon.id, pos: shor2.decode(wrp.pos)}; }
+    }
+  }
 };
 
 /* ========================================================================== */
 
-function Zone(data) {
+function Zone(level, data) {
   this.id = data.id;
+  this.level = level;    // Level that this zone is a part of
+  
   this.initial = data.initial; // shor2 starting point for this zone.
   this.color = data.color; // HTML color of the sky for this zone.
   
