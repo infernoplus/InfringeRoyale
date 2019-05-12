@@ -1,0 +1,260 @@
+html,body {
+  background-color: #AAAAAA;  
+  font-family: "Calibri", monospace;
+  
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+  width: 100%;
+}
+
+.file-error {
+  font-size: 75%;
+  background-color: #999999;  
+  border: 1px #444444 dotted;
+}
+
+/* Gay stuff */
+
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.box .row {
+  border: 1px dotted grey;
+}
+
+.box .row.header {
+  flex: 0 1 21px;
+}
+
+.box .row.content {
+  flex: 1 1 auto;
+}
+
+.box .row.footer {
+  flex: 0 1 250px;
+}
+
+/* end of gay stuff */
+
+.container {
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
+  
+  width: 100%;
+  height: 100%;
+}
+
+.panel-left {
+    background-color: #444444;
+    overflow: auto;
+}
+
+.panel-right {
+    width: 250px;
+    float: right;
+    overflow-y: scroll;
+    
+    border-left: 1px dotted grey;
+}
+
+.panel-top {
+  border: 1px solid #444444;
+  
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
+}
+
+.unselectable {
+   -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+
+   /*
+     Introduced in IE 10.
+     See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+   */
+   -ms-user-select: none;
+   user-select: none;
+}
+
+.toolbar-button-top {
+  font-weight: bold;
+  background-color: #999999;
+  
+  border: 1px solid #757575;
+  
+  margin: 0px 0px 0px 0px;
+  padding: 4px 12px 0px 12px;
+  
+  cursor: pointer;
+}
+
+.toolbar-button-top:hover {
+  color: #FFFFFF;
+  background-color: #444444;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+.list-header {
+  font-weight: bold;
+  font-size: 120%;
+  
+  margin: 0px 0px 0px 0px;
+  padding: 0px 12px 0px 8px;
+}
+
+.list-world {
+  font-weight: bold;
+  background-color: #999999;
+  border-bottom: 1px dotted #757575;
+  
+  margin: 0px 0px 0px 0px;
+  padding: 0px 12px 0px 8px;
+  
+  cursor: default;
+}
+
+.list-zone {
+  background-color: #999999;
+  border-bottom: 1px dotted #757575;
+  
+  margin: 0px 0px 0px 0px;
+  padding: 0px 12px 0px 24px;
+  
+  cursor: pointer;
+}
+
+.list-zone:hover {
+  color: #FFFFFF;
+  background-color: #444444;
+}
+
+.tool-container {
+  
+}
+
+.tool-box {
+  display: inline-block;
+  margin: 4px 8px 0px 12px;
+}
+
+.tool-var {
+  font-weight: bold;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.tool-type {
+  display: inline-block;
+  font-size: 75%;
+}
+
+.tool-val {
+  display: block;
+  background-color: #FFFFFF;
+  border: 1px solid #757575;
+}
+
+.tool-div {
+  display: block;
+  height: 1px;
+  border-top: 1px solid #757575;
+  margin-top: 8px;
+}
+
+/*
+.tool-button {
+  font-weight: bold;
+  background-color: #999999;
+  
+  border: 1px solid #444444;
+  
+  margin: 0px 0px 0px 0px;
+  padding: 0px 12px 0px 12px;
+  
+  cursor: pointer;
+}
+
+.tool-button:hover {
+  color: #FFFFFF;
+  background-color: #444444;
+}
+
+.tool-header {
+  font-weight: bold;
+  
+  margin: 0px 0px 0px 0px;
+  padding: 0px 12px 0px 12px;
+}
+
+.tool-block {
+  background-color: #FFFFFF;
+  width: 100%;
+  height: 450px;
+  font-size: 65% !important;
+  
+  margin: 0px 0px 0px 0px;
+  
+  border: 1px solid #444444;
+  border-left-width: 0px;
+  border-right-width: 0px;
+}
+
+.sm { 
+  font-weight: lighter !important;
+  font-size: 80% !important;
+}
+
+.tall {
+  height: 85% !important;
+}
+
+.short {
+  height: 250px !important;
+}*/
+
+/* ============ Stuff Copied from main app CSS ================ */
+.warn {
+  position: absolute;
+  margin: 0px 0px 0px 0px;
+  padding: 5px 32px 2px 4px;
+  font-family: "Calibri", monospace;
+  color: rgba(255, 255, 255, 1.0);
+  background-color: rgba(0, 0, 0, 0.25);
+
+  font-size: 16px;
+}
+
+.warn-ico {
+  height: 16px;
+  margin-bottom: -2px;
+  margin-right: 2px;
+}
+
+.error {
+  font-size: 32px;
+}
+
+.container-center {
+  font-family: SmbWeb;
+  color: #FFFFFF;
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
+  
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  white-space: nowrap;
+}

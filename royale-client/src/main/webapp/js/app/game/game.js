@@ -207,7 +207,7 @@ Game.prototype.doStep = function() {
     if(obj.garbage) { this.objects.splice(i--, 1); }
   }
   
-  /* Step world to update bumps & etc */
+  /* Step world to update bumps & effects & etc */
   this.world.step();
   
 };

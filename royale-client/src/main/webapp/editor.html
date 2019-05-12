@@ -1,0 +1,132 @@
+<html>
+    <head>
+        <title>Infringe Royale Editor</title>
+        <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+        <link rel='icon' href='img/home/icon.png'>
+        <link rel='stylesheet' type='text/css' href='css/editor.css'>
+    </head>
+    
+    <body id='body' style='display: none;'>
+      <!-- Warning -->
+      <div id='warn' class='warn' style='display:none'></div>
+      
+      <!-- Error -->
+      <div id='error' class='container-center' style='display:none'>
+        <div id ='error-message' class='error'></div>
+      </div>
+      
+      <!-- File -->
+      <div id="file" style='display:none'>
+        <b>Open Game File...</b>
+        <div><input type="file" id="file-input"/></div>
+        <div class="file-error" id="file-error">...</div>
+      </div>
+      
+      <!-- Editor -->
+      <div id='editor' class="box" style='display:none'>
+        <div id='editor-top' class="row header panel-top unselectable" oncontextmenu="return false">
+          <span id='editor-top-world' class="toolbar-button-top left">World</span>
+          <span id='editor-top-level' class="toolbar-button-top left">Level</span>
+          <span id='editor-top-zone' class="toolbar-button-top left">Zone</span>
+          <span id='editor-top-tile' class="toolbar-button-top left">Tile</span>
+          <span id='editor-top-object' class="toolbar-button-top left">Object</span>
+          <span id='editor-top-warp' class="toolbar-button-top left">Warp</span>
+          <span id='editor-top-about' class="toolbar-button-top right">About</span>
+          <span id='editor-top-save' class="toolbar-button-top right">Save</span>
+        </div>
+        <div id='editor-middle' class="row content">
+            <div id='editor-list' class="panel-right">
+            </div>
+            <div id='editor-display' class='panel-left'>
+              <canvas id="editor-display-canvas" width="320" height="240">
+                Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.
+              </canvas>
+            </div>
+        </div>
+        <div id='editor-bottom' class="row footer">
+          <!-- World Tool -->
+          <div id='editor-tool-world' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>Initial Level</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-world-initial' type='text' class="tool-val"/>
+            </div>
+          </div>
+          <!-- Level Tool -->
+          <div id='editor-tool-level' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>ID</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-level-id' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Name</div><div class='tool-type'>string</div>
+              <input id='editor-tool-level-name' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Initial Zone</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-level-initial' type='text' class="tool-val"/>
+            </div>
+          </div>
+          <!-- Zone Tool -->
+          <div id='editor-tool-zone' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>Position</div><div class='tool-type'>short2</div>
+              <input type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Type</div><div class='tool-type'>1 byte</div>
+              <input type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class='tool-var'>Extra Data</div><div class='tool-type'>4 byte</div>
+              <input type='text' class="tool-val"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Libs -->
+      <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
+      
+      <!-- Util -->
+      <script src='js/app/util/util.js'></script>
+      <script src='js/app/util/frame.js'></script>
+      <script src='js/app/util/byteme.js'></script>
+      <script src='js/app/util/squar.js'></script>
+      <script src='js/editor/util/file.js'></script>
+      
+      <!-- Menus -->
+      <script src='js/editor/menu/menu.js'></script>
+      <script src='js/editor/menu/menu-warn.js'></script>
+      <script src='js/editor/menu/menu-error.js'></script>
+      <script src='js/editor/menu/menu-file.js'></script>
+      <script src='js/editor/menu/menu-bar.js'></script>
+      <script src='js/editor/menu/menu-list.js'></script>
+      <script src='js/editor/menu/menu-tool.js'></script>
+      
+      <!-- Tools -->
+      <script src='js/editor/tool/tool-world.js'></script>
+      <script src='js/editor/tool/tool-level.js'></script>
+      
+      <!-- Game Core -->
+      <script src='js/app/game/object/object.js'></script>
+      <script src='js/app/game/object/player.js'></script>
+      <script src='js/app/game/object/goomba.js'></script>
+      <script src='js/app/game/object/item.js'></script>
+      <script src='js/app/game/object/mushroom.js'></script>
+      <script src='js/app/game/object/coin.js'></script>
+      <script src='js/app/game/effect/effect.js'></script>
+      <script src='js/app/game/effect/break.js'></script>
+      <script src='js/app/game/effect/coin.js'></script>
+      <script src='js/editor/input.js'></script>
+      <script src='js/app/game/display/resource.js'></script>
+      <script src='js/app/game/display/camera.js'></script>
+      <script src='js/app/game/display.js'></script>
+      <script src='js/editor/display.js'></script>
+      <script src='js/app/game/world.js'></script>
+      <script src='js/editor/editor.js'></script>
+      
+      <!-- Main Exec -->
+      <script src='js/editor/app.js'></script>
+    </body>        
+</html>
