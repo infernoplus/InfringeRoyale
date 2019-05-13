@@ -13,6 +13,7 @@ function MushroomObject(game, level, zone, pos, oid) {
 /* === STATIC =============================================================== */
 MushroomObject.ASYNC = false;
 MushroomObject.ID = 0x51;
+MushroomObject.NAME = "MUSHROOM"; // Used by editor
 
 MushroomObject.SPRITE = {};
 MushroomObject.SPRITE_LIST = [

@@ -39,6 +39,7 @@ function PlayerObject(game, level, zone, pos, pid) {
 /* === STATIC =============================================================== */
 PlayerObject.ASYNC = false;
 PlayerObject.ID = 0x01;
+PlayerObject.NAME = "PLAYER"; // Used by editor
 
 PlayerObject.ANIMATION_RATE = 3;
 

@@ -31,6 +31,7 @@ function GoombaObject(game, level, zone, pos, oid) {
 /* === STATIC =============================================================== */
 GoombaObject.ASYNC = false;
 GoombaObject.ID = 0x11;
+GoombaObject.NAME = "GOOMBA"; // Used by editor
 
 GoombaObject.ANIMATION_RATE = 3;
 

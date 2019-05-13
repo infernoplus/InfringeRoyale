@@ -14,7 +14,14 @@ App.prototype.load = function(game) {
   this.menu.editorMenu();
   this.editor = new Editor(game);
   
-  app.menu.list.generate();
+  this.menu.list.generate();
+};
+
+App.prototype.save = function() {
+  if(!this.editor) { return; }
+  
+  var data = this.editor.compile();
+  this.file.save(data);
 };
 
 /* Close active game and reload page */

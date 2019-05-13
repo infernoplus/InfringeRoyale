@@ -24,7 +24,7 @@
       
       <!-- Editor -->
       <div id='editor' class="box" style='display:none'>
-        <div id='editor-top' class="row header panel-top unselectable" oncontextmenu="return false">
+        <div id='editor-top' class="row header panel-top unselectable">
           <span id='editor-top-world' class="toolbar-button-top left">World</span>
           <span id='editor-top-level' class="toolbar-button-top left">Level</span>
           <span id='editor-top-zone' class="toolbar-button-top left">Zone</span>
@@ -37,7 +37,7 @@
         <div id='editor-middle' class="row content">
             <div id='editor-list' class="panel-right">
             </div>
-            <div id='editor-display' class='panel-left'>
+            <div id='editor-display' class='panel-left unselectable' oncontextmenu="return false">
               <canvas id="editor-display-canvas" width="320" height="240">
                 Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.
               </canvas>
@@ -49,6 +49,11 @@
             <div class='tool-box'>
               <div class='tool-var'>Initial Level</div><div class='tool-type'>byte</div>
               <input id='editor-tool-world-initial' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div id='editor-tool-world-apply' class="toolbar-button-top">Apply</div>
+              <div id='editor-tool-world-new' class="toolbar-button-top">+ Level</div>
             </div>
           </div>
           <!-- Level Tool -->
@@ -65,21 +70,107 @@
               <div class='tool-var'>Initial Zone</div><div class='tool-type'>byte</div>
               <input id='editor-tool-level-initial' type='text' class="tool-val"/>
             </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div id='editor-tool-level-apply' class="toolbar-button-top">Apply</div>
+              <div id='editor-tool-level-new' class="toolbar-button-top">+ Zone</div>
+            </div>
           </div>
           <!-- Zone Tool -->
           <div id='editor-tool-zone' class='tool-container' style='display: none'>
             <div class='tool-box'>
-              <div class='tool-var'>Position</div><div class='tool-type'>short2</div>
-              <input type='text' class="tool-val"/>
+              <div class='tool-var'>ID</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-zone-id' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Type</div><div class='tool-type'>1 byte</div>
-              <input type='text' class="tool-val"/>
+              <div class='tool-var'>Initial Position</div><div class='tool-type'>shor2</div>
+              <input id='editor-tool-zone-initial' type='text' class="tool-val"/>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class='tool-var'>Extra Data</div><div class='tool-type'>4 byte</div>
-              <input type='text' class="tool-val"/>
+              <div class='tool-var'>Color</div><div class='tool-type'>html color</div>
+              <input id='editor-tool-zone-color' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class='tool-var'>Width</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-zone-width' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Height</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-zone-height' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div id='editor-tool-zone-resize' class="toolbar-button-top">Resize</div>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div id='editor-tool-zone-apply' class="toolbar-button-top">Apply</div>
+            </div>
+          </div>
+          <!-- Tile Tool -->
+          <div id='editor-tool-tile' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>Tile Data</div><div class='tool-type'>td32</div>
+              <div id='editor-tool-tile-raw' class="tool-val-im"></div>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Definition Name</div><div class='tool-type'>string</div>
+              <div id='editor-tool-tile-name' class="tool-val-im"></div>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class='tool-var'>Sprite Index</div><div class='tool-type'>11bit int</div>
+              <input id='editor-tool-tile-index' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Bump State</div><div class='tool-type'>4bit int</div>
+              <input id='editor-tool-tile-bump' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Depth</div><div class='tool-type'>1 bit</div>
+              <input id='editor-tool-tile-depth' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Tile Definition</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-tile-def' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Extra Data</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-tile-data' type='text' class="tool-val"/>
+            </div>
+          </div>
+          
+          <!-- Object Tool -->
+          <div id='editor-tool-object' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>Type</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-object-type' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Name</div><div class='tool-type'>string</div>
+              <div id='editor-tool-object-name' class="tool-val-im"></div>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Position</div><div class='tool-type'>shor2</div>
+              <div id='editor-tool-object-pos' class="tool-val-im"></div>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class='tool-var'>Params</div><div class='tool-type'>string[]</div>
+              <input id='editor-tool-object-param' type='text' class="tool-val"/>
+            </div>
+          </div>
+            
+          <!-- Warp Tool -->
+          <div id='editor-tool-warp' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>ID</div><div class='tool-type'>byte</div>
+              <input id='editor-tool-warp-id' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Position</div><div class='tool-type'>shor2</div>
+              <div id='editor-tool-warp-pos' class="tool-val-im"></div>
             </div>
           </div>
         </div>
@@ -107,6 +198,10 @@
       <!-- Tools -->
       <script src='js/editor/tool/tool-world.js'></script>
       <script src='js/editor/tool/tool-level.js'></script>
+      <script src='js/editor/tool/tool-zone.js'></script>
+      <script src='js/editor/tool/tool-tile.js'></script>
+      <script src='js/editor/tool/tool-object.js'></script>
+      <script src='js/editor/tool/tool-warp.js'></script>
       
       <!-- Game Core -->
       <script src='js/app/game/object/object.js'></script>

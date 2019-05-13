@@ -30,6 +30,10 @@ shor2.asArray = function(/* shor2 */ a) {
 var td32 = {}; // Tile Data 32bit // Stored as an int32
 /* ======================================================================================== */
 
+td32.encode = function(/* 11bit int */ index, /* 4bit int */ bump, /* boolean */ depth, /* byte */ definition, /* byte */ data) {
+  return 0 | (parseInt(index) & 0x000007FF) | ((parseInt(bump) << 11) & 0x00007800) | (((depth?1:0) << 15) & 0x00008000) | ((parseInt(definition) << 16) & 0x00FF0000) | ((parseInt(data) << 24) & 0xFF000000);
+};
+
 td32.decode16 = function(/* td32 */ a) {
   return {index: a & 0x7FF, bump: (a >> 11) & 0xF, depth: ((a >> 15) & 0x1) === 1};
 };
@@ -64,6 +68,7 @@ td32.TRIGGER = {
 td32.TILE_PROPERTIES = {
   /* Nothing */
   0x00: {
+    NAME: "AIR",
     COLLIDE: false,
     WATER: false,
     CLIMB: false,
@@ -75,6 +80,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Solid Standard */
   0x01: {
+    NAME: "SOLID STANDARD",
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -86,6 +92,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Solid Bumpable */
   0x02: {
+    NAME: "SOLID BUMPABLE",
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -111,6 +118,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Solid Breakable Normal */
   0x03: {
+    NAME: "SOLID BREAKABLE NORMAL",
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -137,6 +145,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Item Block Normal */
   0x11: {
+    NAME: "ITEM BLOCK STANDARD",
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -168,6 +177,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Coin Block Normal */
   0x12: {
+    NAME: "COIN BLOCK STANDARD",
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -199,6 +209,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Coin Block Multi */
   0x13: {
+    NAME: "COIN BLOCK MULTI",
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -248,6 +259,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Warp Tile */
   0x51: {
+    NAME: "WARP TILE",
     COLLIDE: false,
     WATER: false,
     CLIMB: false,
@@ -268,6 +280,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Warp Pipe */
   0x52: {
+    NAME: "WARP PIPE",
     COLLIDE: true,
     WATER: false,
     CLIMB: false,
@@ -288,6 +301,7 @@ td32.TILE_PROPERTIES = {
   },
   /* End of Level Warp */
   0x56: {
+    NAME: "LEVEL END WARP",
     COLLIDE: false,
     WATER: false,
     CLIMB: false,

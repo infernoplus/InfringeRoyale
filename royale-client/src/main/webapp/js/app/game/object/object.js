@@ -52,6 +52,6 @@ GameObject.OBJECT = function(id) {
     var obj = GameObject.OBJECT_LIST[i];
     if(obj.ID === id) { return obj; }
   }
-  app.menu.warn("Invalid Object Class ID: " + id);
+  app.menu.warn.show("Invalid Object Class ID: " + id);
   return undefined;
 };

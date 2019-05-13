@@ -166,11 +166,20 @@ html,body {
   border: 1px solid #757575;
 }
 
+.tool-val-im {
+  display: block;
+  background-color: #999999;
+}
+
 .tool-div {
   display: block;
   height: 1px;
   border-top: 1px solid #757575;
   margin-top: 8px;
+}
+
+.red {
+  color: darkred;
 }
 
 /*

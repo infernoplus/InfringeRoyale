@@ -1,5 +1,5 @@
 "use strict";
-/* global app */
+/* global app, URL */
 
 /* Class that reads, parses, and writes map files for Noxio Mapper */
 function File() {
@@ -38,4 +38,25 @@ File.prototype.open = function(e) {
 File.prototype.parse = function(raw) {
   var game = JSON.parse(raw);
   app.load(game);
+};
+
+File.prototype.save = function(data) {
+    var type = "TEXT";
+    var filename = this.lastFileName;
+  
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
 };

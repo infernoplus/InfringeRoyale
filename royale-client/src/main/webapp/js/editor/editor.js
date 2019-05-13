@@ -19,6 +19,8 @@ function Editor(data) {
   this.frame = 0;
   this.delta = util.time.now();
   
+  this.resourceRaw = data.resource; // kept on hand for compile()
+  
   var that = this;
   this.frameReq = requestAnimFrameFunc.call(window, function() { that.draw(); }); // Javascript 🙄
 };
@@ -32,34 +34,68 @@ Editor.prototype.load = function(data) {
   this.ready = true;
 };
 
+Editor.prototype.compile = function() {
+  var data = {
+    resource: this.resourceRaw,
+    initial: this.world.initial,
+    world: []
+  };
+  
+  for(var i=0;i<this.world.levels.length;i++) {
+    var level = this.world.levels[i];
+    var ldat = {
+      id: level.id,
+      name: level.name,
+      initial: level.initial,
+      zone: []
+    };
+    for(var j=0;j<level.zones.length;j++) {
+      var zone = level.zones[j];
+      var zdat = {
+        id: zone.id,
+        initial: zone.initial,
+        color: zone.color,
+        data: zone.data,
+        obj: zone.obj,
+        warp: zone.warp
+      };
+      ldat.zone.push(zdat);
+    }
+    data.world.push(ldat);
+  }
+  
+  return JSON.stringify(data);
+};
+
 Editor.prototype.setTool = function(tool) {
   if(this.tool) { this.tool.destroy(); }
   
   switch(tool) {
     case "world" : { this.tool = new ToolWorld(this); this.tool.load(); break; }
     case "level" : { this.tool = new ToolLevel(this); this.tool.load(); break; }
+    case "zone" : { this.tool = new ToolZone(this); this.tool.load(); break; }
+    case "tile" : { this.tool = new ToolTile(this); this.tool.load(); break; }
+    case "object" : { this.tool = new ToolObject(this); this.tool.load(); break; }
+    case "warp" : { this.tool = new ToolWarp(this); this.tool.load(); break; }
   }
 };
 
 /* Handle player input */
 Editor.prototype.doInput = function() {
-//  var imp = this.input.pop();
+  var imp = this.input.pop();
 //  
 //  if(!this.inx27 && this.input.keyboard.keys[27]) { /* MENU */ } this.inx27 = this.input.keyboard.keys[27]; // ESC
 //  
 //  var obj = this.getPlayer();
 //  if(!obj) { return; }
 //  
-//  var keys = this.input.keyboard.keys;
-//  var dir = [0,0];
-//  if(keys[87] || keys[38]) { dir[1]++; } // W or UP
-//  if(keys[83] || keys[40]) { dir[1]--; } // S or DOWN
-//  if(keys[65] || keys[37]) { dir[0]--; } // A or LEFT
-//  if(keys[68] || keys[39]) { dir[0]++; } // D or RIGHT
-//  var a = keys[32] || keys[17]; // SPACE or RIGHT CONTROL
-//  var b = keys[16] || keys[45]; // LEFT SHIFT or NUMPAD 0
-//  
-//  obj.input(dir, a, b);
+  var mous = this.input.mouse;
+  var keys = this.input.keyboard.keys;
+  
+  if(this.tool && this.tool.input) { this.tool.input(imp, mous, keys); }
+  
+  if(mous.rmb) { this.display.camera.move(vec2.make(-mous.mov.x,mous.mov.y)); }
+  if(mous.spin) { this.display.camera.zoom(mous.spin); }
 };
 
 /* Step game world */
@@ -73,7 +109,7 @@ Editor.prototype.doStep = function() {
 /* Changes to specifed zone  */
 Editor.prototype.setZone = function(zone) {
   this.currentZone = zone;
-  this.tool.reload();
+  if(this.tool) { this.tool.reload(); }
 };
 
 /* Returns the zone we are editing. */

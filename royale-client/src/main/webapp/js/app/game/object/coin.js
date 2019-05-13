@@ -22,6 +22,7 @@ function CoinObject(game, level, zone, pos, oid) {
 /* === STATIC =============================================================== */
 CoinObject.ASYNC = false;
 CoinObject.ID = 0x61;
+CoinObject.NAME = "COIN"; // Used by editor
 
 CoinObject.ANIMATION_RATE = 5;
 
