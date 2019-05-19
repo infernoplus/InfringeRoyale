@@ -11,12 +11,6 @@ function Display(game, container, canvas, resource) {
   this.camera = new Camera();
   
   var context = this.context; // Sanity
-  
-  /* "NEAREST" texture filtering */
-  context.mozImageSmoothingEnabled = false;
-  context.webkitImageSmoothingEnabled = false;
-  context.msImageSmoothingEnabled = false;
-  context.imageSmoothingEnabled = false;
 }
 
 Display.TEXRES = 16.; // Texture resolution. The resolution of a single sprite in a sprite sheet.
@@ -32,6 +26,12 @@ Display.prototype.clear = function() {
   
   // Clear
   context.clearRect(0,0,this.canvas.width,this.canvas.height);
+  
+  // Set Render Settings  ( these reset any time the canvas is resized, so I just reset them every draw )
+  context.mozImageSmoothingEnabled = false;
+  context.webkitImageSmoothingEnabled = false;
+  context.msImageSmoothingEnabled = false;
+  context.imageSmoothingEnabled = false;
 };
 
 Display.prototype.draw = function() {
@@ -56,6 +56,8 @@ Display.prototype.drawMap = function(depth) {
   var tex = this.resource.getTexture("map");
   var zone = this.game.getZone();
   
+  var DS = parseInt(Display.TEXRES * this.camera.scale); // Draw Size; Defines the W/H of tile drawing. Is exact pixels.
+  
   for(var i=0;i<zone.data.length;i++) {
     var row = zone.data[i];
     for(var j=0;j<row.length;j++) {
@@ -68,7 +70,7 @@ Display.prototype.drawMap = function(depth) {
       if(td.bump > 0) {
         bmp = Math.sin((1.-(td.bump/15.))*Math.PI)*0.16;
       }
-      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*j, Display.TEXRES*(i-bmp), Display.TEXRES, Display.TEXRES);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, DS*j, DS*(i-bmp), DS, DS);
     }
   }
 };
@@ -79,6 +81,10 @@ Display.prototype.drawObject = function() {
   var zone = this.game.getZone();
   var dim = zone.dimensions();
   
+  var tex = this.resource.getTexture("obj");
+  
+  var DS = parseInt(Display.TEXRES * this.camera.scale); // Draw Size; Defines the W/H of tile drawing. Is exact pixels.
+  
   var sprites = [];
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
@@ -87,8 +93,6 @@ Display.prototype.drawObject = function() {
     }
   }
   
-  var tex = this.resource.getTexture("obj");
-  
   for(var i=0;i<sprites.length;i++) {
     var sprite = sprites[i];
     
@@ -96,11 +100,11 @@ Display.prototype.drawObject = function() {
     if(sprite.reverse) {
       context.save();
       context.scale(-1.,1.);
-      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, (-1.*(Display.TEXRES*sprite.pos.x))-Display.TEXRES, Display.TEXRES*(dim.y-sprite.pos.y-1.), Display.TEXRES, Display.TEXRES);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, (-1.*(DS*sprite.pos.x))-DS, DS*(dim.y-sprite.pos.y-1.), DS, DS);
       context.restore();
     }
     else {
-      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*sprite.pos.x, Display.TEXRES*(dim.y-sprite.pos.y-1.), Display.TEXRES, Display.TEXRES);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, DS*sprite.pos.x, DS*(dim.y-sprite.pos.y-1.), DS, DS);
     }
   }
 };
@@ -113,6 +117,8 @@ Display.prototype.drawEffect = function() {
   
   var texMap = this.resource.getTexture("map");
   var texObj = this.resource.getTexture("obj");
+  
+  var DS = parseInt(Display.TEXRES * this.camera.scale); // Draw Size; Defines the W/H of tile drawing. Is exact pixels.
   
   var fxs = [];
   zone.getEffects(fxs);
@@ -131,11 +137,11 @@ Display.prototype.drawEffect = function() {
     st[1] = parseInt(st[1] + (fx.sp.y * Display.TEXRES));
     
     context.save();
-    context.translate(parseInt(Display.TEXRES*fx.ss.x*.5), parseInt(Display.TEXRES*fx.ss.y*.5));
-    context.translate(Display.TEXRES*fx.pos.x, Display.TEXRES*(dim.y-fx.pos.y-1.));
+    context.translate(parseInt(DS*fx.ss.x*.5), parseInt(DS*fx.ss.y*.5));
+    context.translate(DS*fx.pos.x, DS*(dim.y-fx.pos.y-1.));
     context.rotate(fx.rot);
-    context.translate(-parseInt(Display.TEXRES*fx.ss.x*.5), -parseInt(Display.TEXRES*fx.ss.y*.5));
-    context.drawImage(tex, st[0], st[1], parseInt(Display.TEXRES*fx.ss.x), parseInt(Display.TEXRES*fx.ss.y), 0, 0, parseInt(Display.TEXRES*fx.ss.x), parseInt(Display.TEXRES*fx.ss.y));
+    context.translate(-parseInt(DS*fx.ss.x*.5), -parseInt(DS*fx.ss.y*.5));
+    context.drawImage(tex, st[0], st[1], parseInt(Display.TEXRES*fx.ss.x), parseInt(Display.TEXRES*fx.ss.y), 0, 0, parseInt(DS*fx.ss.x), parseInt(DS*fx.ss.y));
     context.restore();
   }
   

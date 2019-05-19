@@ -21,8 +21,9 @@ EditorDisplay.prototype.draw = function() {
   context.fillRect(0,0,this.canvas.width,this.canvas.height);
   
   context.save();
+  
   context.translate(this.camera.pos.x, this.camera.pos.y);
-  context.scale(this.camera.scale, this.camera.scale);
+  
   this.drawMap(false); // Render background
   //this.drawObject();
   this.drawMap(true);  // Render foreground
@@ -30,6 +31,7 @@ EditorDisplay.prototype.draw = function() {
   //this.drawUI();
   this.drawObjectTool();
   this.drawWarp();
+  
   context.restore();
   
   this.drawPallete();
@@ -99,17 +101,19 @@ EditorDisplay.prototype.drawObjectTool = function() {
   var tex = this.resource.getTexture("obj");
   var zone = this.game.getZone();
   
+  var DS = parseInt(Display.TEXRES * this.camera.scale); // Draw Size; Defines the W/H of tile drawing. Is exact pixels.
+  
   for(var i=0;i<zone.obj.length;i++) {
     var obj = zone.obj[i];
     var cls = GameObject.OBJECT(obj.type);
     var pos = shor2.decode(obj.pos);
         
     context.fillStyle = obj === this.game.tool.selected ? "rgba(0,255,0,0.5)" : "rgba(255,0,0,0.5)";
-    context.fillRect(pos.x*Display.TEXRES,(zone.data.length-pos.y-1)*Display.TEXRES,Display.TEXRES,Display.TEXRES);
+    context.fillRect(pos.x*DS,(zone.data.length-pos.y-1)*DS,DS,DS);
     
     if(cls && cls.SPRITE && cls.SPRITE[0]) {
       var st = util.sprite.getSprite(tex, cls.SPRITE[0].INDEX);
-      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, pos.x*Display.TEXRES,(zone.data.length-pos.y-1)*Display.TEXRES, Display.TEXRES, Display.TEXRES);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, pos.x*DS,(zone.data.length-pos.y-1)*DS, DS, DS);
     }
   }
 };
@@ -121,11 +125,13 @@ EditorDisplay.prototype.drawWarp = function() {
 
   var zone = this.game.getZone();
   
+  var DS = parseInt(Display.TEXRES * this.camera.scale); // Draw Size; Defines the W/H of tile drawing. Is exact pixels.
+  
   for(var i=0;i<zone.warp.length;i++) {
     var wrp = zone.warp[i];
     var pos = shor2.decode(wrp.pos);
         
     context.fillStyle = wrp === this.game.tool.selected ? "rgba(0,0,255,0.5)" : "rgba(255,0,0,0.5)";
-    context.fillRect(pos.x*Display.TEXRES,(zone.data.length-pos.y-1)*Display.TEXRES,Display.TEXRES,Display.TEXRES);
+    context.fillRect(pos.x*DS,(zone.data.length-pos.y-1)*DS,DS,DS);
   }
 };
