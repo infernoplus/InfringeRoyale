@@ -3,7 +3,7 @@
 /* global util, shor2, vec2, td32, MERGE_BYTE */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global GameObject, PlayerObject */
+/* global Display, GameObject, PlayerObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
@@ -27,6 +27,10 @@ function Game(data) {
   this.out = []; // Outgoing packets.
   
   this.ready = false;
+  
+  /* Set inital camera position */
+  var dim = this.getZone().dimensions();
+  this.display.camera.position(vec2.scale(dim, .5));
   
   /* Level Warp */
   this.levelWarpTimer = 0;      // How long to show level name/lives screen.
@@ -175,23 +179,22 @@ Game.prototype.doInput = function() {
 
 /* Step game world */
 Game.prototype.doStep = function() {
-  var obj = this.getPlayer(); // Our player object
+  var ply = this.getPlayer(); // Our player object
   
   /* Level Warp */
-  if(this.levelWarpId && this.levelWarpTimer > 0) {
+  if(ply && this.levelWarpId && this.levelWarpTimer > 0) {
     if(--this.levelWarpTimer < 1) {
-      var p = this.getPlayer();
       var z = this.world.getLevel(this.levelWarpId).getInitial();
-      p.level = z.level;
-      p.zone = z.id;
-      p.pos = shor2.decode(z.initial);
-      p.show();
+      ply.level = z.level;
+      ply.zone = z.id;
+      ply.pos = shor2.decode(z.initial);
+      ply.show();
       this.levelWarpId = undefined;
     }
   }
   
   /* Create a player object if we don't have one. */
-  if(!obj) {
+  if(!ply) {
     var level = this.world.getInitialLevel();
     var zone = this.world.getInitialZone();
     var pos = zone.initial; // shor2
@@ -206,6 +209,10 @@ Game.prototype.doStep = function() {
     obj.step();
     if(obj.garbage) { this.objects.splice(i--, 1); }
   }
+  
+  /* Update Camera Position */
+  var zone = this.getZone();
+  if(ply && !ply.dead) { this.display.camera.position(vec2.make(obj.pos.x, zone.dimensions().y*.5)); }
   
   /* Step world to update bumps & effects & etc */
   this.world.step();

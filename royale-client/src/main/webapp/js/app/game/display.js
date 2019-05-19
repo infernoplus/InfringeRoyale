@@ -8,15 +8,9 @@ function Display(game, container, canvas, resource) {
   this.context = this.canvas.getContext("2d");
   
   this.resource = new Resource(resource);
-  this.camera = new Camera();
+  this.camera = new Camera(this);
   
   var context = this.context; // Sanity
-  
-  /* "NEAREST" texture filtering */
-  context.mozImageSmoothingEnabled = false;
-  context.webkitImageSmoothingEnabled = false;
-  context.msImageSmoothingEnabled = false;
-  context.imageSmoothingEnabled = false;
 }
 
 Display.TEXRES = 16.; // Texture resolution. The resolution of a single sprite in a sprite sheet.
@@ -32,6 +26,12 @@ Display.prototype.clear = function() {
   
   // Clear
   context.clearRect(0,0,this.canvas.width,this.canvas.height);
+  
+  // Set Render Settings  ( these reset any time the canvas is resized, so I just set them every draw )
+  context.mozImageSmoothingEnabled = false;
+  context.webkitImageSmoothingEnabled = false;
+  context.msImageSmoothingEnabled = false;
+  context.imageSmoothingEnabled = false;
 };
 
 Display.prototype.draw = function() {
@@ -43,10 +43,23 @@ Display.prototype.draw = function() {
   context.fillStyle = this.game.getZone().color;
   context.fillRect(0,0,this.canvas.width,this.canvas.height);
   
+  /* Camera Transform */
+  var zone = this.game.getZone();
+  var dim = zone.dimensions();
+  
+  context.save();
+  context.translate(this.canvas.width*.5, this.canvas.height*.5);
+  context.scale(this.camera.scale, this.camera.scale);
+  context.translate(-this.camera.pos.x*Display.TEXRES, -this.camera.pos.y*Display.TEXRES);
+  
+  /* Draw Game */
   this.drawMap(false); // Render background
   this.drawObject();
   this.drawMap(true);  // Render foreground
   this.drawEffect();
+  
+  /* Draw UI */
+  context.restore();
   this.drawUI();
 };
 

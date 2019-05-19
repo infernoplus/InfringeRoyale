@@ -2,7 +2,7 @@
 /* global app */
 /* global util, shor2, vec2, td32 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global GameObject */
+/* global Display, GameObject */
 
 
 function Editor(data) {
@@ -94,8 +94,10 @@ Editor.prototype.doInput = function() {
   
   if(this.tool && this.tool.input) { this.tool.input(imp, mous, keys); }
   
-  if(mous.rmb) { this.display.camera.move(vec2.make(-mous.mov.x,mous.mov.y)); }
+  if(mous.rmb) { this.display.camera.move(vec2.make(mous.mov.x,-mous.mov.y)); }
   if(mous.spin) { this.display.camera.zoom(mous.spin); }
+  
+  var unp = this.display.camera.unproject(mous.pos);
 };
 
 /* Step game world */
@@ -110,11 +112,13 @@ Editor.prototype.doStep = function() {
 Editor.prototype.setZone = function(zone) {
   this.currentZone = zone;
   if(this.tool) { this.tool.reload(); }
+  var dim = zone.dimensions();
+  this.display.camera.position(vec2.scale(dim, .5));
 };
 
 /* Returns the zone we are editing. */
 Editor.prototype.getZone = function() {
-  if(!this.currentZone) {this.currentZone = this.world.getInitialZone(); }
+  if(!this.currentZone) { this.setZone(this.world.getInitialZone()); }
   return this.currentZone;
 };
 

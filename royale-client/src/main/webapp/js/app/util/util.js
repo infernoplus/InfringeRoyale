@@ -102,6 +102,11 @@ vec2.average = function(ary) {
   return vec2.scale(c, 1/ary.length);
 };
 
+/* Chops decmial points */
+vec2.chop = function(a) {
+  return vec2.make(parseInt(a.x), parseInt(a.y));
+};
+
 vec2.equals = function(a, b) {
   return a.x === b.x && a.y === b.y;
 };

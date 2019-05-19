@@ -20,18 +20,27 @@ EditorDisplay.prototype.draw = function() {
   context.fillStyle = this.game.getZone().color;
   context.fillRect(0,0,this.canvas.width,this.canvas.height);
   
+  /* Camera Transform */
+  var zone = this.game.getZone();
+  var dim = zone.dimensions();
+  
   context.save();
-  context.translate(this.camera.pos.x, this.camera.pos.y);
+  context.translate(this.canvas.width*.5, this.canvas.height*.5);
   context.scale(this.camera.scale, this.camera.scale);
+  context.translate(-this.camera.pos.x*Display.TEXRES, -this.camera.pos.y*Display.TEXRES);
+  
+  /* Draw Game */
   this.drawMap(false); // Render background
   //this.drawObject();
   this.drawMap(true);  // Render foreground
   //this.drawEffect();
   //this.drawUI();
+  this.drawCursor();
   this.drawObjectTool();
   this.drawWarp();
-  context.restore();
   
+  /* Draw UI */
+  context.restore();
   this.drawPallete();
 };
 
@@ -43,25 +52,31 @@ EditorDisplay.prototype.drawEffect = Display.prototype.drawEffect;
 
 EditorDisplay.prototype.drawUI = Display.prototype.drawUI;
 
+EditorDisplay.prototype.drawCursor = function() {
+  if(!this.game.tool || this.game.tool.brush === undefined) { return; }
+  
+  var context = this.context;
+  
+  var dim = this.game.getZone().dimensions();
+  var mous = this.game.input.mouse;
+
+  var g = vec2.chop(this.camera.unproject(mous.pos));
+  if(g.x < 0 || g.x >= dim.x || g.y < 0 || g.y >= dim.y) { return; }
+  
+  context.fillStyle = "rgba(255,255,255,0.5)";
+  context.fillRect(g.x*Display.TEXRES,g.y*Display.TEXRES,Display.TEXRES,Display.TEXRES);
+};
+
 EditorDisplay.prototype.drawPallete = function() {
   
   if(!this.game.tool || this.game.tool.brush === undefined) { return; }
   
   var context = this.context;
   var tex = this.resource.getTexture("map");
-  var zone = this.game.getZone();
   
   var num = (tex.width/Display.TEXRES)*(tex.height/Display.TEXRES);
   var uplim = this.canvas.height-(parseInt(num/parseInt(this.canvas.width/Display.TEXRES))+1)*Display.TEXRES;
-  
-  var mous = this.game.input.mouse;
-  
-  if(mous.pos.y < uplim) {
-    var g = vec2.make(parseInt(mous.pos.x/Display.TEXRES), parseInt(mous.pos.y/Display.TEXRES));
-    context.fillStyle = "rgba(255,255,255,0.5)";
-    context.fillRect(g.x*Display.TEXRES,g.y*Display.TEXRES,Display.TEXRES,Display.TEXRES);
-  }
-  
+
   context.fillStyle = "rgba(0,0,0,0.5)";
   context.fillRect(0,uplim,this.canvas.width,this.canvas.height);
   

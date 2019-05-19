@@ -25,7 +25,7 @@ function ToolObject(editor) {
 
 ToolObject.prototype.input = function(imp, mous, keys) {
   
-  /* Move selected object if we have one and press wasd/arrowkeys. */
+  /* Move selected object if wasd/arrowkeys are pressed. */
   if(this.selected && this.moveTimer-- < 1) {
     if(keys[87] || keys[38]) { this.move(0,1); return; } // W or UP
     if(keys[83] || keys[40]) { this.move(0,-1); return; } // S or DOWN
@@ -37,13 +37,14 @@ ToolObject.prototype.input = function(imp, mous, keys) {
   /* See if we are clicking on a object to select it. */
   var data = this.zone.data;
   
-  var g = vec2.make(parseInt(mous.pos.x/Display.TEXRES), parseInt(data.length-(mous.pos.y/Display.TEXRES)));
+  var g = vec2.chop(this.editor.display.camera.unproject(mous.pos));
+  g.y = data.length-g.y-1;
   if(g.x < 0 || g.x > data[0].length-1 || g.y < 0 || g.y > data.length-1) { return; }
   
   if(mous.lmb) {
     for(var i=0;i<this.zone.obj.length;i++) {
       var obj = this.zone.obj[i];
-      if(vec2.distance(g, shor2.decode(obj.pos)) < 0.6) {
+      if(vec2.distance(g, shor2.decode(obj.pos)) < 0.5) {
         this.select(obj);
         return;
       }

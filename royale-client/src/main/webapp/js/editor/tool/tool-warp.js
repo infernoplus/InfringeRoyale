@@ -33,7 +33,8 @@ ToolWarp.prototype.input = function(imp, mous, keys) {
   /* See if we are clicking on a object to select it. */
   var data = this.zone.data;
   
-  var g = vec2.make(parseInt(mous.pos.x/Display.TEXRES), parseInt(data.length-(mous.pos.y/Display.TEXRES)));
+  var g = vec2.chop(this.editor.display.camera.unproject(mous.pos));
+  g.y = data.length-g.y-1;
   if(g.x < 0 || g.x > data[0].length-1 || g.y < 0 || g.y > data.length-1) { return; }
   
   if(mous.lmb) {
