@@ -13,12 +13,15 @@ function Camera(display) {
 Camera.MOVE_MULT = 0.075;
 Camera.ZOOM_MULT = 0.075;
 
+Camera.ZOOM_MAX = 1.;
+Camera.ZOOM_MIN = 8.;
+
 Camera.prototype.move = function(mov) {
   this.pos = vec2.add(this.pos, vec2.scale(mov, Camera.MOVE_MULT*(1./this.scale)));
 };
 
 Camera.prototype.zoom = function(zm) {
-  this.scale += Camera.ZOOM_MULT*zm;
+  this.scale = Math.max(Camera.ZOOM_MAX, Math.min(Camera.ZOOM_MIN, this.scale + Camera.ZOOM_MULT*zm));
 };
 
 Camera.prototype.position = function(pos) {

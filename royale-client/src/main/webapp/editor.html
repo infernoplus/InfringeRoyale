@@ -31,6 +31,7 @@
           <span id='editor-top-tile' class="toolbar-button-top left">Tile</span>
           <span id='editor-top-object' class="toolbar-button-top left">Object</span>
           <span id='editor-top-warp' class="toolbar-button-top left">Warp</span>
+          <span id='editor-top-ref' class="toolbar-button-top left">Reference</span>
           <span id='editor-top-about' class="toolbar-button-top right">About</span>
           <span id='editor-top-save' class="toolbar-button-top right">Save</span>
         </div>
@@ -56,6 +57,7 @@
               <div id='editor-tool-world-new' class="toolbar-button-top">+ Level</div>
             </div>
           </div>
+          
           <!-- Level Tool -->
           <div id='editor-tool-level' class='tool-container' style='display: none'>
             <div class='tool-box'>
@@ -76,6 +78,7 @@
               <div id='editor-tool-level-new' class="toolbar-button-top">+ Zone</div>
             </div>
           </div>
+          
           <!-- Zone Tool -->
           <div id='editor-tool-zone' class='tool-container' style='display: none'>
             <div class='tool-box'>
@@ -108,6 +111,7 @@
               <div id='editor-tool-zone-apply' class="toolbar-button-top">Apply</div>
             </div>
           </div>
+          
           <!-- Tile Tool -->
           <div id='editor-tool-tile' class='tool-container' style='display: none'>
             <div class='tool-box'>
@@ -173,6 +177,33 @@
               <div id='editor-tool-warp-pos' class="tool-val-im"></div>
             </div>
           </div>
+          
+          <!-- Ref Tool -->
+          <div id='editor-tool-ref' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>IMG Url</div><div class='tool-type'>string url</div>
+              <input id='editor-tool-ref-img' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div id='editor-tool-ref-load' class="toolbar-button-top">Load</div>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class='tool-var'>Offset X</div><div class='tool-type'>int pixels</div>
+              <input id='editor-tool-ref-x' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Offset Y</div><div class='tool-type'>int pixels</div>
+              <input id='editor-tool-ref-y' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div id='editor-tool-ref-apply' class="toolbar-button-top">Apply</div>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class="tool-val-im">Press G to show or hide your reference image.</div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -202,6 +233,7 @@
       <script src='js/editor/tool/tool-tile.js'></script>
       <script src='js/editor/tool/tool-object.js'></script>
       <script src='js/editor/tool/tool-warp.js'></script>
+      <script src='js/editor/tool/tool-ref.js'></script>
       
       <!-- Game Core -->
       <script src='js/app/game/object/object.js'></script>

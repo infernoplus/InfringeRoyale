@@ -160,12 +160,14 @@ Game.prototype.doNET030 = function(n) {
 Game.prototype.doInput = function() {
   var imp = this.input.pop();
   
-  if(!this.inx27 && this.input.keyboard.keys[27]) { /* MENU */ } this.inx27 = this.input.keyboard.keys[27]; // ESC
+  var mous = this.input.mouse;
+  var keys = this.input.keyboard.keys;
+  
+  if(!this.inx27 && keys[27]) { /* MENU */ } this.inx27 = keys[27]; // ESC
   
   var obj = this.getPlayer();
   if(!obj) { return; }
-  
-  var keys = this.input.keyboard.keys;
+
   var dir = [0,0];
   if(keys[87] || keys[38]) { dir[1]++; } // W or UP
   if(keys[83] || keys[40]) { dir[1]--; } // S or DOWN
@@ -173,6 +175,8 @@ Game.prototype.doInput = function() {
   if(keys[68] || keys[39]) { dir[0]++; } // D or RIGHT
   var a = keys[32] || keys[17]; // SPACE or RIGHT CONTROL
   var b = keys[16] || keys[45]; // LEFT SHIFT or NUMPAD 0
+  
+  if(mous.spin) { this.display.camera.zoom(mous.spin); } // Mouse wheel -> Camera zoom
   
   obj.input(dir, a, b);
 };
@@ -200,7 +204,6 @@ Game.prototype.doStep = function() {
     var pos = zone.initial; // shor2
     this.createObject(PlayerObject.ID, level.id, zone.id, shor2.decode(pos), [this.pid]);
     this.out.push(NET010.encode(level, zone, pos));
-    return;
   }
   
   /* Step & delete garbage */
@@ -212,7 +215,7 @@ Game.prototype.doStep = function() {
   
   /* Update Camera Position */
   var zone = this.getZone();
-  if(ply && !ply.dead) { this.display.camera.position(vec2.make(obj.pos.x, zone.dimensions().y*.5)); }
+  if(ply && !ply.dead) { this.display.camera.position(vec2.make(ply.pos.x, zone.dimensions().y*.5)); }
   
   /* Step world to update bumps & effects & etc */
   this.world.step();

@@ -30,11 +30,14 @@ EditorDisplay.prototype.draw = function() {
   context.translate(-this.camera.pos.x*Display.TEXRES, -this.camera.pos.y*Display.TEXRES);
   
   /* Draw Game */
+  this.drawReference();
+  
   this.drawMap(false); // Render background
   //this.drawObject();
   this.drawMap(true);  // Render foreground
   //this.drawEffect();
   //this.drawUI();
+  this.drawBorder();
   this.drawCursor();
   this.drawObjectTool();
   this.drawWarp();
@@ -44,6 +47,18 @@ EditorDisplay.prototype.draw = function() {
   this.drawPallete();
 };
 
+EditorDisplay.prototype.drawReference = function() {
+  var context = this.context; // Sanity
+  
+  if(!this.game.reference || !this.game.showRef) { return; }
+  
+  var tex = this.resource.getTexture(this.game.reference);
+  
+  if(!tex) { return; }
+  
+  context.drawImage(tex, 0, 0, tex.width, tex.height, this.game.offsetRef.x, this.game.offsetRef.y, tex.width, tex.height);
+};
+
 EditorDisplay.prototype.drawMap = Display.prototype.drawMap;
 
 EditorDisplay.prototype.drawObject = Display.prototype.drawObject;
@@ -51,6 +66,21 @@ EditorDisplay.prototype.drawObject = Display.prototype.drawObject;
 EditorDisplay.prototype.drawEffect = Display.prototype.drawEffect;
 
 EditorDisplay.prototype.drawUI = Display.prototype.drawUI;
+
+EditorDisplay.prototype.drawBorder = function() {
+  var context = this.context;
+  
+  var dim = vec2.scale(this.game.getZone().dimensions(), Display.TEXRES);
+  context.lineWidth = 1;
+  context.strokeStyle = '#FFFFFF';
+  context.beginPath(); 
+  context.moveTo(-(Display.TEXRES*0.1),-(Display.TEXRES*0.1));
+  context.lineTo(dim.x+(Display.TEXRES*0.1),-(Display.TEXRES*0.1));
+  context.lineTo(dim.x+(Display.TEXRES*0.1),dim.y+(Display.TEXRES*0.1));
+  context.lineTo(-(Display.TEXRES*0.1),dim.y+(Display.TEXRES*0.1));
+  context.lineTo(-(Display.TEXRES*0.1),-(Display.TEXRES*0.1));
+  context.stroke();
+};
 
 EditorDisplay.prototype.drawCursor = function() {
   if(!this.game.tool || this.game.tool.brush === undefined) { return; }

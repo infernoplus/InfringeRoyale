@@ -21,6 +21,10 @@ function Editor(data) {
   
   this.resourceRaw = data.resource; // kept on hand for compile()
   
+  this.showRef = false;
+  this.offsetRef = vec2.make(0, 0);
+  this.reference = undefined;
+  
   var that = this;
   this.frameReq = requestAnimFrameFunc.call(window, function() { that.draw(); }); // Javascript 🙄
 };
@@ -77,6 +81,7 @@ Editor.prototype.setTool = function(tool) {
     case "tile" : { this.tool = new ToolTile(this); this.tool.load(); break; }
     case "object" : { this.tool = new ToolObject(this); this.tool.load(); break; }
     case "warp" : { this.tool = new ToolWarp(this); this.tool.load(); break; }
+    case "ref" : { this.tool = new ToolRef(this); this.tool.load(); break; }
   }
 };
 
@@ -97,7 +102,7 @@ Editor.prototype.doInput = function() {
   if(mous.rmb) { this.display.camera.move(vec2.make(mous.mov.x,-mous.mov.y)); }
   if(mous.spin) { this.display.camera.zoom(mous.spin); }
   
-  var unp = this.display.camera.unproject(mous.pos);
+  if(keys[71] && !this.inx71) { this.showRef = !this.showRef; this.inx71 = true; } this.inx71 = keys[71]; // G -> Toggle Ref
 };
 
 /* Step game world */

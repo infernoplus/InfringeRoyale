@@ -35,7 +35,7 @@ ToolZone.prototype.resize = function() {
     rs.push([]);
     for(var j=0;j<W;j++) {
       if(i < h && j < w) { rs[i][j] = dat[i][j]; }
-      else { rs[i][j] = 98306; }
+      else { rs[i][j] = 30; }
     }
   }
   
