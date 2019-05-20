@@ -3,13 +3,12 @@
 /* global GameObject */
 /* global NET011, NET020 */
 
-function GoombaObject(game, level, zone, pos, oid, variant) {
+function BowserObject(game, level, zone, pos, oid) {
   GameObject.call(this, game, level, zone, pos);
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !variant?0:variant;
-  this.state = GoombaObject.STATE.RUN;
+  this.state = BowserObject.STATE.RUN;
   this.sprite = this.state.SPRITE[0];
   
   /* Animation */
@@ -30,62 +29,62 @@ function GoombaObject(game, level, zone, pos, oid, variant) {
 
 
 /* === STATIC =============================================================== */
-GoombaObject.ASYNC = false;
-GoombaObject.ID = 0x11;
-GoombaObject.NAME = "GOOMBA"; // Used by editor
+BowserObject.ASYNC = false;
+BowserObject.ID = 0x19;
+BowserObject.NAME = "BOWSER"; // Used by editor
 
-GoombaObject.ANIMATION_RATE = 3;
+BowserObject.ANIMATION_RATE = 3;
 
-GoombaObject.DEAD_TIME = 60;
+BowserObject.DEAD_TIME = 60;
 
-GoombaObject.MOVE_SPEED_MAX = 0.125;
+BowserObject.MOVE_SPEED_MAX = 0.125;
 
-GoombaObject.FALL_SPEED_MAX = 0.35;
-GoombaObject.FALL_SPEED_ACCEL = 0.085;
+BowserObject.FALL_SPEED_MAX = 0.35;
+BowserObject.FALL_SPEED_ACCEL = 0.085;
 
-GoombaObject.SPRITE = {};
-GoombaObject.SPRITE_LIST = [
+BowserObject.SPRITE = {};
+BowserObject.SPRITE_LIST = [
   {NAME: "RUN0", ID: 0x00, INDEX: 0x000F},
   {NAME: "RUN1", ID: 0x01, INDEX: 0x001F},
   {NAME: "DEAD", ID: 0x02, INDEX: 0x002F}
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */
-for(var i=0;i<GoombaObject.SPRITE_LIST.length;i++) {
-  GoombaObject.SPRITE[GoombaObject.SPRITE_LIST[i].NAME] = GoombaObject.SPRITE_LIST[i];
-  GoombaObject.SPRITE[GoombaObject.SPRITE_LIST[i].ID] = GoombaObject.SPRITE_LIST[i];
+for(var i=0;i<BowserObject.SPRITE_LIST.length;i++) {
+  BowserObject.SPRITE[BowserObject.SPRITE_LIST[i].NAME] = BowserObject.SPRITE_LIST[i];
+  BowserObject.SPRITE[BowserObject.SPRITE_LIST[i].ID] = BowserObject.SPRITE_LIST[i];
 }
 
-GoombaObject.STATE = {};
-GoombaObject.STATE_LIST = [
-  {NAME: "RUN", ID: 0x00, SPRITE: [GoombaObject.SPRITE.RUN0,GoombaObject.SPRITE.RUN1]},
-  {NAME: "DEAD", ID: 0x50, SPRITE: [GoombaObject.SPRITE.DEAD]}
+BowserObject.STATE = {};
+BowserObject.STATE_LIST = [
+  {NAME: "RUN", ID: 0x00, SPRITE: [BowserObject.SPRITE.RUN0,BowserObject.SPRITE.RUN1]},
+  {NAME: "DEAD", ID: 0x50, SPRITE: [BowserObject.SPRITE.DEAD]}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
-for(var i=0;i<GoombaObject.STATE_LIST.length;i++) {
-  GoombaObject.STATE[GoombaObject.STATE_LIST[i].NAME] = GoombaObject.STATE_LIST[i];
-  GoombaObject.STATE[GoombaObject.STATE_LIST[i].ID] = GoombaObject.STATE_LIST[i];
+for(var i=0;i<BowserObject.STATE_LIST.length;i++) {
+  BowserObject.STATE[BowserObject.STATE_LIST[i].NAME] = BowserObject.STATE_LIST[i];
+  BowserObject.STATE[BowserObject.STATE_LIST[i].ID] = BowserObject.STATE_LIST[i];
 }
 
 
 /* === INSTANCE ============================================================= */
 
-GoombaObject.prototype.update = function(event) {
+BowserObject.prototype.update = function(event) {
   /* Event trigger */
   switch(event) {
     case 0x00 : { this.kill(); break; }
   }
 };
 
-GoombaObject.prototype.step = function() {
+BowserObject.prototype.step = function() {
   /* Anim */
   this.anim++;
-  this.sprite = this.state.SPRITE[parseInt(this.anim/GoombaObject.ANIMATION_RATE) % this.state.SPRITE.length];
+  this.sprite = this.state.SPRITE[parseInt(this.anim/BowserObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Dead */
-  if(this.state === GoombaObject.STATE.DEAD) {
-    if(this.deadTimer++ < GoombaObject.DEAD_TIME) { }
+  if(this.state === BowserObject.STATE.DEAD) {
+    if(this.deadTimer++ < BowserObject.DEAD_TIME) { }
     else { this.destroy(); }
     return;
   }
@@ -97,15 +96,15 @@ GoombaObject.prototype.step = function() {
   if(this.pos.y < 0.) { this.destroy(); }
 };
 
-GoombaObject.prototype.control = function() {
-  this.moveSpeed = this.dir ? -GoombaObject.MOVE_SPEED_MAX : GoombaObject.MOVE_SPEED_MAX;
+BowserObject.prototype.control = function() {
+  this.moveSpeed = this.dir ? -BowserObject.MOVE_SPEED_MAX : BowserObject.MOVE_SPEED_MAX;
 };
 
-GoombaObject.prototype.physics = function() {
+BowserObject.prototype.physics = function() {
   if(this.grounded) {
     this.fallSpeed = 0;
   }
-  this.fallSpeed = Math.max(this.fallSpeed - GoombaObject.FALL_SPEED_ACCEL, -GoombaObject.FALL_SPEED_MAX);
+  this.fallSpeed = Math.max(this.fallSpeed - BowserObject.FALL_SPEED_ACCEL, -BowserObject.FALL_SPEED_MAX);
   
   var movx = vec2.add(this.pos, vec2.make(this.moveSpeed, 0.));
   var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
@@ -161,41 +160,41 @@ GoombaObject.prototype.physics = function() {
   if(changeDir) { this.dir = !this.dir; }
 };
 
-GoombaObject.prototype.playerCollide = function(p) {
+BowserObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
   p.kill();
 };
 
-GoombaObject.prototype.playerStomp = function(p) {
+BowserObject.prototype.playerStomp = function(p) {
   if(this.dead || this.garbage) { return; }
   this.kill();
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
 };
 
-GoombaObject.prototype.playerBump = function(p) {
+BowserObject.prototype.playerBump = function(p) {
   if(this.dead || this.garbage) { return; }
   p.kill();
 };
 
-GoombaObject.prototype.kill = function() {
+BowserObject.prototype.kill = function() {
   this.dead = true;
-  this.setState(GoombaObject.STATE.DEAD);
+  this.setState(BowserObject.STATE.DEAD);
 };
 
-GoombaObject.prototype.destroy = function() {
+BowserObject.prototype.destroy = function() {
   this.garbage = true;
 };
 
-GoombaObject.prototype.setState = function(STATE) {
+BowserObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
   this.state = STATE;
   this.sprite = STATE.SPRITE[0];
   this.anim = 0;
 };
 
-GoombaObject.prototype.draw = function(sprites) {
+BowserObject.prototype.draw = function(sprites) {
   sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
 };
 
 /* Register object class */
-GameObject.REGISTER_OBJECT(GoombaObject);
+GameObject.REGISTER_OBJECT(BowserObject);

@@ -53,10 +53,10 @@ PlayerObject.MOVE_SPEED_ACCEL = 0.0125;
 PlayerObject.MOVE_SPEED_DECEL = 0.0225;
 PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025;
 
-PlayerObject.FALL_SPEED_MAX = 0.35;
+PlayerObject.FALL_SPEED_MAX = 0.45;
 PlayerObject.FALL_SPEED_ACCEL = 0.085;
-PlayerObject.JUMP_LENGTH_MIN = 2;
-PlayerObject.JUMP_LENGTH_MAX = 8;
+PlayerObject.JUMP_LENGTH_MIN = 3;
+PlayerObject.JUMP_LENGTH_MAX = 9;
 PlayerObject.JUMP_DECEL = 0.005;
 
 PlayerObject.PIPE_TIME = 30;
@@ -225,6 +225,7 @@ PlayerObject.prototype.physics = function() {
   
   this.grounded = false;
   var on = [];              // Tiles we are directly standing on, if applicable
+  var psh = [];             // Tiles we are directly pushing against
   for(var i=0;i<tiles.length;i++) {
     var tile = tiles[i];
     if(!tile.definition.COLLIDE) { continue; }
@@ -236,11 +237,13 @@ PlayerObject.prototype.physics = function() {
         movx.x = tile.pos.x - this.dim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
+        psh.push(tile);
       }
       else if(this.pos.x >= tile.pos.x + tdim.x && movx.x < tile.pos.x + tdim.x) {
         movx.x = tile.pos.x + tdim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
+        psh.push(tile);
       }
     }
   }
@@ -280,6 +283,14 @@ PlayerObject.prototype.physics = function() {
     for(var i=0;i<on.length;i++) {
       var tile = on[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.DOWN);
+    }
+  }
+  
+  /* Tile Push events */
+  if(this.state === PlayerObject.STATE.RUN) {
+    for(var i=0;i<psh.length;i++) {
+      var tile = psh[i];
+      tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.PUSH);
     }
   }
 };

@@ -26,6 +26,7 @@ Resource.prototype.load = function (src) {
     var ext = s.src.split(".").pop().toLowerCase();
     switch(ext) {
       case "png" : { this.loadTexture(s); break; }
+      case "gif" : { this.loadTexture(s); break; }
       case "wav" : { this.loadAudio(s); break; }
       default : { app.menu.warn.show("Failed to load resource with unknown extension: " + ext); break; }
     }
@@ -40,6 +41,7 @@ Resource.prototype.loadTexture = function(src) {
     img.onload = function() {
       tex.cache[src.id] = img;
       tex.load--;
+      if(tex.load < 1) { app.game.loadAsync = true; }
     };
     img.src = src.src;
     tex.load++;

@@ -3,7 +3,7 @@
 /* global util, shor2, vec2, td32, MERGE_BYTE */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global Display, GameObject, PlayerObject */
+/* global Display, GameObject, PlayerObject, GoombaObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
@@ -27,6 +27,7 @@ function Game(data) {
   this.out = []; // Outgoing packets.
   
   this.ready = false;
+  this.loadAsync = false;
   
   /* Set inital camera position */
   var dim = this.getZone().dimensions();
@@ -238,6 +239,9 @@ Game.prototype.doPush = function() {
 Game.prototype.createObject = function(id, level, zone, pos, param) {
   var pgen = [undefined, this, level, zone, pos];
   for(var i=0;i<param.length;i++) { pgen.push(param[i]); }
+  
+  var type = GameObject.OBJECT(id);
+  if(!type) { type = GoombaObject; }
   var obj = new (Function.prototype.bind.apply(GameObject.OBJECT(id), pgen));
   
   this.objects.push(obj);
@@ -309,7 +313,7 @@ Game.prototype.draw = function() {
       
       this.doInput();
       this.doStep();
-      this.display.draw();
+      if(this.loadAsync) { this.display.draw(); }
       this.doPush();
       
       this.frame++;

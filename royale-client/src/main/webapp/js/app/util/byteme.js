@@ -60,6 +60,7 @@ td32.TRIGGER = {
   TYPE: {
     TOUCH: 0x00,
     DOWN: 0x01,
+    PUSH: 0x02,
     SMALL_BUMP: 0x10,
     BIG_BUMP: 0x11
   }
@@ -257,6 +258,70 @@ td32.TILE_PROPERTIES = {
       }
     }
   },
+  /* Item Block Invisible */
+  0x15: {
+    NAME: "ITEM BLOCK INVISIBLE",
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+          break;
+        }
+      }
+    }
+  },
+  /* Coin Block INVISIBLE */
+  0x16: {
+    NAME: "COIN BLOCK INVISIBLE",
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: false,
+    WARP: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.world.getZone(level, zone).coin(x,y+1);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).bump(x,y);
+          game.world.getZone(level, zone).coin(x,y+1);
+          break;
+        }
+      }
+    }
+  },
   /* Warp Tile */
   0x51: {
     NAME: "WARP TILE",
@@ -292,6 +357,27 @@ td32.TILE_PROPERTIES = {
       switch(type) {
         /* Down */
         case 0x01 : {
+          if(game.pid === pid) {
+            game.getPlayer().pipe(td.data);
+          }
+        }
+      }
+    }
+  },
+  /* Warp Pipe Horiz */
+  0x53: {
+    NAME: "WARP PIPE HORIZ",
+    COLLIDE: true,
+    WATER: false,
+    CLIMB: false,
+    KILL: false,
+    PIPE: true,
+    WARP: true,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Push */
+        case 0x02 : {
           if(game.pid === pid) {
             game.getPlayer().pipe(td.data);
           }
