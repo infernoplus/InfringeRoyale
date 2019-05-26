@@ -20,6 +20,12 @@ EditorDisplay.prototype.draw = function() {
   context.fillStyle = this.game.getZone().color;
   context.fillRect(0,0,this.canvas.width,this.canvas.height);
   
+  /* Loading Check */
+  if(!this.resource.ready()) {
+    this.drawLoad();
+    return;
+  }
+  
   /* Camera Transform */
   var zone = this.game.getZone();
   var dim = zone.dimensions();
@@ -39,6 +45,7 @@ EditorDisplay.prototype.draw = function() {
   //this.drawUI();
   this.drawBorder();
   this.drawCursor();
+  this.drawCopyBlock();
   this.drawObjectTool();
   this.drawWarp();
   
@@ -95,6 +102,21 @@ EditorDisplay.prototype.drawCursor = function() {
   
   context.fillStyle = "rgba(255,255,255,0.5)";
   context.fillRect(g.x*Display.TEXRES,g.y*Display.TEXRES,Display.TEXRES,Display.TEXRES);
+};
+
+EditorDisplay.prototype.drawCopyBlock = function() {
+  if(!this.game.tool || !this.game.tool.dim) { return; }
+  
+  var context = this.context;
+  
+  var dim = this.game.getZone().dimensions();
+  var mous = this.game.input.mouse;
+
+  var g = vec2.chop(this.camera.unproject(mous.pos));
+  if(g.x < 0 || g.x >= dim.x || g.y < 0 || g.y >= dim.y) { return; }
+  
+  context.fillStyle = "rgba(255,255,255,0.5)";
+  context.fillRect(g.x*Display.TEXRES,g.y*Display.TEXRES,Display.TEXRES*this.game.tool.dim.x,Display.TEXRES*this.game.tool.dim.y);
 };
 
 EditorDisplay.prototype.drawPallete = function() {
@@ -174,3 +196,5 @@ EditorDisplay.prototype.drawWarp = function() {
     context.fillRect(pos.x*Display.TEXRES,(zone.data.length-pos.y-1)*Display.TEXRES,Display.TEXRES,Display.TEXRES);
   }
 };
+
+EditorDisplay.prototype.drawLoad = Display.prototype.drawLoad;

@@ -63,7 +63,7 @@ ToolWarp.prototype.update = function() {
   try {
     var id = Math.max(0, Math.min(255, parseInt(this.valId.value)));
     
-    if(id === undefined) { throw "oof"; }
+    if(isNaN(id)) { throw "oof"; }
     
     if(this.selected) { this.selected.id = id; }
   }

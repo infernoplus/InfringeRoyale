@@ -3,12 +3,12 @@
 /* global util, shor2, vec2, td32, MERGE_BYTE */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global Display, GameObject, PlayerObject, GoombaObject */
+/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
 
-function Game(data) {  
+function Game(data) {
   this.container = document.getElementById("game");
   this.canvas = document.getElementById("game-canvas");
   
@@ -27,7 +27,6 @@ function Game(data) {
   this.out = []; // Outgoing packets.
   
   this.ready = false;
-  this.loadAsync = false;
   
   /* Set inital camera position */
   var dim = this.getZone().dimensions();
@@ -258,6 +257,21 @@ Game.prototype.getObject = function(level, zone, oid) {
   return undefined;
 };
 
+/* Returns all platform type objects. */
+Game.prototype.getPlatforms = function() {
+  var zon = this.getZone();
+  
+  var plts = [];
+  for(var i=0;i<this.objects.length;i++) {
+    var obj = this.objects[i];
+    if(obj instanceof PlatformObject && obj.level === zon.level && obj.zone === zon.id) {
+      plts.push(obj);
+    }
+  }
+  
+  return plts;
+};
+
 Game.prototype.getGhost = function(pid) {
   for(var i=0;i<this.objects.length;i++) {
     var p = this.objects[i];
@@ -313,7 +327,7 @@ Game.prototype.draw = function() {
       
       this.doInput();
       this.doStep();
-      if(this.loadAsync) { this.display.draw(); }
+      this.display.draw();
       this.doPush();
       
       this.frame++;

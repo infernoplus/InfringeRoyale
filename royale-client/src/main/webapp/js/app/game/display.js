@@ -43,6 +43,12 @@ Display.prototype.draw = function() {
   context.fillStyle = this.game.getZone().color;
   context.fillRect(0,0,this.canvas.width,this.canvas.height);
   
+  /* Loading Check */
+  if(!this.resource.ready()) {
+    this.drawLoad();
+    return;
+  }
+  
   /* Camera Transform */
   var zone = this.game.getZone();
   var dim = zone.dimensions();
@@ -163,4 +169,16 @@ Display.prototype.drawUI = function() {
     context.rect(25,25,100,100); //Test
     context.stroke();
   }
+};
+
+Display.prototype.drawLoad = function() {
+  var context = this.context;
+  
+  context.fillStyle = "black";
+  context.fillRect(0,0,this.canvas.width,this.canvas.height);
+  
+  context.font = Display.TEXRES + "px Arial";
+  context.fillStyle = "white";
+  context.textAlign = "center";
+  context.fillText("Loading Resources...", this.canvas.width*.5, this.canvas.height*.5);
 };

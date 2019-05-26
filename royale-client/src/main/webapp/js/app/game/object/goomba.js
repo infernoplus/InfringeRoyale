@@ -124,13 +124,13 @@ GoombaObject.prototype.physics = function() {
     var hitx = squar.intersection(tile.pos, tdim, movx, this.dim);
     
     if(hitx) {
-      if(this.pos.x + this.dim.x <= tile.pos.x && movx.x + this.dim.x > tile.pos.x) {
+      if(this.pos.x <= movx.x && movx.x + this.dim.x > tile.pos.x) {
         movx.x = tile.pos.x - this.dim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
         changeDir = true;
       }
-      else if(this.pos.x >= tile.pos.x + tdim.x && movx.x < tile.pos.x + tdim.x) {
+      else if(this.pos.x >= movx.x && movx.x < tile.pos.x + tdim.x) {
         movx.x = tile.pos.x + tdim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
@@ -146,11 +146,11 @@ GoombaObject.prototype.physics = function() {
     var hity = squar.intersection(tile.pos, tdim, movy, this.dim);
     
     if(hity) {
-      if(this.pos.y >= tile.pos.y + tdim.y && movy.y < tile.pos.y + tdim.y) {
+      if(this.pos.y >= movy.y && movy.y < tile.pos.y + tdim.y) {
         movy.y = tile.pos.y + tdim.y;
         this.grounded = true;
       }
-      else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
+      else if(this.pos.y <= movy.y && movy.y + this.dim.y > tile.pos.y) {
         movy.y = tile.pos.y - this.dim.y;
         this.jumping = -1;
         this.fallSpeed = 0;

@@ -67,7 +67,7 @@ ToolWorld.prototype.load = function() {
 ToolWorld.prototype.save = function() {
   try {
     var i = parseInt(this.valInitial.value);
-    if(i === undefined) { throw "oof"; }
+    if(isNaN(i)) { throw "oof"; }
     this.editor.world.initial = i;
   }
   catch(ex) { app.menu.warn.show("Failed to parse value. Changes not applied."); }

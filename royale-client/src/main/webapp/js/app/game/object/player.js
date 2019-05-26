@@ -43,7 +43,7 @@ PlayerObject.NAME = "PLAYER"; // Used by editor
 
 PlayerObject.ANIMATION_RATE = 3;
 
-PlayerObject.DEAD_FREEZE_TIME = 5;
+PlayerObject.DEAD_FREEZE_TIME = 7;
 PlayerObject.DEAD_UP_TIME = 9;
 PlayerObject.DEAD_DELETE_TIME = 30;
 PlayerObject.DEAD_MOVE = 0.35;
@@ -61,6 +61,8 @@ PlayerObject.JUMP_DECEL = 0.005;
 
 PlayerObject.PIPE_TIME = 30;
 PlayerObject.PIPE_SPEED = 0.06;
+
+PlayerObject.PLATFORM_SNAP_DIST = 0.15;
 
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [
@@ -221,11 +223,13 @@ PlayerObject.prototype.physics = function() {
   var ext1 = vec2.make(this.moveSpeed>=0?this.pos.x:this.pos.x+this.moveSpeed, this.fallSpeed<=0?this.pos.y:this.pos.y+this.fallSpeed);
   var ext2 = vec2.make(this.dim.y+Math.abs(this.moveSpeed), this.dim.y+Math.abs(this.fallSpeed));
   var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
+  var plats = this.game.getPlatforms();
   var tdim = vec2.make(1., 1.);
   
   this.grounded = false;
   var on = [];              // Tiles we are directly standing on, if applicable
   var psh = [];             // Tiles we are directly pushing against
+  var platform;             // If we landed on or are standing on a platform then this is it.
   for(var i=0;i<tiles.length;i++) {
     var tile = tiles[i];
     if(!tile.definition.COLLIDE) { continue; }
@@ -233,13 +237,13 @@ PlayerObject.prototype.physics = function() {
     var hitx = squar.intersection(tile.pos, tdim, movx, this.dim);
     
     if(hitx) {
-      if(this.pos.x + this.dim.x <= tile.pos.x && movx.x + this.dim.x > tile.pos.x) {
+      if(this.pos.x <= movx.x && movx.x + this.dim.x >= tile.pos.x) {
         movx.x = tile.pos.x - this.dim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
         psh.push(tile);
       }
-      else if(this.pos.x >= tile.pos.x + tdim.x && movx.x < tile.pos.x + tdim.x) {
+      else if(this.pos.x >= movx.x && movx.x <= tile.pos.x + tdim.x) {
         movx.x = tile.pos.x + tdim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
@@ -255,12 +259,12 @@ PlayerObject.prototype.physics = function() {
     var hity = squar.intersection(tile.pos, tdim, movy, this.dim);
     
     if(hity) {
-      if(this.pos.y >= tile.pos.y + tdim.y && movy.y < tile.pos.y + tdim.y) {
+      if(this.pos.y >= movy.y && movy.y <= tile.pos.y + tdim.y) {
         movy.y = tile.pos.y + tdim.y;
         this.grounded = true;
         on.push(tile);
       }
-      else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
+      else if(this.pos.y <= movy.y && movy.y + this.dim.y >= tile.pos.y) {
         movy.y = tile.pos.y - this.dim.y;
         this.jumping = -1;
         this.fallSpeed = 0;
@@ -268,7 +272,30 @@ PlayerObject.prototype.physics = function() {
       }
     }
   }
+
+  for(var i=0;i<plats.length;i++) {
+    var plat = plats[i];
+    
+    var hity = squar.intersection(plat.pos, plat.dim, movy, this.dim);
+    
+    if(hity) {
+      if(this.pos.y >= movy.y && movy.y <= plat.pos.y + plat.dim.y && (plat.pos.y + plat.dim.y) - this.pos.y < PlayerObject.PLATFORM_SNAP_DIST) {
+        movy.y = plat.pos.y + plat.dim.y;
+        this.grounded = true;
+        platform = plat;
+      }
+      else {
+        /* Nothing, pass through bottom of platform when going up */
+      }
+    }
+  }
+  
   this.pos = vec2.make(movx.x, movy.y);
+  
+  /* On Platform */
+  if(platform) {
+    platform.riding(this);
+  }
   
   /* Tile Touch events */
   for(var i=0;i<tiles.length;i++) {

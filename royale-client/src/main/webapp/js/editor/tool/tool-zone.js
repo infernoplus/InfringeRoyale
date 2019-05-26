@@ -62,7 +62,7 @@ ToolZone.prototype.save = function() {
   try {
     var i = parseInt(this.valId.value);
     var j = parseInt(this.valInitial.value);
-    if(i === undefined || j === undefined) { throw "oof"; }
+    if(isNaN(i) || isNaN(j)) { throw "oof"; }
     this.zone.id = i;
     this.zone.initial = j;
     this.zone.color = this.valColor.value;

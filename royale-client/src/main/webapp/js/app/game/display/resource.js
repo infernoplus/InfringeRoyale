@@ -41,7 +41,6 @@ Resource.prototype.loadTexture = function(src) {
     img.onload = function() {
       tex.cache[src.id] = img;
       tex.load--;
-      if(tex.load < 1) { app.game.loadAsync = true; }
     };
     img.src = src.src;
     tex.load++;

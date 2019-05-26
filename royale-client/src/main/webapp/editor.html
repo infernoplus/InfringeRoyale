@@ -31,6 +31,7 @@
           <span id='editor-top-tile' class="toolbar-button-top left">Tile</span>
           <span id='editor-top-object' class="toolbar-button-top left">Object</span>
           <span id='editor-top-warp' class="toolbar-button-top left">Warp</span>
+          <span id='editor-top-copy' class="toolbar-button-top left">Clone</span>
           <span id='editor-top-ref' class="toolbar-button-top left">Reference</span>
           <span id='editor-top-about' class="toolbar-button-top right">About</span>
           <span id='editor-top-save' class="toolbar-button-top right">Save</span>
@@ -178,6 +179,32 @@
             </div>
           </div>
           
+          <!-- Copy Tool -->
+          <div id='editor-tool-copy' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>Copy Data</div><div class='tool-type'>td32[]</div>
+              <div id='editor-tool-copy-raw' class="tool-val-im"></div>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class='tool-var'>Width</div><div class='tool-type'>int</div>
+              <input id='editor-tool-copy-width' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Height</div><div class='tool-type'>int</div>
+              <input id='editor-tool-copy-height' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Overwrite</div><div class='tool-type'>td32</div>
+              <input id='editor-tool-copy-over' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class="tool-val-im">Right click to copy an area, left click to paste.</div>
+              <div class="tool-val-im">If overwrite is set, pasting will only overwrite tiles of the given td32.</div>
+            </div>
+          </div>
+          
           <!-- Ref Tool -->
           <div id='editor-tool-ref' class='tool-container' style='display: none'>
             <div class='tool-box'>
@@ -233,6 +260,7 @@
       <script src='js/editor/tool/tool-tile.js'></script>
       <script src='js/editor/tool/tool-object.js'></script>
       <script src='js/editor/tool/tool-warp.js'></script>
+      <script src='js/editor/tool/tool-copy.js'></script>
       <script src='js/editor/tool/tool-ref.js'></script>
       
       <!-- Game Core -->
@@ -244,6 +272,7 @@
       <script src='js/app/game/object/koopa-fly.js'></script>
       <script src='js/app/game/object/plant.js'></script>
       <script src='js/app/game/object/bowser.js'></script>
+      <script src='js/app/game/object/platform.js'></script>
       <script src='js/app/game/object/fire.js'></script>
       <script src='js/app/game/object/item.js'></script>
       <script src='js/app/game/object/mushroom.js'></script>

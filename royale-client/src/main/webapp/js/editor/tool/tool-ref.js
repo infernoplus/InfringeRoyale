@@ -42,7 +42,7 @@ ToolRef.prototype.save = function() {
   try {
     var x = parseInt(this.valX.value);
     var y = parseInt(this.valY.value);
-    if(x === undefined || y === undefined) { throw "oof"; }
+    if(isNaN(x) || isNaN(y)) { throw "oof"; }
     this.editor.offsetRef = vec2.make(x, y);
   }
   catch(ex) { app.menu.warn.show("Failed to parse value. Changes not applied."); }

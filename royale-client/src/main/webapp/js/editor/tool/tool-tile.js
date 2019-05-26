@@ -64,7 +64,7 @@ ToolTile.prototype.update = function() {
     var def = Math.max(0, Math.min(255, parseInt(this.valDef.value)));
     var data = Math.max(0, Math.min(255, parseInt(this.valData.value)));
     
-    if(index === undefined || bump === undefined || depth === undefined || def === undefined || data === undefined) { throw "oof"; }
+    if(isNaN(index) || isNaN(bump) || isNaN(depth) || isNaN(def) || isNaN(data)) { throw "oof"; }
     
     this.setBrush(td32.encode(index, bump, depth, def, data));
   }

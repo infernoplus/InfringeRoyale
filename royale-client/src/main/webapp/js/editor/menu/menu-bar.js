@@ -10,6 +10,7 @@ function MenuBar() {
   this.btnTile = document.getElementById("editor-top-tile");
   this.btnObject = document.getElementById("editor-top-object");
   this.btnWarp = document.getElementById("editor-top-warp");
+  this.btnCopy = document.getElementById("editor-top-copy");
   this.btnRef = document.getElementById("editor-top-ref");
   this.btnAbout = document.getElementById("editor-top-about");
   this.btnSave = document.getElementById("editor-top-save");
@@ -20,6 +21,7 @@ function MenuBar() {
   this.btnTile.onclick = function() { app.menu.tool.set("tile"); };
   this.btnObject.onclick = function() { app.menu.tool.set("object"); };
   this.btnWarp.onclick = function() { app.menu.tool.set("warp"); };
+  this.btnCopy.onclick = function() { app.menu.tool.set("copy"); };
   this.btnRef.onclick = function() { app.menu.tool.set("ref"); };
   
   this.btnSave.onclick = function() { app.save(); };

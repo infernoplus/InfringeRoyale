@@ -39,7 +39,7 @@ ToolObject.prototype.input = function(imp, mous, keys) {
   
   var g = vec2.chop(this.editor.display.camera.unproject(mous.pos));
   g.y = data.length-g.y-1;
-  if(g.x < 0 || g.x > data[0].length-1 || g.y < 0 || g.y > data.length-1) { return; }
+  if(g.x < 0 || g.x > data[0].length-1 || g.y < 0) { return; }
   
   if(mous.lmb) {
     for(var i=0;i<this.zone.obj.length;i++) {
@@ -68,7 +68,7 @@ ToolObject.prototype.update = function() {
     var type = Math.max(0, Math.min(255, parseInt(this.valType.value)));
     var param = this.valParam.value.trim().split(",");
     
-    if(type === undefined || param === undefined) { throw "oof"; }
+    if(isNaN(type) || param === undefined) { throw "oof"; }
     
     if(this.selected) { this.selected.type = type; this.selected.param = param; }
     this.obj.type = type; this.obj.param = param;
@@ -95,7 +95,7 @@ ToolObject.prototype.select = function(object) {
 ToolObject.prototype.move = function(x,y) {
   var pos = shor2.decode(this.selected.pos);
   pos = vec2.add(pos, vec2.make(x,y));
-  if(pos.x < 0 || pos.x > this.zone.data[0].length-1 || pos.y < 0 || pos.y > this.zone.data.length-1) { return; }
+  if(pos.x < 0 || pos.x > this.zone.data[0].length-1 || pos.y < 0) { return; }
   this.selected.pos = shor2.encode(pos.x, pos.y);
   this.moveTimer=4;
 };
