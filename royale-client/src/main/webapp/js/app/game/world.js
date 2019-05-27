@@ -168,10 +168,10 @@ Zone.prototype.getTiles = function(pos, dim) {
   var cpos = vec2.copy(pos);
   cpos.y = zd.y - 1 - cpos.y;
   
-  var x1 = parseInt(Math.max(Math.min(Math.floor(cpos.x), zd.x), 0.));
-  var x2 = parseInt(Math.max(Math.min(Math.ceil(cpos.x+dim.x), zd.x), 0.));
-  var y1 = parseInt(Math.max(Math.min(Math.floor(cpos.y), zd.y), 0.));
-  var y2 = parseInt(Math.max(Math.min(Math.ceil(cpos.y+dim.y), zd.y), 0.));
+  var x1 = parseInt(Math.max(Math.min(Math.floor(cpos.x)-1, zd.x), 0.));
+  var x2 = parseInt(Math.max(Math.min(Math.ceil(cpos.x+dim.x)+1, zd.x), 0.));
+  var y1 = parseInt(Math.max(Math.min(Math.floor(cpos.y)-1, zd.y), 0.));
+  var y2 = parseInt(Math.max(Math.min(Math.ceil(cpos.y+dim.y)+1, zd.y), 0.));
   
   var tiles = [];
   

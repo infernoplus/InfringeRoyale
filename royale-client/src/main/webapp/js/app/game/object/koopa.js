@@ -9,8 +9,7 @@ function KoopaObject(game, level, zone, pos, oid, variant) {
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
   this.variant = !variant?0:variant;
-  this.state = KoopaObject.STATE.RUN;
-  this.sprite = this.state.SPRITE[0];
+  this.setState(KoopaObject.STATE.RUN);
   
   /* Animation */
   this.anim = 0;
@@ -36,18 +35,23 @@ KoopaObject.NAME = "KOOPA"; // Used by editor
 
 KoopaObject.ANIMATION_RATE = 3;
 
-KoopaObject.DEAD_TIME = 60;
-
-KoopaObject.MOVE_SPEED_MAX = 0.125;
+KoopaObject.MOVE_SPEED_MAX = 0.075;
+KoopaObject.SHELL_MOVE_SPEED_MAX = 0.175;
 
 KoopaObject.FALL_SPEED_MAX = 0.35;
 KoopaObject.FALL_SPEED_ACCEL = 0.085;
 
+KoopaObject.TRANSFORM_TIME = 175;
+KoopaObject.TRANSFORM_THRESHOLD = 75;
+
 KoopaObject.SPRITE = {};
 KoopaObject.SPRITE_LIST = [
-  {NAME: "RUN0", ID: 0x00, INDEX: 0x0047},
-  {NAME: "RUN1", ID: 0x01, INDEX: 0x0048},
-  {NAME: "DEAD", ID: 0x02, INDEX: 0x0047}
+  {NAME: "FLY0", ID: 0x0, INDEX: [[0x0068],[0x0058]]},
+  {NAME: "FLY1", ID: 0x01, INDEX: [[0x0069],[0x0059]]},
+  {NAME: "RUN0", ID: 0x02, INDEX: [[0x0066],[0x0056]]},
+  {NAME: "RUN1", ID: 0x03, INDEX: [[0x0067],[0x0057]]},
+  {NAME: "TRANSFORM", ID: 0x04, INDEX: 0x0051},
+  {NAME: "SHELL", ID: 0x05, INDEX: 0x0050}
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */
@@ -58,8 +62,11 @@ for(var i=0;i<KoopaObject.SPRITE_LIST.length;i++) {
 
 KoopaObject.STATE = {};
 KoopaObject.STATE_LIST = [
-  {NAME: "RUN", ID: 0x00, SPRITE: [KoopaObject.SPRITE.RUN0,KoopaObject.SPRITE.RUN1]},
-  {NAME: "DEAD", ID: 0x50, SPRITE: [KoopaObject.SPRITE.DEAD]}
+  {NAME: "FLY", ID: 0x00, SPRITE: [KoopaObject.SPRITE.FLY0,KoopaObject.SPRITE.FLY1]},
+  {NAME: "RUN", ID: 0x01, SPRITE: [KoopaObject.SPRITE.RUN0,KoopaObject.SPRITE.RUN1]},
+  {NAME: "TRANSFORM", ID: 0x02, SPRITE: [KoopaObject.SPRITE.SHELL,KoopaObject.SPRITE.TRANSFORM]},
+  {NAME: "SHELL", ID: 0x03, SPRITE: [KoopaObject.SPRITE.SHELL]},
+  {NAME: "SPIN", ID: 0x04, SPRITE: [KoopaObject.SPRITE.SHELL]}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
@@ -75,6 +82,8 @@ KoopaObject.prototype.update = function(event) {
   /* Event trigger */
   switch(event) {
     case 0x00 : { this.kill(); break; }
+    case 0x01 : { this.stomped(true); break; }
+    case 0x02 : { this.stomped(false); break; }
   }
 };
 
@@ -83,11 +92,9 @@ KoopaObject.prototype.step = function() {
   this.anim++;
   this.sprite = this.state.SPRITE[parseInt(this.anim/KoopaObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
-  /* Dead */
-  if(this.state === KoopaObject.STATE.DEAD) {
-    if(this.deadTimer++ < KoopaObject.DEAD_TIME) { }
-    else { this.destroy(); }
-    return;
+  if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) {
+    if(--this.transformTimer < KoopaObject.TRANSFORM_THRESHOLD) { this.setState(KoopaObject.STATE.TRANSFORM); }
+    if(this.transformTimer <= 0) { this.setState(KoopaObject.STATE.RUN); }
   }
   
   /* Normal Gameplay */
@@ -98,7 +105,10 @@ KoopaObject.prototype.step = function() {
 };
 
 KoopaObject.prototype.control = function() {
-  this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX;
+  if(this.state === KoopaObject.STATE.FLY) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
+  if(this.state === KoopaObject.STATE.RUN) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
+  if(this.state === KoopaObject.STATE.SPIN) { this.moveSpeed = this.dir ? -KoopaObject.SHELL_MOVE_SPEED_MAX : KoopaObject.SHELL_MOVE_SPEED_MAX; }
+  if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) { this.moveSpeed = 0; }
 };
 
 KoopaObject.prototype.physics = function() {
@@ -161,26 +171,43 @@ KoopaObject.prototype.physics = function() {
   if(changeDir) { this.dir = !this.dir; }
 };
 
+/* dir (true = left, false = right) */
+KoopaObject.prototype.stomped = function(dir) {
+  if(this.state === KoopaObject.STATE.FLY) { this.setState(KoopaObject.STATE.RUN); }
+  else if(this.state === KoopaObject.STATE.RUN) { this.setState(KoopaObject.STATE.SHELL); this.transformTimer = KoopaObject.TRANSFORM_TIME; }
+  else if(this.state === KoopaObject.STATE.SPIN) { this.setState(KoopaObject.STATE.SHELL); this.transformTimer = KoopaObject.TRANSFORM_TIME; }
+  else if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) {
+    this.setState(KoopaObject.STATE.SPIN);
+    this.dir = dir;
+  }
+};
+
 KoopaObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.kill();
+  if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) {
+    var dir = p.pos.x-this.pos.x > 0;
+    this.stomped(dir);
+    this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x01:0x02));
+  }
+  else {
+    p.damage();
+  }
 };
 
 KoopaObject.prototype.playerStomp = function(p) {
   if(this.dead || this.garbage) { return; }
-  this.kill();
-  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
+  var dir = p.pos.x-this.pos.x > 0;
+  p.bounce();
+  this.stomped(dir);
+  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x01:0x02));
 };
 
 KoopaObject.prototype.playerBump = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.kill();
+  p.damage();
 };
 
-KoopaObject.prototype.kill = function() {
-  this.dead = true;
-  this.setState(KoopaObject.STATE.DEAD);
-};
+KoopaObject.prototype.kill = function() { };
 
 KoopaObject.prototype.destroy = function() {
   this.garbage = true;
@@ -194,7 +221,15 @@ KoopaObject.prototype.setState = function(STATE) {
 };
 
 KoopaObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
+  if(this.sprite.INDEX instanceof Array) {
+    var s = this.sprite.INDEX;
+    for(var i=0;i<s.length;i++) {
+      for(var j=0;j<s[i].length;j++) {
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[i][j]});
+      }
+    }
+  }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX}); }
 };
 
 /* Register object class */

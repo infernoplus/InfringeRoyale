@@ -123,7 +123,7 @@ Game.prototype.doNET001 = function(n) {
 Game.prototype.doNET010 = function(n) {
   if(n.pid === this.pid) { return; }
   var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid]);
-  obj.state = PlayerObject.STATE.GHOST;
+  obj.setState(PlayerObject.SNAME.GHOST);
 };
 
 /* KILL_PLAYER_OBJECT [0x11] */
@@ -144,6 +144,7 @@ Game.prototype.doNET012 = function(n) {
 
 /* OBJECT_EVENT_TRIGGER [0x20] */
 Game.prototype.doNET020 = function(n) {
+  if(n.pid === this.pid) { return; }                  // Don't repeat events that we reported.
   var obj = this.getObject(n.level, n.zone, n.oid);
   if(obj) {
     obj.update(n.type);

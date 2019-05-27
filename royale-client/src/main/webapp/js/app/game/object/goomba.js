@@ -38,7 +38,7 @@ GoombaObject.ANIMATION_RATE = 3;
 
 GoombaObject.DEAD_TIME = 60;
 
-GoombaObject.MOVE_SPEED_MAX = 0.125;
+GoombaObject.MOVE_SPEED_MAX = 0.075;
 
 GoombaObject.FALL_SPEED_MAX = 0.35;
 GoombaObject.FALL_SPEED_ACCEL = 0.085;
@@ -163,18 +163,19 @@ GoombaObject.prototype.physics = function() {
 
 GoombaObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.kill();
+  p.damage(this);
 };
 
 GoombaObject.prototype.playerStomp = function(p) {
   if(this.dead || this.garbage) { return; }
   this.kill();
+  p.bounce();
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
 };
 
 GoombaObject.prototype.playerBump = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.kill();
+  p.damage(this);
 };
 
 GoombaObject.prototype.kill = function() {

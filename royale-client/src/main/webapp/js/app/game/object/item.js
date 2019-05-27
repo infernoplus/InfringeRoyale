@@ -147,20 +147,17 @@ ItemObject.prototype.physics = function() {
 
 ItemObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
+  p.powerup(this);
   this.kill();
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
 };
 
 ItemObject.prototype.playerStomp = function(p) {
-  if(this.dead || this.garbage) { return; }
-  this.kill();
-  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
+  this.playerCollide(p);
 };
 
 ItemObject.prototype.playerBump = function(p) {
-  if(this.dead || this.garbage) { return; }
-  this.kill();
-  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
+  this.playerCollide(p);
 };
 
 ItemObject.prototype.kill = function() {

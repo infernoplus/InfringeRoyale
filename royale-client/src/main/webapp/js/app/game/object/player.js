@@ -1,15 +1,12 @@
 "use strict";
 /* global util, vec2, squar, td32 */
-/* global GameObject */
+/* global GameObject, MushroomObject, FlowerObject, StarObject, LifeObject, CoinObject */
 /* global NET011 */
 
 function PlayerObject(game, level, zone, pos, pid) {
   GameObject.call(this, game, level, zone, pos);
   
   this.pid = pid; // Unique Player ID
-  
-  this.state = PlayerObject.STATE.STAND;
-  this.sprite = this.state.SPRITE[0];
   
   /* Animation */
   this.anim = 0;
@@ -20,19 +17,31 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.deadDeleteTimer = 0;
   
   /* Physics */
+  this.lastPos = this.pos;   // Position of mario on previous frame
   this.dim = vec2.make(1., 1.);
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.jumping = -1;
   this.grounded = false;
   
-  this.pipeWarp = undefined; // Warp point the pipe we are using is linked to
+  /* Var */
+  this.power = 0;            // Powerup Index
+  this.starTimer = 0;        // Star powerup active timer
+  this.damageTimer = 0;      // Post damage invincibility timer
+  
+  this.transformTimer = 0;
+  this.transformTarget = -1;
+  
+  this.pipeWarp = undefined; // Warp point that the pipe we are using is linked to
   this.pipeTimer = 0;        // Timer for going down a pipe
   
   /* Control */
   this.btnD = [0,0]; // D-Pad
   this.btnA = false;
   this.btnB = false;
+  
+  /* State */
+  this.setState(PlayerObject.SNAME.STAND);
 }
 
 
@@ -58,6 +67,15 @@ PlayerObject.FALL_SPEED_ACCEL = 0.085;
 PlayerObject.JUMP_LENGTH_MIN = 3;
 PlayerObject.JUMP_LENGTH_MAX = 9;
 PlayerObject.JUMP_DECEL = 0.005;
+PlayerObject.BLOCK_BUMP_THRESHOLD = 0.12;
+
+PlayerObject.POWER_INDEX_SIZE = 0x20;
+PlayerObject.GENERIC_INDEX = 0x60;
+
+PlayerObject.DAMAGE_TIME = 60;
+PlayerObject.TRANSFORM_TIME = 18;
+PlayerObject.TRANSFORM_ANIMATION_RATE = 2;
+PlayerObject.STAR_LENGTH = 450;
 
 PlayerObject.PIPE_TIME = 30;
 PlayerObject.PIPE_SPEED = 0.06;
@@ -66,15 +84,34 @@ PlayerObject.PLATFORM_SNAP_DIST = 0.15;
 
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [
-  {NAME: "STAND", ID: 0x00, INDEX: 0x002D},
-  {NAME: "DOWN", ID: 0x00, INDEX: 0x002D},
-  {NAME: "RUN0", ID: 0x01, INDEX: 0x002A},
-  {NAME: "RUN1", ID: 0x02, INDEX: 0x002B},
-  {NAME: "RUN2", ID: 0x03, INDEX: 0x002C},
-  {NAME: "SLIDE", ID: 0x04, INDEX: 0x0029},
-  {NAME: "FALL", ID: 0x05, INDEX: 0x0028},
-  {NAME: "DEAD", ID: 0x06, INDEX: 0x0020},
-  {NAME: "HIDE", ID: 0x07, INDEX: 0x002E}
+  /* [S]mall mario */
+  {NAME: "S_STAND", ID: 0x00, INDEX: 0x000D},
+  {NAME: "S_RUN0", ID: 0x01, INDEX: 0x000A},
+  {NAME: "S_RUN1", ID: 0x02, INDEX: 0x000B},
+  {NAME: "S_RUN2", ID: 0x03, INDEX: 0x000C},
+  {NAME: "S_SLIDE", ID: 0x04, INDEX: 0x0009},
+  {NAME: "S_FALL", ID: 0x05, INDEX: 0x0008},
+  /* [B]ig mario */
+  {NAME: "B_STAND", ID: 0x20, INDEX: [[0x002D], [0x01D]]}, 
+  {NAME: "B_DOWN", ID: 0x21, INDEX: [[0x002C], [0x01C]]},
+  {NAME: "B_RUN0", ID: 0x22, INDEX: [[0x0029], [0x019]]},
+  {NAME: "B_RUN1", ID: 0x23, INDEX: [[0x002A], [0x01A]]},
+  {NAME: "B_RUN2", ID: 0x24, INDEX: [[0x002B], [0x01B]]},
+  {NAME: "B_SLIDE", ID: 0x25, INDEX: [[0x0028], [0x018]]},
+  {NAME: "B_FALL", ID: 0x26, INDEX: [[0x0027], [0x017]]},
+  {NAME: "B_TRANSFORM", ID:0x27, INDEX:[[0x002E], [0x01E]]},
+  /* [F]ire flower mario */
+  {NAME: "F_STAND", ID: 0x40, INDEX: [[0x004D], [0x03D]]}, 
+  {NAME: "F_DOWN", ID: 0x41, INDEX: [[0x004C], [0x03C]]},
+  {NAME: "F_RUN0", ID: 0x42, INDEX: [[0x0049], [0x039]]},
+  {NAME: "F_RUN1", ID: 0x43, INDEX: [[0x004A], [0x03A]]},
+  {NAME: "F_RUN2", ID: 0x44, INDEX: [[0x004B], [0x03B]]},
+  {NAME: "F_SLIDE", ID: 0x45, INDEX: [[0x0048], [0x038]]},
+  {NAME: "F_FALL", ID: 0x46, INDEX: [[0x0047], [0x037]]},
+  {NAME: "F_TRANSFORM", ID:0x27, INDEX:[[0x004E], [0x03E]]},
+  /* [G]eneric */
+  {NAME: "G_DEAD", ID: 0x60, INDEX: 0x0000},
+  {NAME: "G_HIDE", ID: 0x70, INDEX: 0x000E}
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */
@@ -83,24 +120,48 @@ for(var i=0;i<PlayerObject.SPRITE_LIST.length;i++) {
   PlayerObject.SPRITE[PlayerObject.SPRITE_LIST[i].ID] = PlayerObject.SPRITE_LIST[i];
 }
 
-PlayerObject.STATE = {};
-PlayerObject.STATE_LIST = [
-  {NAME: "STAND", ID: 0x00, SPRITE: [PlayerObject.SPRITE.STAND]},
-  {NAME: "DOWN", ID: 0x01, SPRITE: [PlayerObject.SPRITE.DOWN]},
-  {NAME: "RUN", ID: 0x02, SPRITE: [PlayerObject.SPRITE.RUN0,PlayerObject.SPRITE.RUN1,PlayerObject.SPRITE.RUN2]},
-  {NAME: "SLIDE", ID: 0x03, SPRITE: [PlayerObject.SPRITE.SLIDE]},
-  {NAME: "FALL", ID: 0x10, SPRITE: [PlayerObject.SPRITE.FALL]},
-  {NAME: "DEAD", ID: 0x50, SPRITE: [PlayerObject.SPRITE.DEAD]},
-  {NAME: "HIDE", ID: 0x60, SPRITE: [PlayerObject.SPRITE.HIDE]},
-  {NAME: "GHOST", ID: 0xFF, SPRITE: []}
+/* State Name */
+PlayerObject.SNAME = {
+  STAND: "STAND",
+  DOWN: "DOWN",
+  RUN: "RUN",
+  SLIDE: "SLIDE",
+  FALL: "FALL",
+  TRANSFORM: "TRANSFORM",
+  DEAD: "DEAD",
+  HIDE: "HIDE",
+  GHOST: "GHOST"  
+};
+
+let DIM0 = vec2.make(1,1);  // Temp vars
+let DIM1 = vec2.make(1,2);
+PlayerObject.STATE = [
+  /* Small Mario -> 0x00*/
+  {NAME: PlayerObject.SNAME.STAND, ID: 0x00, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_STAND]},
+  {NAME: PlayerObject.SNAME.DOWN, ID: 0x01, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_STAND]},
+  {NAME: PlayerObject.SNAME.RUN, ID: 0x02, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_RUN2,PlayerObject.SPRITE.S_RUN1,PlayerObject.SPRITE.S_RUN0]},
+  {NAME: PlayerObject.SNAME.SLIDE, ID: 0x03, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_SLIDE]},
+  {NAME: PlayerObject.SNAME.FALL, ID: 0x04, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_FALL]},
+  {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x05, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_STAND]},
+  /* Big Mario -> 0x20 */
+  {NAME: PlayerObject.SNAME.STAND, ID: 0x20, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_STAND]},
+  {NAME: PlayerObject.SNAME.DOWN, ID: 0x21, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.B_DOWN]},
+  {NAME: PlayerObject.SNAME.RUN, ID: 0x22, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_RUN2,PlayerObject.SPRITE.B_RUN1,PlayerObject.SPRITE.B_RUN0]},
+  {NAME: PlayerObject.SNAME.SLIDE, ID: 0x23, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_SLIDE]},
+  {NAME: PlayerObject.SNAME.FALL, ID: 0x24, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_FALL]},
+  {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x25, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.B_TRANSFORM]},
+  /* Fire Mario -> 0x40 */
+  {NAME: PlayerObject.SNAME.STAND, ID: 0x40, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_STAND]},
+  {NAME: PlayerObject.SNAME.DOWN, ID: 0x41, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.F_DOWN]},
+  {NAME: PlayerObject.SNAME.RUN, ID: 0x42, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_RUN2,PlayerObject.SPRITE.F_RUN1,PlayerObject.SPRITE.F_RUN0]},
+  {NAME: PlayerObject.SNAME.SLIDE, ID: 0x43, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_SLIDE]},
+  {NAME: PlayerObject.SNAME.FALL, ID: 0x44, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_FALL]},
+  {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x45, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.F_TRANSFORM]},
+  /* Generic -> 0x60 */
+  {NAME: PlayerObject.SNAME.DEAD, DIM: DIM0, ID: 0x60, SPRITE: [PlayerObject.SPRITE.G_DEAD]},
+  {NAME: PlayerObject.SNAME.HIDE, DIM: DIM0, ID: 0x70, SPRITE: [PlayerObject.SPRITE.G_HIDE]},
+  {NAME: PlayerObject.SNAME.GHOST, DIM: DIM0, ID: 0xFF, SPRITE: []}
 ];
-
-/* Makes states easily referenceable by either ID or NAME. For sanity. */
-for(var i=0;i<PlayerObject.STATE_LIST.length;i++) {
-  PlayerObject.STATE[PlayerObject.STATE_LIST[i].NAME] = PlayerObject.STATE_LIST[i];
-  PlayerObject.STATE[PlayerObject.STATE_LIST[i].ID] = PlayerObject.STATE_LIST[i];
-}
-
 
 /* === INSTANCE ============================================================= */
 
@@ -108,7 +169,7 @@ PlayerObject.prototype.update = function(data) {
   if(this.dead || this.garbage) { return; } // Don't do ghost playback if character is dead
   
   /* Ghost playback update */
-  this.state = PlayerObject.STATE.GHOST;
+  this.setState(PlayerObject.SNAME.GHOST);
   this.level = data.level;
   this.zone = data.zone;
   this.pos = data.pos;
@@ -118,21 +179,40 @@ PlayerObject.prototype.update = function(data) {
 
 PlayerObject.prototype.step = function() {
   /* Ghost playback */
-  if(this.state === PlayerObject.STATE.GHOST) { return; }
+  if(this.isState("GHOST")) { return; }
   
   /* Player Hidden */
-  if(this.state === PlayerObject.STATE.HIDE) { return; }
+  if(this.isState("HIDE")) { return; }
   
   /* Anim */
   this.anim++;
   this.sprite = this.state.SPRITE[parseInt(this.anim/PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Dead */
-  if(this.state === PlayerObject.STATE.DEAD) {
+  if(this.isState("DEAD")) {
     if(this.deadFreezeTimer++ < PlayerObject.DEAD_FREEZE_TIME) { }
     else if(this.deadUpTimer++ < PlayerObject.DEAD_UP_TIME) { this.pos.y += PlayerObject.DEAD_MOVE; }
     else if(this.deadDeleteTimer++ < PlayerObject.DEAD_DELETE_TIME) { this.pos.y -= PlayerObject.DEAD_MOVE; }
     else { this.destroy(); }
+    return;
+  }
+  
+  /* Transform */
+  if(this.isState("TRANSFORM")) {
+    if(--this.transformTimer > 0) {
+      var ind = parseInt(this.anim/PlayerObject.TRANSFORM_ANIMATION_RATE) % 3;
+      var high = this.power>this.transformTarget?this.power:this.transformTarget;
+      switch(ind) {
+        case 0 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).SPRITE[0]; break; }
+        case 1 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.TRANSFORM, high).SPRITE[0]; break; }
+        case 2 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.transformTarget).SPRITE[0]; break; }
+      }
+    }
+    else {
+      this.power = this.transformTarget;
+      this.transformTarget = -1;
+      this.setState(PlayerObject.SNAME.STAND);
+    }
     return;
   }
   
@@ -148,6 +228,8 @@ PlayerObject.prototype.step = function() {
   }
   
   /* Normal Gameplay */
+  this.lastPos = this.pos;
+  
   this.control();
   this.physics();
   this.interaction();
@@ -166,25 +248,25 @@ PlayerObject.prototype.control = function() {
   if(this.btnD[0] !== 0) {
     if(Math.abs(this.moveSpeed) > 0.01 && !(this.btnD[0] >= 0 ^ this.moveSpeed < 0)) {
       this.moveSpeed += PlayerObject.MOVE_SPEED_DECEL * this.btnD[0];
-      this.setState(PlayerObject.STATE.SLIDE);
+      this.setState(PlayerObject.SNAME.SLIDE);
     }
     else {
       this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, PlayerObject.MOVE_SPEED_MAX);
-      this.setState(PlayerObject.STATE.RUN);
+      this.setState(PlayerObject.SNAME.RUN);
     }
     this.reverse = this.btnD[0] >= 0;
   }
   else {
     if(Math.abs(this.moveSpeed) > 0.01) {
       this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed)-PlayerObject.MOVE_SPEED_DECEL, 0);
-      this.setState(PlayerObject.STATE.RUN);
+      this.setState(PlayerObject.SNAME.RUN);
     }
     else {
       this.moveSpeed = 0;
-      this.setState(PlayerObject.STATE.STAND);
+      this.setState(PlayerObject.SNAME.STAND);
     }
     if(this.btnD[1] === -1) {
-      this.setState(PlayerObject.STATE.DOWN);
+      this.setState(PlayerObject.SNAME.DOWN);
     }
   }
   
@@ -202,7 +284,7 @@ PlayerObject.prototype.control = function() {
     }
   }
   
-  if(!this.grounded) { this.setState(PlayerObject.STATE.FALL); }
+  if(!this.grounded) { this.setState(PlayerObject.SNAME.FALL); }
 };
 
 PlayerObject.prototype.physics = function() {
@@ -221,7 +303,7 @@ PlayerObject.prototype.physics = function() {
   var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
   
   var ext1 = vec2.make(this.moveSpeed>=0?this.pos.x:this.pos.x+this.moveSpeed, this.fallSpeed<=0?this.pos.y:this.pos.y+this.fallSpeed);
-  var ext2 = vec2.make(this.dim.y+Math.abs(this.moveSpeed), this.dim.y+Math.abs(this.fallSpeed));
+  var ext2 = vec2.make(this.dim.x+Math.abs(this.moveSpeed), this.dim.y+Math.abs(this.fallSpeed));
   var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
   var plats = this.game.getPlatforms();
   var tdim = vec2.make(1., 1.);
@@ -229,6 +311,7 @@ PlayerObject.prototype.physics = function() {
   this.grounded = false;
   var on = [];              // Tiles we are directly standing on, if applicable
   var psh = [];             // Tiles we are directly pushing against
+  var bmp = [];             // Tiles we bumped from below when jumping
   var platform;             // If we landed on or are standing on a platform then this is it.
   for(var i=0;i<tiles.length;i++) {
     var tile = tiles[i];
@@ -251,12 +334,15 @@ PlayerObject.prototype.physics = function() {
       }
     }
   }
-    
+   
+  var bmpLoc;
   for(var i=0;i<tiles.length;i++) {
     var tile = tiles[i];
     if(!tile.definition.COLLIDE) { continue; }
     
     var hity = squar.intersection(tile.pos, tdim, movy, this.dim);
+    
+    if(bmpLoc && vec2.distance(bmpLoc, tile.pos) < this.dim.x*.25) { bmp.push(tile); }
     
     if(hity) {
       if(this.pos.y >= movy.y && movy.y <= tile.pos.y + tdim.y) {
@@ -265,10 +351,11 @@ PlayerObject.prototype.physics = function() {
         on.push(tile);
       }
       else if(this.pos.y <= movy.y && movy.y + this.dim.y >= tile.pos.y) {
+        if(!bmpLoc && this.fallSpeed > PlayerObject.BLOCK_BUMP_THRESHOLD) { bmpLoc = vec2.make(movx.x+(this.dim.x*.5), tile.pos.y); bmp.push(tile); }
+        
         movy.y = tile.pos.y - this.dim.y;
         this.jumping = -1;
-        this.fallSpeed = 0;
-        tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.SMALL_BUMP);
+        this.fallSpeed = -PlayerObject.BLOCK_BUMP_THRESHOLD;
       }
     }
   }
@@ -306,7 +393,7 @@ PlayerObject.prototype.physics = function() {
     }
   }
   /* Tile Down events */
-  if(this.state === PlayerObject.STATE.DOWN && this.moveSpeed < 0.01) {
+  if(this.isState("DOWN") && this.moveSpeed < 0.01) {
     for(var i=0;i<on.length;i++) {
       var tile = on[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.DOWN);
@@ -314,11 +401,18 @@ PlayerObject.prototype.physics = function() {
   }
   
   /* Tile Push events */
-  if(this.state === PlayerObject.STATE.RUN) {
+  if(this.isState("RUN")) {
     for(var i=0;i<psh.length;i++) {
       var tile = psh[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.PUSH);
     }
+  }
+  
+  /* Tile Bump events */
+  for(var i=0;i<bmp.length;i++) {
+    var tile = bmp[i];
+    var bty = this.power>0?td32.TRIGGER.TYPE.BIG_BUMP:td32.TRIGGER.TYPE.SMALL_BUMP;
+    tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, bty);
   }
 };
 
@@ -330,23 +424,45 @@ PlayerObject.prototype.interaction = function() {
     if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) {
-        if(Math.abs(obj.pos.x - this.pos.x) > Math.abs(obj.pos.y - this.pos.y)) {
-          /* Horizontal Collision */
-          if(obj.playerCollide) { obj.playerCollide(this); }
+        if(this.lastPos.y > obj.pos.y + obj.dim.y) {
+          /* Stomped */
+          if(obj.playerStomp) { obj.playerStomp(this); }
+        }
+        else if(this.lastPos.y < obj.pos.y) {
+          /* Bumped */
+          if(obj.playerBump) { obj.playerBump(this); }
         }
         else {
-          if(obj.pos.y - this.pos.y) {
-            /* Stomped */
-            if(obj.playerStomp) { obj.playerStomp(this); }
-          }
-          else {
-            /* Bumped */
-            if(obj.playerBump) { obj.playerBump(this); }
-          }
+          /* Touched */
+          if(obj.playerCollide) { obj.playerCollide(this); }
         }
       }
     }
   }
+};
+
+PlayerObject.prototype.bounce = function() {
+  this.jumping = 0;
+};
+
+PlayerObject.prototype.damage = function(obj) {
+  if(this.star > 0 || this.damageTimer > 0) { return; }
+  if(this.power > 0) { this.transform(0); this.damageTimer = PlayerObject.DAMAGE_TIME; return; }
+  this.kill();
+};
+
+PlayerObject.prototype.powerup = function(obj) {
+  if(obj instanceof MushroomObject && this.power < 1) { this.transform(1); return; }
+  if(obj instanceof FlowerObject && this.power < 2) { this.transform(2); return; }
+  if(obj instanceof StarObject) { this.star = PlayerObject.STAR_LENGTH; return; }
+  if(obj instanceof LifeObject) { return; }
+  if(obj instanceof CoinObject) { return; }
+};
+
+PlayerObject.prototype.transform = function(to) {
+  this.transformTarget = to;
+  this.transformTimer = PlayerObject.TRANSFORM_TIME;
+  this.setState(PlayerObject.SNAME.TRANSFORM);
 };
 
 PlayerObject.prototype.warp = function(wid) {
@@ -365,16 +481,16 @@ PlayerObject.prototype.pipe = function(wid) {
 
 /* Make the player invisible, intangible, and frozen until show() is called. */
 PlayerObject.prototype.hide = function() {
-  this.setState(PlayerObject.STATE.HIDE);
+  this.setState(PlayerObject.SNAME.HIDE);
 };
 
 PlayerObject.prototype.show = function() {
-  this.setState(PlayerObject.STATE.STAND);
+  this.setState(PlayerObject.SNAME.STAND);
 };
 
 PlayerObject.prototype.kill = function() {
   this.dead = true;
-  this.setState(PlayerObject.STATE.DEAD);
+  this.setState(PlayerObject.SNAME.DEAD);
   
   if(this.game.getPlayer() === this) {
     this.game.out.push(NET011.encode());
@@ -385,15 +501,39 @@ PlayerObject.prototype.destroy = function() {
   this.garbage = true;
 };
 
-PlayerObject.prototype.setState = function(STATE) {
+PlayerObject.prototype.setState = function(SNAME) {
+  var STATE = this.getStateByPowerIndex(SNAME, this.power);
   if(STATE === this.state) { return; }
   this.state = STATE;
-  this.sprite = STATE.SPRITE[0];
+  if(STATE.SPRITE.length > 0) { this.sprite = STATE.SPRITE[0]; } // Ghost state special case
+  this.dim = STATE.DIM;
   this.anim = 0;
 };
 
+/* Lmoa */
+PlayerObject.prototype.getStateByPowerIndex = function(SNAME, pind) {
+  for(var i=0;i<PlayerObject.STATE.length;i++) {
+    var ste = PlayerObject.STATE[i];
+    if(ste.NAME !== SNAME) { continue; }
+    if(ste.ID >= PlayerObject.GENERIC_INDEX) { return ste; }
+    if(ste.ID >= PlayerObject.POWER_INDEX_SIZE*pind && ste.ID < PlayerObject.POWER_INDEX_SIZE*(pind+1)) { return ste; }
+  }
+};
+
+PlayerObject.prototype.isState = function(SNAME) {
+  return SNAME === this.state.NAME;
+};
+
 PlayerObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
+  if(this.sprite.INDEX instanceof Array) {
+    var s = this.sprite.INDEX;
+    for(var i=0;i<s.length;i++) {
+      for(var j=0;j<s[i].length;j++) {
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: this.reverse, index: s[i][j]});
+      }
+    }
+  }
+  else { sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX}); }
 };
 
 /* Register object class */

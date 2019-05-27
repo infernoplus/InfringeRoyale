@@ -84,8 +84,9 @@ Display.prototype.drawMap = function(depth) {
       
       var st = util.sprite.getSprite(tex, td.index);
       var bmp = 0;
-      if(td.bump > 0) {
-        bmp = Math.sin((1.-(td.bump/15.))*Math.PI)*0.16;
+      var adj = Math.max(0, td.bump-7);
+      if(adj > 0) {
+        bmp = Math.sin((1.-((adj-2)/8.))*Math.PI)*0.22;
       }
       context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*j, Display.TEXRES*(i-bmp), Display.TEXRES, Display.TEXRES);
     }

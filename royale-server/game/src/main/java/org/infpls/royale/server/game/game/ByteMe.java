@@ -149,8 +149,9 @@ public class ByteMe {
     
     @Override
     public ByteBuffer encode() {
-      final ByteBuffer bb = ByteBuffer.allocate(8);
+      final ByteBuffer bb = ByteBuffer.allocate(10);
       bb.put(designation);
+      bb.putShort(pid);
       bb.put(level);
       bb.put(zone);
       bb.putInt(oid);

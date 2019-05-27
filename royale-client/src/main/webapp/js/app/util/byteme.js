@@ -557,7 +557,7 @@ NET012.decode = function(/* NET012_SERV */ a) {
 var NET020 = {}; // OBJECT_EVENT_TRIGGER [0x20] // As Uint8Array
 /* ======================================================================================== */
 NET020.DESIGNATION = 0x20;
-NET020.BYTES = 8;
+NET020.BYTES = 10;
 
 /* Client->Server */
 NET020.encode = function(/* byte */ levelID, /* byte */ zoneID, /* int */ oid, /* byte */ type) {
@@ -572,10 +572,11 @@ NET020.encode = function(/* byte */ levelID, /* byte */ zoneID, /* int */ oid, /
 NET020.decode = function(/* NET020_SERV */ a) {
   return {
     designation: NET020.DESIGNATION,
-    level: a[0],
-    zone: a[1],
-    oid: (a[5] & 0xFF) | ((a[4] << 8) & 0xFF00) | ((a[3] << 16) & 0xFF0000) | ((a[2] << 24) & 0xFF0000),
-    type: a[6]
+    pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
+    level: a[2],
+    zone: a[3],
+    oid: (a[7] & 0xFF) | ((a[6] << 8) & 0xFF00) | ((a[5] << 16) & 0xFF0000) | ((a[4] << 24) & 0xFF0000),
+    type: a[8]
   };
 };
 

@@ -90,18 +90,12 @@ FireObject.prototype.physics = function() {
 
 FireObject.prototype.playerCollide = function(p) {
   if(this.garbage) { return; }
-  p.kill();
+  p.damage(this);
 };
 
-FireObject.prototype.playerStomp = function(p) {
-  if(this.garbage) { return; }
-  p.kill();
-};
+FireObject.prototype.playerStomp = function(p) { };
 
-FireObject.prototype.playerBump = function(p) {
-  if(this.garbage) { return; }
-  p.kill();
-};
+FireObject.prototype.playerBump = function(p) { };
 
 FireObject.prototype.kill = function() {
   

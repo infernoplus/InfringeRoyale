@@ -12,9 +12,9 @@ function BreakEffect(pos, sprite) {
   this.bits = [
     {
       pos: vec2.add(this.pos, vec2.make(0.,0.)),
-      vel: vec2.make(-0.1,0.4),
+      vel: vec2.make(-0.24,0.9),
       rot: 0.,
-      ang: -0.4,
+      ang: -0.3,
       
       sp: vec2.make(0.,0.),   // Sprite Position
       ss: vec2.make(.5,.5),   // Sprite Size
@@ -22,9 +22,9 @@ function BreakEffect(pos, sprite) {
     },
     {
       pos: vec2.add(this.pos, vec2.make(.5,0.)),
-      vel: vec2.make(0.1,0.4),
+      vel: vec2.make(0.24,0.9),
       rot: 0.,
-      ang: 0.4,
+      ang: 0.3,
       
       sp: vec2.make(.5,0.),   // Sprite Position
       ss: vec2.make(.5,.5),   // Sprite Size
@@ -32,9 +32,9 @@ function BreakEffect(pos, sprite) {
     },
     {
       pos: vec2.add(this.pos, vec2.make(0.,-.5)),
-      vel: vec2.make(-0.15,0.2),
+      vel: vec2.make(-0.3,0.5),
       rot: 0.,
-      ang: -0.4,
+      ang: -0.33,
       
       sp: vec2.make(0.,.5),   // Sprite Position
       ss: vec2.make(.5,.5),   // Sprite Size
@@ -42,9 +42,9 @@ function BreakEffect(pos, sprite) {
     },
     {
       pos: vec2.add(this.pos, vec2.make(.5,-.5)),
-      vel: vec2.make(0.15,0.2),
+      vel: vec2.make(0.3,0.5),
       rot: 0.,
-      ang: 0.4,
+      ang: 0.33,
       
       sp: vec2.make(.5,.5),   // Sprite Position
       ss: vec2.make(.5,.5),   // Sprite Size
@@ -53,8 +53,8 @@ function BreakEffect(pos, sprite) {
   ];
 };
 
-BreakEffect.FALL_SPEED = 0.0825;
-BreakEffect.DRAG = 0.965;
+BreakEffect.FALL_SPEED = 0.0775;
+BreakEffect.DRAG = 0.975;
 
 BreakEffect.prototype.step = function() {
   for(var i=0;i<this.bits.length;i++) {
