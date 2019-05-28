@@ -18,13 +18,13 @@ function BowserObject(game, level, zone, pos, oid) {
   this.deadTimer = 0;
   
   /* Physics */
-  this.dim = vec2.make(1., 1.);
+  this.dim = vec2.make(2., 2.);
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.grounded = false;
   
   /* Control */
-  this.dir = false; /* false = left, true = right */
+  this.dir = true; /* false = left, true = right */
 }
 
 
@@ -44,9 +44,10 @@ BowserObject.FALL_SPEED_ACCEL = 0.085;
 
 BowserObject.SPRITE = {};
 BowserObject.SPRITE_LIST = [
-  {NAME: "RUN0", ID: 0x00, INDEX: 0x000F},
-  {NAME: "RUN1", ID: 0x01, INDEX: 0x001F},
-  {NAME: "DEAD", ID: 0x02, INDEX: 0x002F}
+  {NAME: "RUN0", ID: 0x00, INDEX: [[0x00C4,0x00C5],[0x00B4,0x00B5]]},
+  {NAME: "RUN1", ID: 0x01, INDEX: [[0x00C6,0x00C7],[0x00B6,0x00B7]]},
+  {NAME: "ATTACK0", ID: 0x02, INDEX: [[0x00C0,0x00C1],[0x00B0,0x00B1]]},
+  {NAME: "ATTACK1", ID: 0x03, INDEX: [[0x00C2,0x00C3],[0x00B2,0x00B3]]}
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */
@@ -58,7 +59,7 @@ for(var i=0;i<BowserObject.SPRITE_LIST.length;i++) {
 BowserObject.STATE = {};
 BowserObject.STATE_LIST = [
   {NAME: "RUN", ID: 0x00, SPRITE: [BowserObject.SPRITE.RUN0,BowserObject.SPRITE.RUN1]},
-  {NAME: "DEAD", ID: 0x50, SPRITE: [BowserObject.SPRITE.DEAD]}
+  {NAME: "ATTACK", ID: 0x50, SPRITE: [BowserObject.SPRITE.ATTACK0,BowserObject.SPRITE.ATTACK1]}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
@@ -73,7 +74,7 @@ for(var i=0;i<BowserObject.STATE_LIST.length;i++) {
 BowserObject.prototype.update = function(event) {
   /* Event trigger */
   switch(event) {
-    case 0x00 : { this.kill(); break; }
+
   }
 };
 
@@ -97,7 +98,7 @@ BowserObject.prototype.step = function() {
 };
 
 BowserObject.prototype.control = function() {
-  this.moveSpeed = this.dir ? -BowserObject.MOVE_SPEED_MAX : BowserObject.MOVE_SPEED_MAX;
+  //this.moveSpeed = this.dir ? -BowserObject.MOVE_SPEED_MAX : BowserObject.MOVE_SPEED_MAX;
 };
 
 BowserObject.prototype.physics = function() {
@@ -165,21 +166,11 @@ BowserObject.prototype.playerCollide = function(p) {
   p.kill();
 };
 
-BowserObject.prototype.playerStomp = function(p) {
-  if(this.dead || this.garbage) { return; }
-  this.kill();
-  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
-};
+BowserObject.prototype.playerStomp = BowserObject.prototype.playerCollide;
 
-BowserObject.prototype.playerBump = function(p) {
-  if(this.dead || this.garbage) { return; }
-  p.kill();
-};
+BowserObject.prototype.playerBump = BowserObject.prototype.playerCollide;
 
-BowserObject.prototype.kill = function() {
-  this.dead = true;
-  this.setState(BowserObject.STATE.DEAD);
-};
+BowserObject.prototype.kill = function() { };
 
 BowserObject.prototype.destroy = function() {
   this.garbage = true;
@@ -193,7 +184,15 @@ BowserObject.prototype.setState = function(STATE) {
 };
 
 BowserObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
+  if(this.sprite.INDEX instanceof Array) {
+    var s = this.sprite.INDEX;
+    for(var i=0;i<s.length;i++) {
+      for(var j=0;j<s[i].length;j++) {
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[i][j]});
+      }
+    }
+  }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX}); }
 };
 
 /* Register object class */

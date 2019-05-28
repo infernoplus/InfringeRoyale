@@ -8,12 +8,18 @@ function StarObject(game, level, zone, pos, oid) {
   
   this.state = StarObject.STATE.IDLE;
   this.sprite = this.state.SPRITE[0];
+  
+  this.groundTimer = 0;
 }
 
 /* === STATIC =============================================================== */
 StarObject.ASYNC = false;
 StarObject.ID = 0x54;
 StarObject.NAME = "STAR"; // Used by editor
+
+StarObject.JUMP_LENGTH = 6;
+StarObject.MOVE_SPEED_MAX = 0.125;
+StarObject.JUMP_DELAY = 2;
 
 StarObject.SPRITE = {};
 StarObject.SPRITE_LIST = [
@@ -46,7 +52,9 @@ StarObject.prototype.update = ItemObject.prototype.update;
 StarObject.prototype.step = ItemObject.prototype.step;
 
 StarObject.prototype.control = function() {
-  this.moveSpeed = this.dir ? -ItemObject.MOVE_SPEED_MAX : ItemObject.MOVE_SPEED_MAX;
+  this.moveSpeed = this.dir ? -StarObject.MOVE_SPEED_MAX : StarObject.MOVE_SPEED_MAX;
+  if(this.grounded && ++this.groundTimer >= StarObject.JUMP_DELAY) { this.jump = 0; }
+  else if(this.jump > StarObject.JUMP_LENGTH) { this.jump = -1; this.groundTimer = 0; }
 };
 
 StarObject.prototype.physics = ItemObject.prototype.physics;

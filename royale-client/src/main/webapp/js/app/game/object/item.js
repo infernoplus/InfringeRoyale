@@ -28,6 +28,7 @@ function ItemObject(game, level, zone, pos, oid) {
   
   /* Control */
   this.dir = false; /* false = left, true = right */
+  this.jump = -1;
 }
 
 
@@ -39,8 +40,9 @@ ItemObject.ANIMATION_RATE = 3;
 
 ItemObject.MOVE_SPEED_MAX = 0.075;
 
-ItemObject.FALL_SPEED_MAX = 0.35;
-ItemObject.FALL_SPEED_ACCEL = 0.085;
+ItemObject.FALL_SPEED_MAX = 0.45;
+ItemObject.FALL_SPEED_ACCEL = 0.075;
+ItemObject.JUMP_DECEL = 0.015;
 
 ItemObject.RISE_RATE = 0.15;
 
@@ -86,10 +88,16 @@ ItemObject.prototype.physics = function() {
     return;
   }
   
-  if(this.grounded) {
-    this.fallSpeed = 0;
+  if(this.jump !== -1) {
+    this.fallSpeed = ItemObject.FALL_SPEED_MAX - (this.jump*ItemObject.JUMP_DECEL);
+    this.jump++;
   }
-  this.fallSpeed = Math.max(this.fallSpeed - ItemObject.FALL_SPEED_ACCEL, -ItemObject.FALL_SPEED_MAX);
+  else {
+    if(this.grounded) {
+      this.fallSpeed = 0;
+    }
+    this.fallSpeed = Math.max(this.fallSpeed - ItemObject.FALL_SPEED_ACCEL, -ItemObject.FALL_SPEED_MAX);
+  }
   
   var movx = vec2.add(this.pos, vec2.make(this.moveSpeed, 0.));
   var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
