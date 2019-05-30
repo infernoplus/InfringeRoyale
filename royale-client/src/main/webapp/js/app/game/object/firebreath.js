@@ -65,7 +65,7 @@ for(var i=0;i<FireBreathProj.STATE_LIST.length;i++) {
 
 /* === INSTANCE ============================================================= */
 
-FireBreathProj.prototype.update = function() { };
+FireBreathProj.prototype.update = function(event) { /* ASYNC */ };
 
 FireBreathProj.prototype.step = function() {
   /* Dead */

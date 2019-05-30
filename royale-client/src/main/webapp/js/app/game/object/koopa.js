@@ -15,13 +15,16 @@ function KoopaObject(game, level, zone, pos, oid, variant) {
   this.anim = 0;
   
   /* Dead */
-  this.deadTimer = 0;
+  this.bonkTimer = 0;
   
   /* Physics */
   this.dim = vec2.make(1., 1.);
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.grounded = false;
+  
+  /* Var */
+  this.kickTimer = 0;
   
   /* Control */
   this.dir = false; /* false = left, true = right */
@@ -34,6 +37,13 @@ KoopaObject.ID = 0x12;
 KoopaObject.NAME = "KOOPA"; // Used by editor
 
 KoopaObject.ANIMATION_RATE = 3;
+
+KoopaObject.BONK_TIME = 90;
+KoopaObject.BONK_IMP = vec2.make(0.25, 0.4);
+KoopaObject.BONK_DECEL = 0.925;
+KoopaObject.BONK_FALL_SPEED = 0.5;
+
+KoopaObject.PLAYER_KICK_IMMUNE_TIME = 3;  // Player is immune to damage from shell for 5 frames after they kick it
 
 KoopaObject.MOVE_SPEED_MAX = 0.075;
 KoopaObject.SHELL_MOVE_SPEED_MAX = 0.175;
@@ -66,7 +76,8 @@ KoopaObject.STATE_LIST = [
   {NAME: "RUN", ID: 0x01, SPRITE: [KoopaObject.SPRITE.RUN0,KoopaObject.SPRITE.RUN1]},
   {NAME: "TRANSFORM", ID: 0x02, SPRITE: [KoopaObject.SPRITE.SHELL,KoopaObject.SPRITE.TRANSFORM]},
   {NAME: "SHELL", ID: 0x03, SPRITE: [KoopaObject.SPRITE.SHELL]},
-  {NAME: "SPIN", ID: 0x04, SPRITE: [KoopaObject.SPRITE.SHELL]}
+  {NAME: "SPIN", ID: 0x04, SPRITE: [KoopaObject.SPRITE.SHELL]},
+  {NAME: "BONK", ID: 0x51, SPRITE: []}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
@@ -81,13 +92,23 @@ for(var i=0;i<KoopaObject.STATE_LIST.length;i++) {
 KoopaObject.prototype.update = function(event) {
   /* Event trigger */
   switch(event) {
-    case 0x00 : { this.kill(); break; }
-    case 0x01 : { this.stomped(true); break; }
-    case 0x02 : { this.stomped(false); break; }
+    case 0x01 : { this.bonk(); break; }
+    case 0x10 : { this.stomped(true); break; }
+    case 0x11 : { this.stomped(false); break; }
   }
 };
 
 KoopaObject.prototype.step = function() {
+  /* Bonked */
+  if(this.state === KoopaObject.STATE.BONK) {
+    if(this.bonkTimer++ > KoopaObject.BONK_TIME) { this.destroy(); return; }
+    
+    this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    this.moveSpeed *= KoopaObject.BONK_DECEL;
+    this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.BONK_FALL_SPEED);
+    return;
+  }
+  
   /* Anim */
   this.anim++;
   this.sprite = this.state.SPRITE[parseInt(this.anim/KoopaObject.ANIMATION_RATE) % this.state.SPRITE.length];
@@ -98,6 +119,8 @@ KoopaObject.prototype.step = function() {
   }
   
   /* Normal Gameplay */
+  if(this.kickTimer > 0) { this.kickTimer--; }
+  
   this.control();
   this.physics();
   
@@ -171,6 +194,17 @@ KoopaObject.prototype.physics = function() {
   if(changeDir) { this.dir = !this.dir; }
 };
 
+KoopaObject.prototype.damage = function(p) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); };
+
+/* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
+/* Generally triggred by shells, fireballs, etc */
+KoopaObject.prototype.bonk = function() {
+  this.setState(KoopaObject.STATE.BONK);
+  this.moveSpeed = KoopaObject.BONK_IMP.x;
+  this.fallSpeed = KoopaObject.BONK_IMP.y;
+  this.dead = true;
+};
+
 /* dir (true = left, false = right) */
 KoopaObject.prototype.stomped = function(dir) {
   if(this.state === KoopaObject.STATE.FLY) { this.setState(KoopaObject.STATE.RUN); }
@@ -187,11 +221,10 @@ KoopaObject.prototype.playerCollide = function(p) {
   if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) {
     var dir = p.pos.x-this.pos.x > 0;
     this.stomped(dir);
-    this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x01:0x02));
+    this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x10:0x11));
+    this.kickTimer = KoopaObject.PLAYER_KICK_IMMUNE_TIME;
   }
-  else {
-    p.damage();
-  }
+  else if(this.kickTimer <= 0) { p.damage(); }
 };
 
 KoopaObject.prototype.playerStomp = function(p) {
@@ -199,7 +232,7 @@ KoopaObject.prototype.playerStomp = function(p) {
   var dir = p.pos.x-this.pos.x > 0;
   p.bounce();
   this.stomped(dir);
-  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x01:0x02));
+  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x10:0x11));
 };
 
 KoopaObject.prototype.playerBump = function(p) {
@@ -216,20 +249,24 @@ KoopaObject.prototype.destroy = function() {
 KoopaObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
   this.state = STATE;
-  this.sprite = STATE.SPRITE[0];
+  if(STATE.SPRITE.length > 0) { this.sprite = STATE.SPRITE[0]; }
   this.anim = 0;
 };
 
 KoopaObject.prototype.draw = function(sprites) {
+  var mod;
+  if(this.state === KoopaObject.STATE.BONK) { mod = 0x03; }
+  else { mod = 0x00; }
+  
   if(this.sprite.INDEX instanceof Array) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[i][j], mode: 0x00});
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: 0x00}); }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
 };
 
 /* Register object class */

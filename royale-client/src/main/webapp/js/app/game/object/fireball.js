@@ -4,8 +4,10 @@
 /* global NET011, NET020 */
 
 /* Player Fireball Projectile Object */
-function FireballProj(game, level, zone, pos, dir) {
+function FireballProj(game, level, zone, pos, dir, owner) {
   GameObject.call(this, game, level, zone, pos);
+  
+  this.owner = owner;   // PID of the PlayerObject that created this fireball
   
   this.state = FireballProj.STATE.IDLE;
   this.sprite = this.state.SPRITE[0];
@@ -70,7 +72,7 @@ for(var i=0;i<FireballProj.STATE_LIST.length;i++) {
 
 /* === INSTANCE ============================================================= */
 
-FireballProj.prototype.update = function() { };
+FireballProj.prototype.update = function(event) { /* ASYNC */ };
 
 FireballProj.prototype.step = function() {
   /* Dead */
@@ -159,7 +161,18 @@ FireballProj.prototype.physics = function() {
 };
 
 FireballProj.prototype.interaction = function() {
-  
+  for(var i=0;i<this.game.objects.length;i++) {
+    var obj = this.game.objects[i];
+    if(obj === this || !obj.dead || obj.pid === this.owner || !obj.damage) { continue; }  // Fireballs skip objects that lack a damage function to call, and their owners
+    if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
+      var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
+      if(hit) {
+        if(this.owner === this.game.pid) { obj.damage(); }     // Fireballs created by other players don't do damage. They are just ghosts.
+        this.kill();
+        return;
+      }
+    }
+  }
 };
 
 FireballProj.prototype.playerCollide = function(p) { };

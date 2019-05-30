@@ -15,11 +15,13 @@ function PlantObject(game, level, zone, pos, oid, variant) {
   this.anim = 0;
   
   /* Dead */
-  this.deadTimer = 0;
+  this.bonkTimer = 0;
   
   /* Physics */
   this.loc = [vec2.copy(this.pos), vec2.add(this.pos, vec2.make(0., -1.5))];
   this.dim = vec2.make(1., 1.);
+  this.moveSpeed = 0;  // These are only used during a bonk.
+  this.fallSpeed = 0; 
   
   /* Control */
   this.dir = 0;
@@ -31,10 +33,15 @@ PlantObject.ASYNC = false;
 PlantObject.ID = 0x16;
 PlantObject.NAME = "UNSPELLABLE PLANT"; // Used by editor
 
+PlantObject.ANIMATION_RATE = 3;
+
+PlantObject.BONK_TIME = 90;
+PlantObject.BONK_IMP = vec2.make(0.25, 0.4);
+PlantObject.BONK_DECEL = 0.925;
+PlantObject.BONK_FALL_SPEED = 0.5;
+
 PlantObject.WAIT_TIME = 25;
 PlantObject.TRAVEL_SPEED = 0.05;
-
-PlantObject.ANIMATION_RATE = 3;
 
 PlantObject.SPRITE = {};
 PlantObject.SPRITE_LIST = [
@@ -50,7 +57,8 @@ for(var i=0;i<PlantObject.SPRITE_LIST.length;i++) {
 
 PlantObject.STATE = {};
 PlantObject.STATE_LIST = [
-  {NAME: "IDLE", ID: 0x00, SPRITE: [PlantObject.SPRITE.IDLE0,PlantObject.SPRITE.IDLE1]}
+  {NAME: "IDLE", ID: 0x00, SPRITE: [PlantObject.SPRITE.IDLE0,PlantObject.SPRITE.IDLE1]},
+  {NAME: "BONK", ID: 0x51, SPRITE: []}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
@@ -65,11 +73,21 @@ for(var i=0;i<PlantObject.STATE_LIST.length;i++) {
 PlantObject.prototype.update = function(event) {
   /* Event trigger */
   switch(event) {
-    case 0x00 : { this.kill(); break; }
+    case 0x01 : { this.bonk(); break; }
   }
 };
 
 PlantObject.prototype.step = function() {
+  /* Bonked */
+  if(this.state === PlantObject.STATE.BONK) {
+    if(this.bonkTimer++ > PlantObject.BONK_TIME) { this.destroy(); return; }
+    
+    this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    this.moveSpeed *= PlantObject.BONK_DECEL;
+    this.fallSpeed = Math.max(this.fallSpeed - PlantObject.FALL_SPEED_ACCEL, -PlantObject.BONK_FALL_SPEED);
+    return;
+  }
+  
   /* Anim */
   this.anim++;
   this.sprite = this.state.SPRITE[parseInt(this.anim/PlantObject.ANIMATION_RATE) % this.state.SPRITE.length];
@@ -99,6 +117,17 @@ PlantObject.prototype.physics = function() {
   }
 };
 
+PlantObject.prototype.damage = function(p) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); };
+
+/* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
+/* Generally triggred by shells, fireballs, etc */
+PlantObject.prototype.bonk = function() {
+  this.setState(PlantObject.STATE.BONK);
+  this.moveSpeed = PlantObject.BONK_IMP.x;
+  this.fallSpeed = PlantObject.BONK_IMP.y;
+  this.dead = true;
+};
+
 PlantObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
   p.damage();
@@ -123,20 +152,24 @@ PlantObject.prototype.destroy = function() {
 PlantObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
   this.state = STATE;
-  this.sprite = STATE.SPRITE[0];
+  if(STATE.SPRITE.length > 0) { this.sprite = STATE.SPRITE[0]; }
   this.anim = 0;
 };
 
 PlantObject.prototype.draw = function(sprites) {
+  var mod;
+  if(this.state === PlantObject.STATE.BONK) { mod = 0x03; }
+  else { mod = 0x00; }
+  
   if(this.sprite.INDEX instanceof Array) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[i][j], mode: 0x00});
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: 0x00}); }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
 };
 
 /* Register object class */

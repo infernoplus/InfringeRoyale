@@ -15,7 +15,8 @@ function BowserObject(game, level, zone, pos, oid) {
   this.anim = 0;
   
   /* Dead */
-  this.deadTimer = 0;
+  this.health = BowserObject.HEALTH;
+  this.bonkTimer = 0;
   
   /* Physics */
   this.dim = vec2.make(2., 2.);
@@ -34,13 +35,18 @@ function BowserObject(game, level, zone, pos, oid) {
 }
 
 /* === STATIC =============================================================== */
-BowserObject.ASYNC = false;
+BowserObject.ASYNC = true;
 BowserObject.ID = 0x19;
 BowserObject.NAME = "BOWSER"; // Used by editor
 
 BowserObject.ANIMATION_RATE = 5;
 
-BowserObject.DEAD_TIME = 60;
+BowserObject.HEALTH = 5;
+
+BowserObject.BONK_TIME = 90;
+BowserObject.BONK_IMP = vec2.make(0.25, 0.4);
+BowserObject.BONK_DECEL = 0.925;
+BowserObject.BONK_FALL_SPEED = 0.5;
 
 BowserObject.MOVE_SPEED_MAX = 0.095;
 BowserObject.JUMP_DELAY = 45;        // Time between jumps
@@ -71,7 +77,8 @@ for(var i=0;i<BowserObject.SPRITE_LIST.length;i++) {
 BowserObject.STATE = {};
 BowserObject.STATE_LIST = [
   {NAME: "RUN", ID: 0x00, SPRITE: [BowserObject.SPRITE.RUN0,BowserObject.SPRITE.RUN1]},
-  {NAME: "ATTACK", ID: 0x01, SPRITE: [BowserObject.SPRITE.ATTACK0,BowserObject.SPRITE.ATTACK1]}
+  {NAME: "ATTACK", ID: 0x01, SPRITE: [BowserObject.SPRITE.ATTACK0,BowserObject.SPRITE.ATTACK1]},
+  {NAME: "BONK", ID: 0x51, SPRITE: []}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
@@ -82,24 +89,22 @@ for(var i=0;i<BowserObject.STATE_LIST.length;i++) {
 
 /* === INSTANCE ============================================================= */
 
-BowserObject.prototype.update = function(event) {
-  /* Event trigger */
-  switch(event) {
-
-  }
-};
+BowserObject.prototype.update = function(event) { /* ASYNC */ };
 
 BowserObject.prototype.step = function() {
+  /* Bonked */
+  if(this.state === BowserObject.STATE.BONK) {
+    if(this.bonkTimer++ > BowserObject.BONK_TIME) { this.destroy(); return; }
+    
+    this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    this.moveSpeed *= BowserObject.BONK_DECEL;
+    this.fallSpeed = Math.max(this.fallSpeed - BowserObject.FALL_SPEED_ACCEL, -BowserObject.BONK_FALL_SPEED);
+    return;
+  }
+
   /* Anim */
   this.anim++;
   this.sprite = this.state.SPRITE[parseInt(this.anim/BowserObject.ANIMATION_RATE) % this.state.SPRITE.length];
-  
-  /* Dead */
-  if(this.state === BowserObject.STATE.DEAD) {
-    if(this.deadTimer++ < BowserObject.DEAD_TIME) { }
-    else { this.destroy(); }
-    return;
-  }
   
   /* Normal Gameplay */
   this.control();
@@ -201,7 +206,20 @@ BowserObject.prototype.playerStomp = BowserObject.prototype.playerCollide;
 
 BowserObject.prototype.playerBump = BowserObject.prototype.playerCollide;
 
-BowserObject.prototype.kill = function() { };
+BowserObject.prototype.damage = function(p) {
+  if(--this.health <= 0) { this.bonk(); }
+};
+
+/* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
+/* Generally triggred by shells, fireballs, etc */
+BowserObject.prototype.bonk = function() {
+  this.setState(BowserObject.STATE.BONK);
+  this.moveSpeed = BowserObject.BONK_IMP.x;
+  this.fallSpeed = BowserObject.BONK_IMP.y;
+  this.dead = true;
+};
+
+BowserObject.prototype.kill = function() { /* No standard killstate */ };
 
 BowserObject.prototype.destroy = function() {
   this.garbage = true;
@@ -210,20 +228,24 @@ BowserObject.prototype.destroy = function() {
 BowserObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
   this.state = STATE;
-  this.sprite = STATE.SPRITE[0];
+  if(STATE.SPRITE.length > 0) { this.sprite = STATE.SPRITE[0]; }
   this.anim = 0;
 };
 
 BowserObject.prototype.draw = function(sprites) {
+  var mod;
+  if(this.state === BowserObject.STATE.BONK) { mod = 0x03; }
+  else { mod = 0x00; }
+  
   if(this.sprite.INDEX instanceof Array) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[i][j]});
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: 0x00}); }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
 };
 
 /* Register object class */

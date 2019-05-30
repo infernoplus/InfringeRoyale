@@ -17,6 +17,7 @@ function GoombaObject(game, level, zone, pos, oid, variant) {
   
   /* Dead */
   this.deadTimer = 0;
+  this.bonkTimer = 0;
   
   /* Physics */
   this.dim = vec2.make(1., 1.);
@@ -37,6 +38,10 @@ GoombaObject.NAME = "GOOMBA"; // Used by editor
 GoombaObject.ANIMATION_RATE = 3;
 
 GoombaObject.DEAD_TIME = 60;
+GoombaObject.BONK_TIME = 90;
+GoombaObject.BONK_IMP = vec2.make(0.25, 0.4);
+GoombaObject.BONK_DECEL = 0.925;
+GoombaObject.BONK_FALL_SPEED = 0.5;
 
 GoombaObject.MOVE_SPEED_MAX = 0.075;
 
@@ -59,7 +64,8 @@ for(var i=0;i<GoombaObject.SPRITE_LIST.length;i++) {
 GoombaObject.STATE = {};
 GoombaObject.STATE_LIST = [
   {NAME: "RUN", ID: 0x00, SPRITE: [GoombaObject.SPRITE.RUN0,GoombaObject.SPRITE.RUN1]},
-  {NAME: "DEAD", ID: 0x50, SPRITE: [GoombaObject.SPRITE.DEAD]}
+  {NAME: "DEAD", ID: 0x50, SPRITE: [GoombaObject.SPRITE.DEAD]},
+  {NAME: "BONK", ID: 0x51, SPRITE: []}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
@@ -75,10 +81,21 @@ GoombaObject.prototype.update = function(event) {
   /* Event trigger */
   switch(event) {
     case 0x00 : { this.kill(); break; }
+    case 0x01 : { this.bonk(); break; }
   }
 };
 
 GoombaObject.prototype.step = function() {
+  /* Bonked */
+  if(this.state === GoombaObject.STATE.BONK) {
+    if(this.bonkTimer++ > GoombaObject.BONK_TIME) { this.destroy(); return; }
+    
+    this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    this.moveSpeed *= GoombaObject.BONK_DECEL;
+    this.fallSpeed = Math.max(this.fallSpeed - GoombaObject.FALL_SPEED_ACCEL, -GoombaObject.BONK_FALL_SPEED);
+    return;
+  }
+  
   /* Anim */
   this.anim++;
   this.sprite = this.state.SPRITE[parseInt(this.anim/GoombaObject.ANIMATION_RATE) % this.state.SPRITE.length];
@@ -161,6 +178,17 @@ GoombaObject.prototype.physics = function() {
   if(changeDir) { this.dir = !this.dir; }
 };
 
+GoombaObject.prototype.damage = function(p) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); };
+
+/* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
+/* Generally triggred by shells, fireballs, etc */
+GoombaObject.prototype.bonk = function() {
+  this.setState(GoombaObject.STATE.BONK);
+  this.moveSpeed = GoombaObject.BONK_IMP.x;
+  this.fallSpeed = GoombaObject.BONK_IMP.y;
+  this.dead = true;
+};
+
 GoombaObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
   p.damage(this);
@@ -190,12 +218,24 @@ GoombaObject.prototype.destroy = function() {
 GoombaObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
   this.state = STATE;
-  this.sprite = STATE.SPRITE[0];
+  if(STATE.SPRITE.length > 0) { this.sprite = STATE.SPRITE[0]; }
   this.anim = 0;
 };
 
 GoombaObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00});
+  var mod;
+  if(this.state === GoombaObject.STATE.BONK) { mod = 0x03; }
+  else { mod = 0x00; }
+  
+  if(this.sprite.INDEX instanceof Array) {
+    var s = this.sprite.INDEX;
+    for(var i=0;i<s.length;i++) {
+      for(var j=0;j<s[i].length;j++) {
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
+      }
+    }
+  }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
 };
 
 /* Register object class */

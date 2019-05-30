@@ -520,7 +520,8 @@ PlayerObject.prototype.interaction = function() {
 PlayerObject.prototype.attack = function() {
   this.attackTimer = PlayerObject.ATTACK_DELAY;
   this.attackCharge -= PlayerObject.ATTACK_CHARGE;
-  this.game.createObject(FireballProj.ID, this.level, this.zone, vec2.add(this.pos, PlayerObject.PROJ_OFFSET), [this.reverse]);
+  var p = this.reverse?vec2.add(this.pos, PlayerObject.PROJ_OFFSET):vec2.add(this.pos, vec2.multiply(PlayerObject.PROJ_OFFSET, vec2.make(-1., 1.)));
+  this.game.createObject(FireballProj.ID, this.level, this.zone, p, [this.reverse, this.pid]);
 };
 
 PlayerObject.prototype.bounce = function() {
