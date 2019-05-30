@@ -60,6 +60,7 @@ public class Controller {
         case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
         case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
         case 0x12 : { process012((ByteMe.NET012)n); loc.add(n); break; }
+        case 0x13 : { process013((ByteMe.NET013)n); glo.add(n); break; }
         case 0x20 : { process020((ByteMe.NET020)n); glo.add(n); break; }
         case 0x30 : { process030((ByteMe.NET030)n); glo.add(n); break; }
       }
@@ -85,6 +86,11 @@ public class Controller {
     zone = n.zone;
     position = n.pos;
     sprite = n.sprite;
+  }
+  
+  /* PLAYER_OBJECT_EVENT */
+  public void process013(ByteMe.NET013 n) {
+    
   }
   
   /* OBJECT_EVENT_TRIGGER */

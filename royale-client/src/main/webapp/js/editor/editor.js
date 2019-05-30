@@ -82,6 +82,7 @@ Editor.prototype.setTool = function(tool) {
     case "object" : { this.tool = new ToolObject(this); this.tool.load(); break; }
     case "warp" : { this.tool = new ToolWarp(this); this.tool.load(); break; }
     case "copy" : { this.tool = new ToolCopy(this); this.tool.load(); break; }
+    case "rep" : { this.tool = new ToolRep(this); this.tool.load(); break; }
     case "ref" : { this.tool = new ToolRef(this); this.tool.load(); break; }
   }
 };

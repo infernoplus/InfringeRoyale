@@ -185,5 +185,5 @@ ItemObject.prototype.setState = function(STATE) {
 };
 
 ItemObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
+  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00});
 };

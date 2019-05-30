@@ -115,7 +115,7 @@ FireObject.prototype.setState = function(STATE) {
 FireObject.prototype.draw = function(sprites) {
   var vec = vec2.normalize(vec2.make(Math.sin(-this.anim/FireObject.SPIN_RATE), Math.cos(-this.anim/FireObject.SPIN_RATE)));
   for(var i=0;i<FireObject.PARTS;i++) {
-    sprites.push({pos: vec2.add(this.pos, vec2.scale(vec, FireObject.SPACING*i)), reverse: this.reverse, index: this.sprite.INDEX});
+    sprites.push({pos: vec2.add(this.pos, vec2.scale(vec, FireObject.SPACING*i)), reverse: false, index: this.sprite.INDEX, mode: 0x00});
   }
 };
 

@@ -121,7 +121,7 @@ PlatformObject.prototype.setState = function(STATE) {
 PlatformObject.prototype.draw = function(sprites) {
   if(this.delay>0) { return; }
   for(var i=0;i<this.dim.x;i++) {
-    sprites.push({pos: vec2.add(this.pos, vec2.make(i, 0)), reverse: this.reverse, index: this.sprite.INDEX});
+    sprites.push({pos: vec2.add(this.pos, vec2.make(i, 0)), reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00});
   }
 };
 

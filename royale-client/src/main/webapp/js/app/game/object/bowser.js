@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject */
+/* global GameObject, FireBreathProj */
 /* global NET011, NET020 */
 
 function BowserObject(game, level, zone, pos, oid) {
@@ -24,22 +24,34 @@ function BowserObject(game, level, zone, pos, oid) {
   this.grounded = false;
   
   /* Control */
-  this.dir = true; /* false = left, true = right */
+  this.loc = [this.pos.x, this.pos.x - BowserObject.MOVE_AREA];
+  this.attackTimer = 0;
+  this.attackAnimTimer = 0;
+  this.groundTimer = 0;
+  this.jumpTimer = -1;
+  this.reverse = false; /* direction bowser is moving */
+  this.dir = true; /* false = facing left, true = facing right */
 }
-
 
 /* === STATIC =============================================================== */
 BowserObject.ASYNC = false;
 BowserObject.ID = 0x19;
 BowserObject.NAME = "BOWSER"; // Used by editor
 
-BowserObject.ANIMATION_RATE = 3;
+BowserObject.ANIMATION_RATE = 5;
 
 BowserObject.DEAD_TIME = 60;
 
-BowserObject.MOVE_SPEED_MAX = 0.125;
-
-BowserObject.FALL_SPEED_MAX = 0.35;
+BowserObject.MOVE_SPEED_MAX = 0.095;
+BowserObject.JUMP_DELAY = 45;        // Time between jumps
+BowserObject.MOVE_AREA = 5;          // 7 Blocks horizontal area
+BowserObject.JUMP_LENGTH = 6;        // Length of jump
+BowserObject.JUMP_DECEL = 0.009;     // Jump deceleration
+BowserObject.ATTACK_DELAY = 75;      // Time between attacks
+BowserObject.ATTACK_ANIM_LENGTH = 15;
+BowserObject.PROJ_OFFSET = vec2.make(-.25, 1.1);
+    
+BowserObject.FALL_SPEED_MAX = 0.3;
 BowserObject.FALL_SPEED_ACCEL = 0.085;
 
 BowserObject.SPRITE = {};
@@ -59,7 +71,7 @@ for(var i=0;i<BowserObject.SPRITE_LIST.length;i++) {
 BowserObject.STATE = {};
 BowserObject.STATE_LIST = [
   {NAME: "RUN", ID: 0x00, SPRITE: [BowserObject.SPRITE.RUN0,BowserObject.SPRITE.RUN1]},
-  {NAME: "ATTACK", ID: 0x50, SPRITE: [BowserObject.SPRITE.ATTACK0,BowserObject.SPRITE.ATTACK1]}
+  {NAME: "ATTACK", ID: 0x01, SPRITE: [BowserObject.SPRITE.ATTACK0,BowserObject.SPRITE.ATTACK1]}
 ];
 
 /* Makes states easily referenceable by either ID or NAME. For sanity. */
@@ -67,7 +79,6 @@ for(var i=0;i<BowserObject.STATE_LIST.length;i++) {
   BowserObject.STATE[BowserObject.STATE_LIST[i].NAME] = BowserObject.STATE_LIST[i];
   BowserObject.STATE[BowserObject.STATE_LIST[i].ID] = BowserObject.STATE_LIST[i];
 }
-
 
 /* === INSTANCE ============================================================= */
 
@@ -94,18 +105,36 @@ BowserObject.prototype.step = function() {
   this.control();
   this.physics();
   
+  if(this.attackTimer++ > BowserObject.ATTACK_DELAY) { this.attack(); }
+  if(this.attackAnimTimer > 0) { this.setState(BowserObject.STATE.ATTACK); this.attackAnimTimer--; }
+  else { this.setState(BowserObject.STATE.RUN); }
+  
   if(this.pos.y < 0.) { this.destroy(); }
 };
 
 BowserObject.prototype.control = function() {
-  //this.moveSpeed = this.dir ? -BowserObject.MOVE_SPEED_MAX : BowserObject.MOVE_SPEED_MAX;
+  if(this.grounded) {
+    if(BowserObject.JUMP_DELAY < this.groundTimer++) { this.jumpTimer = 0; this.groundTimer = 0; }
+    if(this.pos.x > this.loc[0]) { this.reverse = true; }
+    else if(this.pos.x < this.loc[1]) { this.reverse = false; }
+  }
+  else if(this.jumpTimer > BowserObject.JUMP_LENGTH) {
+    this.jumpTimer = -1;
+  }
+
+  this.moveSpeed = (this.moveSpeed * .75) + ((this.reverse ? -BowserObject.MOVE_SPEED_MAX : BowserObject.MOVE_SPEED_MAX) * .25);  // Rirp
 };
 
 BowserObject.prototype.physics = function() {
-  if(this.grounded) {
-    this.fallSpeed = 0;
+  if(this.jumpTimer !== -1) {
+    this.fallSpeed = BowserObject.FALL_SPEED_MAX - (this.jumpTimer*BowserObject.JUMP_DECEL);
+    this.jumpTimer++;
+    this.grounded = false;
   }
-  this.fallSpeed = Math.max(this.fallSpeed - BowserObject.FALL_SPEED_ACCEL, -BowserObject.FALL_SPEED_MAX);
+  else {
+    if(this.grounded) { this.fallSpeed = 0; }
+    this.fallSpeed = Math.max(this.fallSpeed - BowserObject.FALL_SPEED_ACCEL, -BowserObject.FALL_SPEED_MAX);
+  }
   
   var movx = vec2.add(this.pos, vec2.make(this.moveSpeed, 0.));
   var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
@@ -115,7 +144,6 @@ BowserObject.prototype.physics = function() {
   var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
   var tdim = vec2.make(1., 1.);
   
-  var changeDir = false;
   this.grounded = false;
   for(var i=0;i<tiles.length;i++) {
     var tile = tiles[i];
@@ -128,13 +156,11 @@ BowserObject.prototype.physics = function() {
         movx.x = tile.pos.x - this.dim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
-        changeDir = true;
       }
       else if(this.pos.x >= tile.pos.x + tdim.x && movx.x < tile.pos.x + tdim.x) {
         movx.x = tile.pos.x + tdim.x;
         movy.x = movx.x;
         this.moveSpeed = 0;
-        changeDir = true;
       }
     }
   }
@@ -152,13 +178,18 @@ BowserObject.prototype.physics = function() {
       }
       else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
         movy.y = tile.pos.y - this.dim.y;
-        this.jumping = -1;
+        this.jumpTimer = -1;
         this.fallSpeed = 0;
       }
     }
   }
   this.pos = vec2.make(movx.x, movy.y);
-  if(changeDir) { this.dir = !this.dir; }
+};
+
+BowserObject.prototype.attack = function() {
+  this.attackAnimTimer = BowserObject.ATTACK_ANIM_LENGTH;
+  this.attackTimer = 0;
+  this.game.createObject(FireBreathProj.ID, this.level, this.zone, vec2.add(this.pos, BowserObject.PROJ_OFFSET), []);
 };
 
 BowserObject.prototype.playerCollide = function(p) {
@@ -192,7 +223,7 @@ BowserObject.prototype.draw = function(sprites) {
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX}); }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: 0x00}); }
 };
 
 /* Register object class */

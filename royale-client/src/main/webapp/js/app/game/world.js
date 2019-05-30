@@ -163,15 +163,16 @@ Zone.prototype.dimensions = function() {
 };
 
 /* Returns an array of all tiles in an area with position <vec2 pos> width/height <vec2 dim> */
+/* +y dimension is up, specifying because of a confusing bug */
 Zone.prototype.getTiles = function(pos, dim) {
   var zd = this.dimensions();
   var cpos = vec2.copy(pos);
-  cpos.y = zd.y - 1 - cpos.y;
+  cpos.y = zd.y - cpos.y;
   
   var x1 = parseInt(Math.max(Math.min(Math.floor(cpos.x)-1, zd.x), 0.));
   var x2 = parseInt(Math.max(Math.min(Math.ceil(cpos.x+dim.x)+1, zd.x), 0.));
-  var y1 = parseInt(Math.max(Math.min(Math.floor(cpos.y)-1, zd.y), 0.));
-  var y2 = parseInt(Math.max(Math.min(Math.ceil(cpos.y+dim.y)+1, zd.y), 0.));
+  var y1 = parseInt(Math.max(Math.min(Math.floor(cpos.y-dim.y)-1, zd.y), 0.));
+  var y2 = parseInt(Math.max(Math.min(Math.ceil(cpos.y)+1, zd.y), 0.));
   
   var tiles = [];
   

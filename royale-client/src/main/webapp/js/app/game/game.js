@@ -106,6 +106,7 @@ Game.prototype.doUpdate = function(data) {
       case 0x10 : { this.doNET010(n); break; }
       case 0x11 : { this.doNET011(n); break; }
       case 0x12 : { this.doNET012(n); break; }
+      case 0x13 : { this.doNET013(n); break; }
       case 0x20 : { this.doNET020(n); break; }
       case 0x30 : { this.doNET030(n); break; }
     }
@@ -142,6 +143,13 @@ Game.prototype.doNET012 = function(n) {
   obj.update(n);
 };
 
+/* PLAYER_OBJECT_EVENT [0x13] */
+Game.prototype.doNET013 = function(n) {
+  if(n.pid === this.pid) { return; }
+  var obj = this.getGhost(n.pid);
+  obj.trigger(n.type);
+};
+
 /* OBJECT_EVENT_TRIGGER [0x20] */
 Game.prototype.doNET020 = function(n) {
   if(n.pid === this.pid) { return; }                  // Don't repeat events that we reported.
@@ -175,7 +183,7 @@ Game.prototype.doInput = function() {
   if(keys[65] || keys[37]) { dir[0]--; } // A or LEFT
   if(keys[68] || keys[39]) { dir[0]++; } // D or RIGHT
   var a = keys[32] || keys[17]; // SPACE or RIGHT CONTROL
-  var b = keys[16] || keys[45]; // LEFT SHIFT or NUMPAD 0
+  var b = keys[70] || keys[45]; // F or num0
   
   if(mous.spin) { this.display.camera.zoom(mous.spin); } // Mouse wheel -> Camera zoom
   
@@ -193,6 +201,7 @@ Game.prototype.doStep = function() {
       ply.level = z.level;
       ply.zone = z.id;
       ply.pos = shor2.decode(z.initial);
+      ply.grounded = false;
       ply.show();
       this.levelWarpId = undefined;
     }

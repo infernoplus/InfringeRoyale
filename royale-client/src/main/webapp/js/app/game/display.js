@@ -112,6 +112,13 @@ Display.prototype.drawObject = function() {
   for(var i=0;i<sprites.length;i++) {
     var sprite = sprites[i];
     
+    var rest = false;
+    switch(sprite.mode) {
+      case 0x00 : { break; }  // Standard
+      case 0x01 : { context.save(); rest = true; context.globalAlpha = .5; break; }  // 50% Transparent
+      case 0x02 : { if(parseInt(this.game.frame*.5) % 2 === 0) { context.save(); rest = true; context.globalCompositeOperation = "lighter"; } break; }  // Flashing Composite
+    }
+    
     var st = util.sprite.getSprite(tex, sprite.index);
     if(sprite.reverse) {
       context.save();
@@ -122,6 +129,8 @@ Display.prototype.drawObject = function() {
     else {
       context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, Display.TEXRES*sprite.pos.x, Display.TEXRES*(dim.y-sprite.pos.y-1.), Display.TEXRES, Display.TEXRES);
     }
+    
+    if(rest) { context.restore(); }
   }
 };
 

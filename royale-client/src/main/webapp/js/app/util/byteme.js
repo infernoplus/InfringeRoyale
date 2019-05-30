@@ -71,11 +71,7 @@ td32.TILE_PROPERTIES = {
   0x00: {
     NAME: "AIR",
     COLLIDE: false,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: false,
     ASYNC: true,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
   },
@@ -83,11 +79,7 @@ td32.TILE_PROPERTIES = {
   0x01: {
     NAME: "SOLID STANDARD",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: false,
     ASYNC: true,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
   },
@@ -95,11 +87,7 @@ td32.TILE_PROPERTIES = {
   0x02: {
     NAME: "SOLID BUMPABLE",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: false,
     ASYNC: false,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
@@ -121,11 +109,7 @@ td32.TILE_PROPERTIES = {
   0x03: {
     NAME: "SOLID BREAKABLE NORMAL",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: false,
     ASYNC: false,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
@@ -148,11 +132,7 @@ td32.TILE_PROPERTIES = {
   0x11: {
     NAME: "ITEM BLOCK STANDARD",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: false,
     ASYNC: false,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
@@ -180,11 +160,7 @@ td32.TILE_PROPERTIES = {
   0x12: {
     NAME: "COIN BLOCK STANDARD",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: false,
     ASYNC: false,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
@@ -212,11 +188,7 @@ td32.TILE_PROPERTIES = {
   0x13: {
     NAME: "COIN BLOCK MULTI",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: false,
     ASYNC: false,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
@@ -262,11 +234,7 @@ td32.TILE_PROPERTIES = {
   0x15: {
     NAME: "ITEM BLOCK INVISIBLE",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: true,
     ASYNC: false,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
@@ -294,11 +262,7 @@ td32.TILE_PROPERTIES = {
   0x16: {
     NAME: "COIN BLOCK INVISIBLE",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: false,
+    HIDDEN: true,
     ASYNC: false,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
@@ -326,11 +290,7 @@ td32.TILE_PROPERTIES = {
   0x51: {
     NAME: "WARP TILE",
     COLLIDE: false,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: true,
+    HIDDEN: false,
     ASYNC: true,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       switch(type) {
@@ -347,11 +307,7 @@ td32.TILE_PROPERTIES = {
   0x52: {
     NAME: "WARP PIPE",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: true,
-    WARP: true,
+    HIDDEN: false,
     ASYNC: true,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       switch(type) {
@@ -368,11 +324,7 @@ td32.TILE_PROPERTIES = {
   0x53: {
     NAME: "WARP PIPE HORIZ",
     COLLIDE: true,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: true,
-    WARP: true,
+    HIDDEN: false,
     ASYNC: true,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       switch(type) {
@@ -389,11 +341,7 @@ td32.TILE_PROPERTIES = {
   0x56: {
     NAME: "LEVEL END WARP",
     COLLIDE: false,
-    WATER: false,
-    CLIMB: false,
-    KILL: false,
-    PIPE: false,
-    WARP: true,
+    HIDDEN: false,
     ASYNC: true,
     TRIGGER: function(game, pid, td, level, zone, x, y, type) {
       switch(type) {
@@ -422,6 +370,7 @@ NETX.decode = function(/* Uint8Array */ data) {
       case 0x10 : { de.push(NET010.decode(data.slice(i, i+=NET010.BYTES-1))); break; }
       case 0x11 : { de.push(NET011.decode(data.slice(i, i+=NET011.BYTES-1))); break; }
       case 0x12 : { de.push(NET012.decode(data.slice(i, i+=NET012.BYTES-1))); break; }
+      case 0x13 : { de.push(NET013.decode(data.slice(i, i+=NET013.BYTES-1))); break; }
       case 0x20 : { de.push(NET020.decode(data.slice(i, i+=NET020.BYTES-1))); break; }
       case 0x30 : { de.push(NET030.decode(data.slice(i, i+=NET030.BYTES-1))); break; }
       default : { if(app) { app.menu.warn.show("Error decoding binary data!"); } return de; }
@@ -549,6 +498,26 @@ NET012.decode = function(/* NET012_SERV */ a) {
     pos: vec2.make(v1.getFloat32(0), v2.getFloat32(0)),
     sprite: a[12],
     reverse: a[13] !== 0
+  };
+};
+
+
+var NET013 = {}; // PLAYER_OBJECT_EVENT [0x13] // As Uint8Array
+/* ======================================================================================== */
+NET013.DESIGNATION = 0x13;
+NET013.BYTES = 4;
+
+/* Client->Server */
+NET013.encode = function(/* byte */ type) {
+  return new Uint8Array([NET013.DESIGNATION, type]);
+};
+
+/* Server->>Client */
+NET013.decode = function(/* NET012_SERV */ a) {
+  return {
+    designation: NET013.DESIGNATION,
+    pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
+    type: a[2]
   };
 };
 

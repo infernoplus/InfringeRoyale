@@ -194,7 +194,7 @@ KoopaRedObject.prototype.setState = function(STATE) {
 };
 
 KoopaRedObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
+  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00});
 };
 
 /* Register object class */

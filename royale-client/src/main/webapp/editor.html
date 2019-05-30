@@ -32,6 +32,7 @@
           <span id='editor-top-object' class="toolbar-button-top left">Object</span>
           <span id='editor-top-warp' class="toolbar-button-top left">Warp</span>
           <span id='editor-top-copy' class="toolbar-button-top left">Clone</span>
+          <span id='editor-top-rep' class="toolbar-button-top left">Replace</span>
           <span id='editor-top-ref' class="toolbar-button-top left">Reference</span>
           <span id='editor-top-about' class="toolbar-button-top right">About</span>
           <span id='editor-top-save' class="toolbar-button-top right">Save</span>
@@ -205,6 +206,26 @@
             </div>
           </div>
           
+          <!-- Rep Tool -->
+          <div id='editor-tool-rep' class='tool-container' style='display: none'>
+            <div class='tool-box'>
+              <div class='tool-var'>Target</div><div class='tool-type'>td32</div>
+              <input id='editor-tool-rep-target' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Replacement</div><div class='tool-type'>td32</div>
+              <input id='editor-tool-rep-replace' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div id='editor-tool-rep-apply' class="toolbar-button-top">Apply</div>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class="tool-val-im">Replaces all tiles that match the td32 of 'target' with 'replacement'.</div>
+            </div>
+          </div>
+          
           <!-- Ref Tool -->
           <div id='editor-tool-ref' class='tool-container' style='display: none'>
             <div class='tool-box'>
@@ -261,6 +282,7 @@
       <script src='js/editor/tool/tool-object.js'></script>
       <script src='js/editor/tool/tool-warp.js'></script>
       <script src='js/editor/tool/tool-copy.js'></script>
+      <script src='js/editor/tool/tool-rep.js'></script>
       <script src='js/editor/tool/tool-ref.js'></script>
       
       <!-- Game Core -->
@@ -274,6 +296,8 @@
       <script src='js/app/game/object/bowser.js'></script>
       <script src='js/app/game/object/platform.js'></script>
       <script src='js/app/game/object/fire.js'></script>
+      <script src='js/app/game/object/fireball.js'></script>
+      <script src='js/app/game/object/firebreath.js'></script>
       <script src='js/app/game/object/item.js'></script>
       <script src='js/app/game/object/mushroom.js'></script>
       <script src='js/app/game/object/flower.js'></script>

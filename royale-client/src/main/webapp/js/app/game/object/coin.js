@@ -102,7 +102,7 @@ CoinObject.prototype.setState = function(STATE) {
 };
 
 CoinObject.prototype.draw = function(sprites) {
-  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX});
+  sprites.push({pos: this.pos, reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00});
 };
 
 /* Register object class */

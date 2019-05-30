@@ -132,11 +132,11 @@ PlantObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[i][j]});
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[i][j], mode: 0x00});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX}); }
+  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: 0x00}); }
 };
 
 /* Register object class */
