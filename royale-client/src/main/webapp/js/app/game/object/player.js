@@ -62,7 +62,7 @@ PlayerObject.DEAD_UP_TIME = 9;
 PlayerObject.DEAD_DELETE_TIME = 30;
 PlayerObject.DEAD_MOVE = 0.35;
 
-PlayerObject.MOVE_SPEED_MAX = 0.225;
+PlayerObject.MOVE_SPEED_MAX = 0.215;
 PlayerObject.MOVE_SPEED_ACCEL = 0.0125;
 PlayerObject.MOVE_SPEED_DECEL = 0.0225;
 PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025;
@@ -500,7 +500,7 @@ PlayerObject.prototype.interaction = function() {
     if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) {
-        if(this.lastPos.y > obj.pos.y + obj.dim.y) {
+        if(this.lastPos.y > obj.pos.y + obj.dim.y - obj.fallSpeed) {
           /* Stomped */
           if(obj.playerStomp) { obj.playerStomp(this); }
         }

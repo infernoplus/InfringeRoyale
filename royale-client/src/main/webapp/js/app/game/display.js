@@ -124,12 +124,13 @@ Display.prototype.drawObject = function() {
       case 0x03 : { ry = true; break; } // Vertical mirror
     }
     
-    if(rx || ry) { context.save(); rest = true; context.scale(rx?-1.:1., ry?-1.:1.); }
+    if(rx || ry) { context.save(); context.scale(rx?-1.:1., ry?-1.:1.); }
     x = rx?((-1.*(Display.TEXRES*sprite.pos.x))-Display.TEXRES):(Display.TEXRES*sprite.pos.x);
     y = ry?((-1.*(Display.TEXRES*(dim.y-sprite.pos.y-1.)))-Display.TEXRES):(Display.TEXRES*(dim.y-sprite.pos.y-1.));
 
     context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, x, y, Display.TEXRES, Display.TEXRES);
     
+    if(rx || ry) { context.restore(); }
     if(rest) { context.restore(); }
   }
 };

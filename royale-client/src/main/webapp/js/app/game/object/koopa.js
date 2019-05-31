@@ -1,15 +1,15 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject */
+/* global GameObject, PlayerObject */
 /* global NET011, NET020 */
 
-function KoopaObject(game, level, zone, pos, oid, variant) {
+function KoopaObject(game, level, zone, pos, oid, fly, variant) {
   GameObject.call(this, game, level, zone, pos);
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !variant?0:variant;
-  this.setState(KoopaObject.STATE.RUN);
+  this.variant = !parseInt(variant)?0:parseInt(variant);
+  this.setState(!parseInt(fly)?KoopaObject.STATE.RUN:KoopaObject.STATE.FLY);
   
   /* Animation */
   this.anim = 0;
@@ -43,10 +43,10 @@ KoopaObject.BONK_IMP = vec2.make(0.25, 0.4);
 KoopaObject.BONK_DECEL = 0.925;
 KoopaObject.BONK_FALL_SPEED = 0.5;
 
-KoopaObject.PLAYER_KICK_IMMUNE_TIME = 3;  // Player is immune to damage from shell for 5 frames after they kick it
+KoopaObject.PLAYER_KICK_IMMUNE_TIME = 6;  // Player is immune to damage from shell for 6 frames after they kick it
 
 KoopaObject.MOVE_SPEED_MAX = 0.075;
-KoopaObject.SHELL_MOVE_SPEED_MAX = 0.175;
+KoopaObject.SHELL_MOVE_SPEED_MAX = 0.275;
 
 KoopaObject.FALL_SPEED_MAX = 0.35;
 KoopaObject.FALL_SPEED_ACCEL = 0.085;
@@ -123,6 +123,7 @@ KoopaObject.prototype.step = function() {
   
   this.control();
   this.physics();
+  this.interaction();
   
   if(this.pos.y < 0.) { this.destroy(); }
 };
@@ -192,6 +193,18 @@ KoopaObject.prototype.physics = function() {
   }
   this.pos = vec2.make(movx.x, movy.y);
   if(changeDir) { this.dir = !this.dir; }
+};
+
+KoopaObject.prototype.interaction = function() {
+  if(this.state !== KoopaObject.STATE.SPIN) { return; }
+  for(var i=0;i<this.game.objects.length;i++) {
+    var obj = this.game.objects[i];
+    if(obj === this || obj instanceof PlayerObject || obj.dead || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
+    if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
+      var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
+      if(hit) { obj.damage(); }  // We don't sync this event since it's not a direct player interaction. It *should* synchronize naturally though.
+    }
+  }
 };
 
 KoopaObject.prototype.damage = function(p) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); };

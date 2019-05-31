@@ -94,7 +94,18 @@ FireBreathProj.prototype.physics = function() {
 };
 
 FireBreathProj.prototype.interaction = function() {
-  
+  for(var i=0;i<this.game.objects.length;i++) {
+    var obj = this.game.objects[i];
+    if(!(obj instanceof PlayerObject) || obj.dead) { continue; }  // Skip everything thats not a living player
+    if(obj.level === this.level && obj.zone === this.zone) {
+      var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
+      if(hit) {
+        obj.damage();
+        this.kill();
+        return;
+      }
+    }
+  }
 };
 
 FireBreathProj.prototype.playerCollide = function(p) { };

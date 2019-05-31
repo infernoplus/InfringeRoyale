@@ -179,6 +179,7 @@ BowserObject.prototype.physics = function() {
     if(hity) {
       if(this.pos.y >= tile.pos.y + tdim.y && movy.y < tile.pos.y + tdim.y) {
         movy.y = tile.pos.y + tdim.y;
+        this.fallSpeed = 0;
         this.grounded = true;
       }
       else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {

@@ -8,7 +8,7 @@ function GoombaObject(game, level, zone, pos, oid, variant) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !variant?0:variant;
+  this.variant = !parseInt(variant)?0:parseInt(variant);
   this.state = GoombaObject.STATE.RUN;
   this.sprite = this.state.SPRITE[0];
   
@@ -165,11 +165,11 @@ GoombaObject.prototype.physics = function() {
     if(hity) {
       if(this.pos.y >= movy.y && movy.y < tile.pos.y + tdim.y) {
         movy.y = tile.pos.y + tdim.y;
+        this.fallSpeed = 0;
         this.grounded = true;
       }
       else if(this.pos.y <= movy.y && movy.y + this.dim.y > tile.pos.y) {
         movy.y = tile.pos.y - this.dim.y;
-        this.jumping = -1;
         this.fallSpeed = 0;
       }
     }

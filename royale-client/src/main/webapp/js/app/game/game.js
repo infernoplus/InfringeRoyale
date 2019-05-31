@@ -195,7 +195,7 @@ Game.prototype.doStep = function() {
   var ply = this.getPlayer(); // Our player object
   
   /* Level Warp */
-  if(ply && this.levelWarpId && this.levelWarpTimer > 0) {
+  if(ply && this.levelWarpId !== undefined && this.levelWarpTimer > 0) {
     if(--this.levelWarpTimer < 1) {
       var z = this.world.getLevel(this.levelWarpId).getInitial();
       ply.level = z.level;

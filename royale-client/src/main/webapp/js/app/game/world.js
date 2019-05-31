@@ -162,6 +162,15 @@ Zone.prototype.dimensions = function() {
   return vec2.make(this.data[0].length, this.data.length);
 };
 
+/* Returns a single tile at the given position. Pos is world coordiantes! */
+Zone.prototype.getTile = function(pos) {
+  var zd = this.dimensions();
+  var cpos = vec2.copy(pos);
+  cpos.y = zd.y - cpos.y;
+  
+  return td32.decode(this.data[Math.max(0, Math.min(zd.y, Math.floor(cpos.y)))][Math.max(0, Math.min(zd.x, Math.floor(cpos.x)))]);
+};
+
 /* Returns an array of all tiles in an area with position <vec2 pos> width/height <vec2 dim> */
 /* +y dimension is up, specifying because of a confusing bug */
 Zone.prototype.getTiles = function(pos, dim) {

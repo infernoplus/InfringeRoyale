@@ -8,7 +8,7 @@ function PlantObject(game, level, zone, pos, oid, variant) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !variant?0:variant;
+  this.variant = !parseInt(variant)?0:parseInt(variant);
   this.setState(PlantObject.STATE.IDLE);
   
   /* Animation */
@@ -39,6 +39,8 @@ PlantObject.BONK_TIME = 90;
 PlantObject.BONK_IMP = vec2.make(0.25, 0.4);
 PlantObject.BONK_DECEL = 0.925;
 PlantObject.BONK_FALL_SPEED = 0.5;
+
+PlantObject.FALL_SPEED_ACCEL = 0.085;
 
 PlantObject.WAIT_TIME = 25;
 PlantObject.TRAVEL_SPEED = 0.05;
