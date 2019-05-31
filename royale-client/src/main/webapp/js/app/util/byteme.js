@@ -353,6 +353,24 @@ td32.TILE_PROPERTIES = {
         }
       }
     }
+  },
+  /* Flagpole */
+  0xA0: {
+    NAME: "FLAGPOLE",
+    COLLIDE: false,
+    HIDDEN: false,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Touch */
+        case 0x00 : {
+          if(game.pid === pid) {
+            var ply = game.getPlayer();
+            if(ply.pos.x >= x) { ply.pole(vec2.make(x,y)); }
+          }
+        }
+      }
+    }
   }
 };
 

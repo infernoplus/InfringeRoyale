@@ -201,6 +201,7 @@ Game.prototype.doStep = function() {
       ply.level = z.level;
       ply.zone = z.id;
       ply.pos = shor2.decode(z.initial);
+      ply.autoTarget = undefined;
       ply.grounded = false;
       ply.show();
       this.levelWarpId = undefined;

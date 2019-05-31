@@ -39,6 +39,8 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.attackCharge = PlayerObject.MAX_CHARGE;
   this.attackTimer = 0;
   
+  this.autoTarget = undefined; // Vec2 target for automatic movement.
+  
   /* Control */
   this.btnD = [0,0]; // D-Pad
   this.btnA = false;
@@ -91,6 +93,10 @@ PlayerObject.ATTACK_ANIM_LENGTH = 3;
 PlayerObject.PIPE_TIME = 30;
 PlayerObject.PIPE_SPEED = 0.06;
 
+PlayerObject.POLE_DELAY = 15;
+PlayerObject.POLE_SLIDE_SPEED = 0.15;
+PlayerObject.LEVEL_END_MOVE_OFF = vec2.make(10, 0); // Position offset for where auto walk to at the end of a level.
+
 PlayerObject.PLATFORM_SNAP_DIST = 0.15;
 
 PlayerObject.SPRITE = {};
@@ -102,6 +108,7 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "S_RUN2", ID: 0x03, INDEX: 0x000C},
   {NAME: "S_SLIDE", ID: 0x04, INDEX: 0x0009},
   {NAME: "S_FALL", ID: 0x05, INDEX: 0x0008},
+  {NAME: "S_POLE", ID: 0x06, INDEX: 0x0007},
   /* [B]ig mario */
   {NAME: "B_STAND", ID: 0x20, INDEX: [[0x002D], [0x01D]]}, 
   {NAME: "B_DOWN", ID: 0x21, INDEX: [[0x002C], [0x01C]]},
@@ -110,7 +117,8 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "B_RUN2", ID: 0x24, INDEX: [[0x002B], [0x01B]]},
   {NAME: "B_SLIDE", ID: 0x25, INDEX: [[0x0028], [0x018]]},
   {NAME: "B_FALL", ID: 0x26, INDEX: [[0x0027], [0x017]]},
-  {NAME: "B_TRANSFORM", ID:0x27, INDEX:[[0x002E], [0x01E]]},
+  {NAME: "B_POLE", ID: 0x27, INDEX: [[0x0026], [0x016]]},
+  {NAME: "B_TRANSFORM", ID:0x29, INDEX:[[0x002E], [0x01E]]},
   /* [F]ire flower mario */
   {NAME: "F_STAND", ID: 0x40, INDEX: [[0x004D], [0x03D]]}, 
   {NAME: "F_DOWN", ID: 0x41, INDEX: [[0x004C], [0x03C]]},
@@ -119,8 +127,9 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "F_RUN2", ID: 0x44, INDEX: [[0x004B], [0x03B]]},
   {NAME: "F_SLIDE", ID: 0x45, INDEX: [[0x0048], [0x038]]},
   {NAME: "F_FALL", ID: 0x46, INDEX: [[0x0047], [0x037]]},
-  {NAME: "F_ATTACK", ID: 0x47, INDEX: [[0x004F], [0x03F]]},
-  {NAME: "F_TRANSFORM", ID:0x48, INDEX:[[0x004E], [0x03E]]},
+  {NAME: "F_POLE", ID: 0x47, INDEX: [[0x0046], [0x036]]},
+  {NAME: "F_ATTACK", ID: 0x48, INDEX: [[0x004F], [0x03F]]},
+  {NAME: "F_TRANSFORM", ID:0x49, INDEX:[[0x004E], [0x03E]]},
   /* [G]eneric */
   {NAME: "G_DEAD", ID: 0x60, INDEX: 0x0000},
   {NAME: "G_HIDE", ID: 0x70, INDEX: 0x000E}
@@ -139,6 +148,7 @@ PlayerObject.SNAME = {
   RUN: "RUN",
   SLIDE: "SLIDE",
   FALL: "FALL",
+  POLE: "POLE",
   ATTACK: "ATTACK",
   TRANSFORM: "TRANSFORM",
   DEAD: "DEAD",
@@ -156,6 +166,7 @@ PlayerObject.STATE = [
   {NAME: PlayerObject.SNAME.SLIDE, ID: 0x03, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_SLIDE]},
   {NAME: PlayerObject.SNAME.FALL, ID: 0x04, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_FALL]},
   {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x05, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_STAND]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x06, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_POLE]},
   /* Big Mario -> 0x20 */
   {NAME: PlayerObject.SNAME.STAND, ID: 0x20, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_STAND]},
   {NAME: PlayerObject.SNAME.DOWN, ID: 0x21, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.B_DOWN]},
@@ -163,6 +174,7 @@ PlayerObject.STATE = [
   {NAME: PlayerObject.SNAME.SLIDE, ID: 0x23, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_SLIDE]},
   {NAME: PlayerObject.SNAME.FALL, ID: 0x24, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_FALL]},
   {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x25, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.B_TRANSFORM]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x26, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_POLE]},
   /* Fire Mario -> 0x40 */
   {NAME: PlayerObject.SNAME.STAND, ID: 0x40, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_STAND]},
   {NAME: PlayerObject.SNAME.DOWN, ID: 0x41, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.F_DOWN]},
@@ -171,6 +183,7 @@ PlayerObject.STATE = [
   {NAME: PlayerObject.SNAME.FALL, ID: 0x44, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_FALL]},
   {NAME: PlayerObject.SNAME.ATTACK, ID: 0x45, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_ATTACK]},
   {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x46, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.F_TRANSFORM]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x47, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_POLE]},
   /* Generic -> 0x60 */
   {NAME: PlayerObject.SNAME.DEAD, DIM: DIM0, ID: 0x60, SPRITE: [PlayerObject.SPRITE.G_DEAD]},
   {NAME: PlayerObject.SNAME.HIDE, DIM: DIM0, ID: 0x70, SPRITE: [PlayerObject.SPRITE.G_HIDE]},
@@ -199,17 +212,44 @@ PlayerObject.prototype.trigger = function(type) {
 
 PlayerObject.prototype.step = function() {
   /* Ghost playback */
-  if(this.isState("GHOST")) { return; }
+  if(this.isState(PlayerObject.SNAME.GHOST)) { return; }
   
   /* Player Hidden */
-  if(this.isState("HIDE")) { return; }
+  if(this.isState(PlayerObject.SNAME.HIDE)) { return; }
+  
+  /* Flagpole Slide */
+  if(this.isState(PlayerObject.SNAME.POLE)) {
+    if(this.poleTimer > 0) {this.poleTimer--; }
+    else if(this.autoTarget) { this.setState(PlayerObject.SNAME.STAND); }
+    else {
+      var mov = vec2.add(this.pos, vec2.make(0., -PlayerObject.POLE_SLIDE_SPEED));
+      var ext1 = vec2.make(this.pos.x, this.pos.y-PlayerObject.POLE_SLIDE_SPEED);
+      var ext2 = vec2.make(this.dim.x, this.dim.y+PlayerObject.POLE_SLIDE_SPEED);
+
+      var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
+      var tdim = vec2.make(1., 1.);
+
+      var hit = false;
+      for(var i=0;i<tiles.length;i++) {
+        var tile = tiles[i];
+        if(squar.intersection(tile.pos, tdim, mov, this.dim) && tile.definition.COLLIDE) { hit = true; break; }
+      }
+
+      if(hit) {
+        this.poleTimer = PlayerObject.POLE_DELAY;
+        this.autoTarget = vec2.add(mov, PlayerObject.LEVEL_END_MOVE_OFF);
+      }
+      else { this.pos = mov; }
+    }
+    return;
+  }
   
   /* Anim */
   this.anim++;
   this.sprite = this.state.SPRITE[parseInt(this.anim/PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Dead */
-  if(this.isState("DEAD")) {
+  if(this.isState(PlayerObject.SNAME.DEAD)) {
     if(this.deadFreezeTimer++ < PlayerObject.DEAD_FREEZE_TIME) { }
     else if(this.deadUpTimer++ < PlayerObject.DEAD_UP_TIME) { this.pos.y += PlayerObject.DEAD_MOVE; }
     else if(this.deadDeleteTimer++ < PlayerObject.DEAD_DELETE_TIME) { this.pos.y -= PlayerObject.DEAD_MOVE; }
@@ -218,7 +258,7 @@ PlayerObject.prototype.step = function() {
   }
   
   /* Transform */
-  if(this.isState("TRANSFORM")) {
+  if(this.isState(PlayerObject.SNAME.TRANSFORM)) {
     if(--this.transformTimer > 0) {
       var ind = parseInt(this.anim/PlayerObject.TRANSFORM_ANIMATION_RATE) % 3;
       var high = this.power>this.transformTarget?this.power:this.transformTarget;
@@ -256,6 +296,7 @@ PlayerObject.prototype.step = function() {
   if(this.attackCharge < PlayerObject.MAX_CHARGE) { this.attackCharge++; }
   if(this.attackTimer > 0) { this.attackTimer--; }
   
+  if(this.autoTarget) { this.autoMove(); }  
   this.control();
   this.physics();
   this.interaction();
@@ -268,6 +309,14 @@ PlayerObject.prototype.input = function(dir, a, b) {
   this.btnD = dir;
   this.btnA = a;
   this.btnB = b;
+};
+
+/* Handles auto input */
+PlayerObject.prototype.autoMove = function() {
+  this.btnD = [0,0];
+  this.btnA = false; this.btnB = false;
+  
+  this.btnD = [1,0];
 };
 
 PlayerObject.prototype.control = function() {
@@ -556,12 +605,22 @@ PlayerObject.prototype.warp = function(wid) {
   this.zone = wrp.zone;
   this.pos = wrp.pos;
   
+  this.autoTarget = undefined;
   this.grounded = false;
 };
 
 PlayerObject.prototype.pipe = function(wid) {
   this.pipeWarp = wid;
   this.pipeTimer = PlayerObject.PIPE_TIME;
+};
+
+PlayerObject.prototype.pole = function(p) {
+  if(this.autoTarget) { return; }
+  this.setState(PlayerObject.SNAME.POLE);
+  this.moveSpeed = 0;
+  this.fallSpeed = 0;
+  this.pos.x = p.x;
+  this.poleTimer = PlayerObject.POLE_DELAY;
 };
 
 /* Make the player invisible, intangible, and frozen until show() is called. */
