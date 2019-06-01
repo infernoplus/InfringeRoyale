@@ -8,7 +8,7 @@ function KoopaObject(game, level, zone, pos, oid, fly, variant) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !parseInt(variant)?0:parseInt(variant);
+  this.variant = isNaN(parseInt(variant))?0:parseInt(variant);
   this.setState(!parseInt(fly)?KoopaObject.STATE.RUN:KoopaObject.STATE.FLY);
   
   /* Animation */
@@ -24,7 +24,7 @@ function KoopaObject(game, level, zone, pos, oid, fly, variant) {
   this.grounded = false;
   
   /* Var */
-  this.kickTimer = 0;
+  this.immuneTimer = 0;
   
   /* Control */
   this.dir = false; /* false = left, true = right */
@@ -37,13 +37,14 @@ KoopaObject.ID = 0x12;
 KoopaObject.NAME = "KOOPA"; // Used by editor
 
 KoopaObject.ANIMATION_RATE = 3;
+KoopaObject.VARIANT_OFFSET = 0x20; //2 rows down in the sprite sheet
 
 KoopaObject.BONK_TIME = 90;
 KoopaObject.BONK_IMP = vec2.make(0.25, 0.4);
 KoopaObject.BONK_DECEL = 0.925;
 KoopaObject.BONK_FALL_SPEED = 0.5;
 
-KoopaObject.PLAYER_KICK_IMMUNE_TIME = 6;  // Player is immune to damage from shell for 6 frames after they kick it
+KoopaObject.PLAYER_IMMUNE_TIME = 6;  // Player is immune to damage for this many frames after bouncing off or kicking this enemy
 
 KoopaObject.MOVE_SPEED_MAX = 0.075;
 KoopaObject.SHELL_MOVE_SPEED_MAX = 0.275;
@@ -119,7 +120,7 @@ KoopaObject.prototype.step = function() {
   }
   
   /* Normal Gameplay */
-  if(this.kickTimer > 0) { this.kickTimer--; }
+  if(this.immuneTimer > 0) { this.immuneTimer--; }
   
   this.control();
   this.physics();
@@ -235,9 +236,9 @@ KoopaObject.prototype.playerCollide = function(p) {
     var dir = p.pos.x-this.pos.x > 0;
     this.stomped(dir);
     this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x10:0x11));
-    this.kickTimer = KoopaObject.PLAYER_KICK_IMMUNE_TIME;
+    this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME;
   }
-  else if(this.kickTimer <= 0) { p.damage(); }
+  else if(this.immuneTimer <= 0) { p.damage(); }
 };
 
 KoopaObject.prototype.playerStomp = function(p) {
@@ -245,6 +246,7 @@ KoopaObject.prototype.playerStomp = function(p) {
   var dir = p.pos.x-this.pos.x > 0;
   p.bounce();
   this.stomped(dir);
+  this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME;
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x10:0x11));
 };
 
@@ -275,11 +277,23 @@ KoopaObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
+        var sp = s[!mod?i:(s.length-1-i)][j];
+        switch(this.variant) {
+          case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
+          default : { break; }
+        }
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: sp, mode: mod});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
+  else {
+    var sp = this.sprite.INDEX;
+    switch(this.variant) {
+      case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
+      default : { break; }
+    }
+    sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
+  }
 };
 
 /* Register object class */

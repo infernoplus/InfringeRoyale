@@ -8,9 +8,8 @@ function GoombaObject(game, level, zone, pos, oid, variant) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !parseInt(variant)?0:parseInt(variant);
-  this.state = GoombaObject.STATE.RUN;
-  this.sprite = this.state.SPRITE[0];
+  this.variant = isNaN(parseInt(variant))?0:parseInt(variant);
+  this.setState(GoombaObject.STATE.RUN);
   
   /* Animation */
   this.anim = 0;
@@ -36,6 +35,7 @@ GoombaObject.ID = 0x11;
 GoombaObject.NAME = "GOOMBA"; // Used by editor
 
 GoombaObject.ANIMATION_RATE = 3;
+GoombaObject.VARIANT_OFFSET = 0x50;   //5 rows down in the sprite sheet
 
 GoombaObject.DEAD_TIME = 60;
 GoombaObject.BONK_TIME = 90;
@@ -231,11 +231,23 @@ GoombaObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
+        var sp = s[!mod?i:(s.length-1-i)][j];
+        switch(this.variant) {
+          case 1 : { sp += GoombaObject.VARIANT_OFFSET; break; }
+          default : { break; }
+        }
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: sp, mode: mod});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
+  else {
+    var sp = this.sprite.INDEX;
+    switch(this.variant) {
+      case 1 : { sp += GoombaObject.VARIANT_OFFSET; break; }
+      default : { break; }
+    }
+    sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
+  }
 };
 
 /* Register object class */

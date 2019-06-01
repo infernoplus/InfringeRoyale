@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global PlayerObject */
+/* global PlayerObject, CoinObject */
 
 var shor2 = {}; // Two Shorts 32bits // Stored as an int32
 /* ======================================================================================== */
@@ -80,6 +80,33 @@ td32.GEN_FUNC.BUMP = function(game, pid, td, level, zone, x, y, type) {
         if(obj instanceof PlayerObject) { obj.bounce(); }
         else if(obj.bounce) { obj.bounce(); }
         else if(obj.bonk) { obj.bonk(); }
+        else if(obj instanceof CoinObject) {
+          if(game.pid === pid) { obj.playerCollide(game.getPlayer()); }
+          game.world.getZone(level, zone).coin(obj.pos.x, obj.pos.y);
+          obj.kill();
+        }
+      }
+    }
+  }
+};
+
+td32.GEN_FUNC.BREAK = function(game, pid, td, level, zone, x, y, type) {
+  var rep = 30; // Replacement td32 data for broken tile.
+  game.world.getZone(level, zone).break(x,y,rep);
+  var tdim = vec2.make(1.,0.15);
+  var tpos = vec2.make(x, y+1.);
+  for(var i=0;i<game.objects.length;i++) {
+    var obj = game.objects[i];
+    if(!obj.dead && obj.level === level && obj.zone === zone && obj.dim) {
+      if(squar.intersection(tpos, tdim, obj.pos, obj.dim)) {
+        if(obj instanceof PlayerObject) { obj.bounce(); }
+        else if(obj.bounce) { obj.bounce(); }
+        else if(obj.bonk) { obj.bonk(); }
+        else if(obj instanceof CoinObject) {
+          if(game.pid === pid) { obj.playerCollide(game.getPlayer()); }
+          game.world.getZone(level, zone).coin(obj.pos.x, obj.pos.y);
+          obj.kill();
+        }
       }
     }
   }
@@ -140,8 +167,7 @@ td32.TILE_PROPERTIES = {
         }
         /* Big bump */
         case 0x11 : {
-          var rep = 30; // Replacement td32 data for broken tile.
-          game.world.getZone(level, zone).break(x,y,rep);
+          td32.GEN_FUNC.BREAK(game, pid, td, level, zone, x, y, type);
           break;
         }
       }

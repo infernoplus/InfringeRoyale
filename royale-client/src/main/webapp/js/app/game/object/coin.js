@@ -73,17 +73,9 @@ CoinObject.prototype.playerCollide = function(p) {
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
 };
 
-CoinObject.prototype.playerStomp = function(p) {
-  if(this.dead || this.garbage) { return; }
-  this.kill();
-  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
-};
+CoinObject.prototype.playerStomp = function(p) { this.playerCollide(p); };
 
-CoinObject.prototype.playerBump = function(p) {
-  if(this.dead || this.garbage) { return; }
-  this.kill();
-  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
-};
+CoinObject.prototype.playerBump = function(p) { this.playerCollide(p); };
 
 CoinObject.prototype.kill = function() {
   this.dead = true;

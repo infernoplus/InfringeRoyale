@@ -14,8 +14,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   
   /* Dead */
   this.deadFreezeTimer = 0;
-  this.deadUpTimer = 0;
-  this.deadDeleteTimer = 0;
+  this.deadTimer = 0;
   
   /* Physics */
   this.lastPos = this.pos;   // Position of mario on previous frame
@@ -23,6 +22,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.jumping = -1;
+  this.isBounce = false;  // True if the jump we are doing was a bounce
   this.grounded = false;
   
   /* Var */
@@ -37,6 +37,9 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.pipeTimer = 0;        // Timer for warp pipe animation
   this.pipeDir = -1;  // Direction of current anim.  null up down left right = -1 0 1 2 3
   this.pipeExt = -1;  // Direction of the exit pipe. null up down left right = -1 0 1 2 3
+  
+  this.poleTimer = 0; // Timer used for flag pole
+  this.poleWait = false;  // True when waiting for flag to come all the way down
   
   this.attackCharge = PlayerObject.MAX_CHARGE;
   this.attackTimer = 0;
@@ -62,9 +65,8 @@ PlayerObject.ANIMATION_RATE = 3;
 PlayerObject.DIM_OFFSET = vec2.make(-.05, 0.);
 
 PlayerObject.DEAD_FREEZE_TIME = 7;
-PlayerObject.DEAD_UP_TIME = 9;
-PlayerObject.DEAD_DELETE_TIME = 30;
-PlayerObject.DEAD_MOVE = 0.35;
+PlayerObject.DEAD_TIME = 30;
+PlayerObject.DEAD_UP_FORCE = 0.65;
 
 PlayerObject.MOVE_SPEED_MAX = 0.215;
 PlayerObject.MOVE_SPEED_ACCEL = 0.0125;
@@ -74,6 +76,7 @@ PlayerObject.STUCK_SLIDE_SPEED = 0.08;
 
 PlayerObject.FALL_SPEED_MAX = 0.45;
 PlayerObject.FALL_SPEED_ACCEL = 0.085;
+PlayerObject.BOUNCE_LENGTH_MIN = 1;
 PlayerObject.JUMP_LENGTH_MIN = 3;
 PlayerObject.JUMP_LENGTH_MAX = 9;
 PlayerObject.JUMP_DECEL = 0.005;
@@ -120,7 +123,7 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "B_RUN2", ID: 0x24, INDEX: [[0x002B], [0x01B]]},
   {NAME: "B_SLIDE", ID: 0x25, INDEX: [[0x0028], [0x018]]},
   {NAME: "B_FALL", ID: 0x26, INDEX: [[0x0027], [0x017]]},
-  {NAME: "B_POLE", ID: 0x27, INDEX: [[0x0026], [0x016]]},
+  {NAME: "B_POLE", ID: 0x27, INDEX: [[0x0025], [0x015]]},
   {NAME: "B_TRANSFORM", ID:0x29, INDEX:[[0x002E], [0x01E]]},
   /* [F]ire flower mario */
   {NAME: "F_STAND", ID: 0x40, INDEX: [[0x004D], [0x03D]]}, 
@@ -130,7 +133,7 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "F_RUN2", ID: 0x44, INDEX: [[0x004B], [0x03B]]},
   {NAME: "F_SLIDE", ID: 0x45, INDEX: [[0x0048], [0x038]]},
   {NAME: "F_FALL", ID: 0x46, INDEX: [[0x0047], [0x037]]},
-  {NAME: "F_POLE", ID: 0x47, INDEX: [[0x0046], [0x036]]},
+  {NAME: "F_POLE", ID: 0x47, INDEX: [[0x0045], [0x035]]},
   {NAME: "F_ATTACK", ID: 0x48, INDEX: [[0x004F], [0x03F]]},
   {NAME: "F_TRANSFORM", ID:0x49, INDEX:[[0x004E], [0x03E]]},
   /* [G]eneric */
@@ -156,7 +159,8 @@ PlayerObject.SNAME = {
   TRANSFORM: "TRANSFORM",
   DEAD: "DEAD",
   HIDE: "HIDE",
-  GHOST: "GHOST"  
+  GHOST: "GHOST",
+  DEADGHOST: "DEADGHOST"
 };
 
 let DIM0 = vec2.make(0.9,0.95);  // Temp vars
@@ -190,7 +194,8 @@ PlayerObject.STATE = [
   /* Generic -> 0x60 */
   {NAME: PlayerObject.SNAME.DEAD, DIM: DIM0, ID: 0x60, SPRITE: [PlayerObject.SPRITE.G_DEAD]},
   {NAME: PlayerObject.SNAME.HIDE, DIM: DIM0, ID: 0x70, SPRITE: [PlayerObject.SPRITE.G_HIDE]},
-  {NAME: PlayerObject.SNAME.GHOST, DIM: DIM0, ID: 0xFF, SPRITE: []}
+  {NAME: PlayerObject.SNAME.GHOST, DIM: DIM0, ID: 0xFF, SPRITE: []},
+  {NAME: PlayerObject.SNAME.DEADGHOST, DIM: DIM0, ID: 0xFE, SPRITE: [PlayerObject.SPRITE.G_DEAD]}
 ];
 
 /* === INSTANCE ============================================================= */
@@ -221,9 +226,11 @@ PlayerObject.prototype.step = function() {
   if(this.isState(PlayerObject.SNAME.HIDE)) { return; }
   
   /* Flagpole Slide */
-  if(this.isState(PlayerObject.SNAME.POLE)) {
-    if(this.poleTimer > 0) {this.poleTimer--; }
-    else if(this.autoTarget) { this.setState(PlayerObject.SNAME.STAND); }
+  if(this.isState(PlayerObject.SNAME.POLE)) {    
+    if(this.poleTimer > 0 && !this.poleWait) { this.poleTimer--; return; }
+        
+    if(this.poleWait) { }
+    else if(this.poleTimer <= 0 && this.autoTarget) { this.setState(PlayerObject.SNAME.STAND); }
     else {
       var mov = vec2.add(this.pos, vec2.make(0., -PlayerObject.POLE_SLIDE_SPEED));
       var ext1 = vec2.make(this.pos.x, this.pos.y-PlayerObject.POLE_SLIDE_SPEED);
@@ -237,13 +244,19 @@ PlayerObject.prototype.step = function() {
         var tile = tiles[i];
         if(squar.intersection(tile.pos, tdim, mov, this.dim) && tile.definition.COLLIDE) { hit = true; break; }
       }
-
+      
       if(hit) {
         this.poleTimer = PlayerObject.POLE_DELAY;
         this.autoTarget = vec2.add(mov, PlayerObject.LEVEL_END_MOVE_OFF);
+        this.poleWait = true;
       }
       else { this.pos = mov; }
     }
+    
+    var flag = this.game.getFlag(this.level, this.zone);
+    if(flag.pos.y - PlayerObject.POLE_SLIDE_SPEED >= this.pos.y) { flag.pos.y -= PlayerObject.POLE_SLIDE_SPEED; }
+    else { flag.pos.y = this.pos.y; this.poleWait = false; }
+    
     return;
   }
   
@@ -252,10 +265,13 @@ PlayerObject.prototype.step = function() {
   this.sprite = this.state.SPRITE[parseInt(this.anim/PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Dead */
-  if(this.isState(PlayerObject.SNAME.DEAD)) {
-    if(this.deadFreezeTimer++ < PlayerObject.DEAD_FREEZE_TIME) { }
-    else if(this.deadUpTimer++ < PlayerObject.DEAD_UP_TIME) { this.pos.y += PlayerObject.DEAD_MOVE; }
-    else if(this.deadDeleteTimer++ < PlayerObject.DEAD_DELETE_TIME) { this.pos.y -= PlayerObject.DEAD_MOVE; }
+  if(this.isState(PlayerObject.SNAME.DEAD) || this.isState(PlayerObject.SNAME.DEADGHOST)) {
+    if(this.deadFreezeTimer > 0) { this.deadFreezeTimer--; }
+    else if(this.deadTimer > 0) {
+      this.deadTimer--;
+      this.pos.y += this.fallSpeed;
+      this.fallSpeed = Math.max(this.fallSpeed - PlayerObject.FALL_SPEED_ACCEL, -PlayerObject.FALL_SPEED_MAX);
+    }
     else { this.destroy(); }
     return;
   }
@@ -296,8 +312,8 @@ PlayerObject.prototype.step = function() {
       this.pipeTimer = PlayerObject.PIPE_TIME;
       this.pipeDir = this.pipeExt; 
       switch(this.pipeDir) {
-        case 0 : { this.pos.y -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
-        case 1 : { this.pos.y += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 0 : { this.pos.y -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 1 : { this.pos.y += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
         case 2 : { this.pos.x -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
         case 3 : { this.pos.x += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
       }
@@ -379,7 +395,7 @@ PlayerObject.prototype.control = function() {
     }
   }
   else {
-    if(this.jumping > PlayerObject.JUMP_LENGTH_MIN) {
+    if((this.jumping > PlayerObject.JUMP_LENGTH_MIN)  || (this.isBounce && this.jumping > PlayerObject.BOUNCE_LENGTH_MIN)) {
       this.jumping = -1;
     }
   }
@@ -403,6 +419,7 @@ PlayerObject.prototype.physics = function() {
     this.grounded = false;
   }
   else {
+    this.isBounce = false;
     if(this.grounded) {
       this.fallSpeed = 0;
     }
@@ -423,7 +440,8 @@ PlayerObject.prototype.physics = function() {
   var on = [];              // Tiles we are directly standing on
   var psh = [];             // Tiles we are directly pushing against
   var bmp = [];             // Tiles we bumped from below when jumping
-  var platform;             // If we landed on or are standing on a platform then this is it.
+  var platforms = [];       // All platforms we collided with
+  var platform;             // The platform we are actually riding, if applicable.
   
   /* Collect likely hits & handle push */
   for(var i=0;i<tiles.length;i++) {
@@ -440,7 +458,7 @@ PlayerObject.prototype.physics = function() {
   /* Platforms */
   for(var i=0;i<plats.length;i++) {
     var plat = plats[i];
-    if(squar.intersection(plat.pos, plat.dim, mov, this.dim)) { platform = plat; break; }
+    if(squar.intersection(plat.pos, plat.dim, mov, this.dim)) { platforms.push(plat); }
   }
   
   /* Correct X collision */
@@ -492,10 +510,13 @@ PlayerObject.prototype.physics = function() {
     }
   }
   
-  if(platform) {
-    if(this.pos.y >= mov.y && (platform.pos.y + platform.dim.y) - this.pos.y < PlayerObject.PLATFORM_SNAP_DIST) {
-      mov.y = platform.pos.y + platform.dim.y;
+  for(var i=0;i<platforms.length;i++) {
+    var plat = platforms[i];
+    if(this.pos.y >= mov.y && (plat.pos.y + plat.dim.y) - this.pos.y < PlayerObject.PLATFORM_SNAP_DIST) {
+      mov.y = plat.pos.y + plat.dim.y;
       grounded = true;
+      platform = plat;
+      break;
     }
     else {
       /* Nothing, pass through bottom of platform when going up */
@@ -519,7 +540,7 @@ PlayerObject.prototype.physics = function() {
   }
   
   /* Tile Down events */
-  if(this.isState("DOWN") && this.moveSpeed < 0.05) {
+  if(this.isState(PlayerObject.SNAME.DOWN) && this.moveSpeed < 0.05) {
     for(var i=0;i<on.length;i++) {
       var tile = on[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.DOWN);
@@ -527,7 +548,7 @@ PlayerObject.prototype.physics = function() {
   }
   
   /* Tile Push events */
-  if(this.isState("RUN")) {
+  if(this.isState(PlayerObject.SNAME.RUN)) {
     for(var i=0;i<psh.length;i++) {
       var tile = psh[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.PUSH);
@@ -592,6 +613,7 @@ PlayerObject.prototype.attack = function() {
 
 PlayerObject.prototype.bounce = function() {
   this.jumping = 0;
+  this.isBounce = true;
 };
 
 PlayerObject.prototype.damage = function(obj) {
@@ -628,6 +650,7 @@ PlayerObject.prototype.warp = function(wid) {
 
 /* ent/ext = up, down, left, right [0,1,2,3] */
 PlayerObject.prototype.pipe = function(ent, ext, wid) {
+  if(ent === 0 || ent === 1) { this.setState(PlayerObject.SNAME.STAND); }
   this.pipeWarp = wid;
   this.pipeTimer = PlayerObject.PIPE_TIME;
   this.pipeDir = ent;
@@ -653,12 +676,15 @@ PlayerObject.prototype.show = function() {
 };
 
 PlayerObject.prototype.kill = function() {
-  this.dead = true;
-  this.setState(PlayerObject.SNAME.DEAD);
+  if(this.isState(PlayerObject.SNAME.GHOST)) { this.setState(PlayerObject.SNAME.DEADGHOST); }
+  else { this.setState(PlayerObject.SNAME.DEAD); }
   
-  if(this.game.getPlayer() === this) {
-    this.game.out.push(NET011.encode());
-  }
+  this.dead = true;
+  this.deadTimer = PlayerObject.DEAD_TIME;
+  this.deadFreezeTimer = PlayerObject.DEAD_FREEZE_TIME;
+  this.fallSpeed = PlayerObject.DEAD_UP_FORCE;
+  
+  if(this.game.getPlayer() === this) { this.game.out.push(NET011.encode()); }
 };
 
 PlayerObject.prototype.destroy = function() {
@@ -693,7 +719,7 @@ PlayerObject.prototype.draw = function(sprites) {
     
   var mod; // Special draw mode
   if(this.starTimer > 0) { mod = 0x02; }
-  else if(this.isState(PlayerObject.SNAME.GHOST)) { mod = 0x01; }
+  else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { mod = 0x01; }
   else { mod = 0x00; }
 
   if(this.sprite.INDEX instanceof Array) {

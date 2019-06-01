@@ -8,7 +8,7 @@ function PlantObject(game, level, zone, pos, oid, variant) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !parseInt(variant)?0:parseInt(variant);
+  this.variant = isNaN(parseInt(variant))?0:parseInt(variant);
   this.setState(PlantObject.STATE.IDLE);
   
   /* Animation */
@@ -34,6 +34,7 @@ PlantObject.ID = 0x16;
 PlantObject.NAME = "UNSPELLABLE PLANT"; // Used by editor
 
 PlantObject.ANIMATION_RATE = 3;
+PlantObject.VARIANT_OFFSET = 0x20; //2 rows down in the sprite sheet
 
 PlantObject.BONK_TIME = 90;
 PlantObject.BONK_IMP = vec2.make(0.25, 0.4);
@@ -167,11 +168,23 @@ PlantObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
+        var sp = s[!mod?i:(s.length-1-i)][j];
+        switch(this.variant) {
+          case 1 : { sp += PlantObject.VARIANT_OFFSET; break; }
+          default : { break; }
+        }
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: sp, mode: mod});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
+  else {
+    var sp = this.sprite.INDEX;
+    switch(this.variant) {
+      case 1 : { sp += PlantObject.VARIANT_OFFSET; break; }
+      default : { break; }
+    }
+    sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
+  }
 };
 
 /* Register object class */

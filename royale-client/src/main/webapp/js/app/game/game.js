@@ -3,7 +3,7 @@
 /* global util, shor2, vec2, td32, MERGE_BYTE */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject */
+/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, FlagObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
@@ -266,7 +266,16 @@ Game.prototype.getObject = function(level, zone, oid) {
       return obj;
     }
   }
-  return undefined;
+};
+
+/* Returns first flag object found in the specific zone. Or undefined. */
+Game.prototype.getFlag = function(level, zone) {
+  for(var i=0;i<this.objects.length;i++) {
+    var obj = this.objects[i];
+    if(obj.level === level && obj.zone === zone && obj instanceof FlagObject) {
+      return obj;
+    }
+  }
 };
 
 /* Returns all platform type objects. */

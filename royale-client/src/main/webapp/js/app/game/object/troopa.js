@@ -8,7 +8,7 @@ function TroopaObject(game, level, zone, pos, oid, fly, variant) {
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.variant = !parseInt(variant)?0:parseInt(variant);
+  this.variant = isNaN(parseInt(variant))?0:parseInt(variant);
   this.setState(!parseInt(fly)?TroopaObject.STATE.RUN:TroopaObject.STATE.FLY);
   
   /* Animation */
@@ -269,11 +269,23 @@ TroopaObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: s[!mod?i:(s.length-1-i)][j], mode: mod});
+        var sp = s[!mod?i:(s.length-1-i)][j];
+        switch(this.variant) {
+          case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
+          default : { break; }
+        }
+        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: sp, mode: mod});
       }
     }
   }
-  else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
+  else {
+    var sp = this.sprite.INDEX;
+    switch(this.variant) {
+      case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
+      default : { break; }
+    }
+    sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
+  }
 };
 
 /* Register object class */
