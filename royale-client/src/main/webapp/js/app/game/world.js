@@ -166,7 +166,7 @@ Zone.prototype.dimensions = function() {
 Zone.prototype.getTile = function(pos) {
   var zd = this.dimensions();
   var cpos = vec2.copy(pos);
-  cpos.y = zd.y - cpos.y;
+  cpos.y = zd.y - cpos.y -1;
   
   return td32.decode(this.data[Math.max(0, Math.min(zd.y, Math.floor(cpos.y)))][Math.max(0, Math.min(zd.x, Math.floor(cpos.x)))]);
 };
@@ -176,7 +176,7 @@ Zone.prototype.getTile = function(pos) {
 Zone.prototype.getTiles = function(pos, dim) {
   var zd = this.dimensions();
   var cpos = vec2.copy(pos);
-  cpos.y = zd.y - cpos.y;
+  cpos.y = zd.y - cpos.y; // Might be a bug... maybe -1?
   
   var x1 = parseInt(Math.max(Math.min(Math.floor(cpos.x)-1, zd.x), 0.));
   var x2 = parseInt(Math.max(Math.min(Math.ceil(cpos.x+dim.x)+1, zd.x), 0.));

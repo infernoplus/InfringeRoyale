@@ -43,6 +43,7 @@ ItemObject.MOVE_SPEED_MAX = 0.075;
 ItemObject.FALL_SPEED_MAX = 0.45;
 ItemObject.FALL_SPEED_ACCEL = 0.075;
 ItemObject.JUMP_DECEL = 0.015;
+ItemObject.JUMP_LENGTH = 3;
 
 ItemObject.RISE_RATE = 0.15;
 
@@ -67,7 +68,9 @@ ItemObject.prototype.step = function() {
   if(this.pos.y < 0.) { this.kill(); }
 };
 
-ItemObject.prototype.control = function() { };
+ItemObject.prototype.control = function() {
+  if(this.jump >= ItemObject.JUMP_LENGTH) { this.jump = -1; }
+};
 
 ItemObject.prototype.physics = function() {
   if(this.rise) {
@@ -151,6 +154,11 @@ ItemObject.prototype.physics = function() {
   }
   this.pos = vec2.make(movx.x, movy.y);
   if(changeDir) { this.dir = !this.dir; }
+};
+
+ItemObject.prototype.bounce = function() {
+  if(this.grounded) { this.dir = !this.dir; }
+  this.jump = 0;
 };
 
 ItemObject.prototype.playerCollide = function(p) {

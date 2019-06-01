@@ -17,6 +17,7 @@ function Game(data) {
   
   this.objects = [];
   this.pid = undefined; /* Unique player id for this client. Assigned during init packet. */
+  this.players = []; /* List of player names and associated pids */
   
   this.load(data);
   
@@ -80,7 +81,7 @@ Game.prototype.handlePacket = function(packet) {
 
 /* G12 */
 Game.prototype.updatePlayerList = function(packet) {
-  console.log(packet.players);
+  this.players = packet.players;
 };
 
 Game.prototype.handleBinary = function(data) {
@@ -315,6 +316,14 @@ Game.prototype.getZone = function() {
   
   /* Starting location */
   return this.world.getInitialZone();
+};
+
+/* Return player info by given pid */
+Game.prototype.getPlayerInfo = function(pid) {
+  for(var i=0;i<this.players.length;i++) {
+    var ply = this.players[i];
+    if(ply.id === pid) { return ply; }
+  }
 };
 
 /* Shows lives/level name screen then warps player to start of specified level. */

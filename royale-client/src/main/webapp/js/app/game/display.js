@@ -102,10 +102,13 @@ Display.prototype.drawObject = function() {
   var sprites = [];
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj.level === zone.level && obj.zone === zone.id) {
+    if(obj.level === zone.level && obj.zone === zone.id && obj.pid !== this.game.pid) {
       obj.draw(sprites);
     }
   }
+  
+  var ply = this.game.getPlayer();
+  if(ply && ply.level === zone.level && ply.zone === zone.id) { ply.draw(sprites); } // Draw our character last.
   
   var tex = this.resource.getTexture("obj");
   
@@ -173,23 +176,46 @@ Display.prototype.drawEffect = function() {
 
 Display.prototype.drawUI = function() {
   var context = this.context; // Sanity
+  var W = this.canvas.width;
+  var H = this.canvas.height;
+  var COIN = [0x00F0, 0x00F1, 0x00F2, 0x00F1];
+  var c = COIN[parseInt(this.game.frame/3) % COIN.length];
+  var tex = this.resource.getTexture("obj");
+  var ply = this.game.getPlayerInfo(this.game.pid);
+    
   if(this.game.levelWarpId) {
-    context.beginPath();
-    context.lineWidth = "6";
-    context.strokeStyle = "red";
-    context.rect(25,25,100,100); //Test
-    context.stroke();
+    var level = this.game.world.getLevel(this.game.levelWarpId);
+
+    context.fillStyle = "black";
+    context.fillRect(0,0,W,H);
+    
+    context.fillStyle = "white";
+    context.font = "32px SmbWeb";
+    context.textAlign = "center";
+    context.fillText(level.name, W*.5, H*.5);
   }
+  
+  context.fillStyle = "white";
+  context.font = "24px SmbWeb";
+  context.textAlign = "left";
+  context.fillText((ply?ply.name:"INFRINGIO"), 8, 32);
+  var st = util.sprite.getSprite(tex, c);
+  context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, 4, 40, 24, 24);
+  context.fillText("x99", 30, 64);
+  var txt = "99 PLAYERS REMAIN";
+  context.fillText(txt, W-context.measureText(txt).width-8, 32);
 };
 
 Display.prototype.drawLoad = function() {
   var context = this.context;
+  var W = this.canvas.width;
+  var H = this.canvas.height;
   
   context.fillStyle = "black";
-  context.fillRect(0,0,this.canvas.width,this.canvas.height);
+  context.fillRect(0,0,W,H);
   
-  context.font = Display.TEXRES + "px Arial";
+  context.font = "32px SmbWeb";
   context.fillStyle = "white";
   context.textAlign = "center";
-  context.fillText("Loading Resources...", this.canvas.width*.5, this.canvas.height*.5);
+  context.fillText("Loading Resources...", W*.5, H*.5);
 };

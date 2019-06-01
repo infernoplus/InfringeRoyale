@@ -43,10 +43,13 @@ LifeObject.prototype.update = ItemObject.prototype.update;
 LifeObject.prototype.step = ItemObject.prototype.step;
 
 LifeObject.prototype.control = function() {
+  ItemObject.prototype.control.call(this);
   this.moveSpeed = this.dir ? -ItemObject.MOVE_SPEED_MAX : ItemObject.MOVE_SPEED_MAX;
 };
 
 LifeObject.prototype.physics = ItemObject.prototype.physics;
+
+LifeObject.prototype.bounce = ItemObject.prototype.bounce;
 
 LifeObject.prototype.playerCollide = ItemObject.prototype.playerCollide;
 LifeObject.prototype.playerStomp = ItemObject.prototype.playerStomp;

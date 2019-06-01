@@ -59,6 +59,8 @@ StarObject.prototype.control = function() {
 
 StarObject.prototype.physics = ItemObject.prototype.physics;
 
+StarObject.prototype.bounce = ItemObject.prototype.bounce;
+
 StarObject.prototype.playerCollide = ItemObject.prototype.playerCollide;
 StarObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
 StarObject.prototype.playerBump = ItemObject.prototype.playerBump;

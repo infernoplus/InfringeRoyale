@@ -211,7 +211,7 @@ TroopaObject.prototype.interaction = function() {
 /* Looks at the ground in front of this koopa troopa and checks if it's solid. */
 TroopaObject.prototype.checkGround = function() {
   var inf = this.dir?vec2.add(this.pos, vec2.make(-TroopaObject.CHECK_DIST, 0)):vec2.add(this.pos, vec2.make(TroopaObject.CHECK_DIST+this.dim.x, 0));
-  inf.y -= 0.5;
+  inf.y -= 1.5;
   
   var tile = this.game.world.getZone(this.level, this.zone).getTile(inf);
   

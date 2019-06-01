@@ -34,7 +34,9 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.transformTarget = -1;
   
   this.pipeWarp = undefined; // Warp point that the pipe we are using is linked to
-  this.pipeTimer = 0;        // Timer for going down a pipe
+  this.pipeTimer = 0;        // Timer for warp pipe animation
+  this.pipeDir = -1;  // Direction of current anim.  null up down left right = -1 0 1 2 3
+  this.pipeExt = -1;  // Direction of the exit pipe. null up down left right = -1 0 1 2 3
   
   this.attackCharge = PlayerObject.MAX_CHARGE;
   this.attackTimer = 0;
@@ -92,6 +94,7 @@ PlayerObject.ATTACK_ANIM_LENGTH = 3;
 
 PlayerObject.PIPE_TIME = 30;
 PlayerObject.PIPE_SPEED = 0.06;
+PlayerObject.PIPE_EXT_OFFSET = vec2.make(.5,0.); // Horizontal offset from warp point when exiting warp pipe.
 
 PlayerObject.POLE_DELAY = 15;
 PlayerObject.POLE_SLIDE_SPEED = 0.15;
@@ -278,13 +281,27 @@ PlayerObject.prototype.step = function() {
   }
   
   /* Warp Pipe */
-  if(this.pipeTimer > 0 && this.pipeWarp) {                            // Down
-    this.pipeTimer--; this.pos.y -= PlayerObject.PIPE_SPEED;
-    if(this.pipeTimer < 1) { this.warp(this.pipeWarp); this.pipeWarp = undefined; this.pipeTimer = PlayerObject.PIPE_TIME; }
-    return;
-  }
-  else if(this.pipeTimer > 0 && !this.pipeWarp) {                      // Up
-    this.pipeTimer--; this.pos.y += PlayerObject.PIPE_SPEED;
+  if(this.pipeTimer > 0) {
+    this.pipeTimer--;
+    switch(this.pipeDir) {
+      case 0 : { this.pos.y += PlayerObject.PIPE_SPEED; break; }
+      case 1 : { this.pos.y -= PlayerObject.PIPE_SPEED; break; }
+      case 2 : { this.pos.x -= PlayerObject.PIPE_SPEED; break; }
+      case 3 : { this.pos.x += PlayerObject.PIPE_SPEED; break; }
+    }
+    if(this.pipeTimer <= 0 && this.pipeWarp) {
+      this.warp(this.pipeWarp);
+      this.pipeWarp = undefined;
+      if(this.pipeExt < 0) { return; }
+      this.pipeTimer = PlayerObject.PIPE_TIME;
+      this.pipeDir = this.pipeExt; 
+      switch(this.pipeDir) {
+        case 0 : { this.pos.y -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 1 : { this.pos.y += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 2 : { this.pos.x -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
+        case 3 : { this.pos.x += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
+      }
+    }
     return;
   }
   
@@ -609,9 +626,12 @@ PlayerObject.prototype.warp = function(wid) {
   this.grounded = false;
 };
 
-PlayerObject.prototype.pipe = function(wid) {
+/* ent/ext = up, down, left, right [0,1,2,3] */
+PlayerObject.prototype.pipe = function(ent, ext, wid) {
   this.pipeWarp = wid;
   this.pipeTimer = PlayerObject.PIPE_TIME;
+  this.pipeDir = ent;
+  this.pipeExt = ext;
 };
 
 PlayerObject.prototype.pole = function(p) {

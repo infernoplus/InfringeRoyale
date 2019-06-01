@@ -43,10 +43,13 @@ MushroomObject.prototype.update = ItemObject.prototype.update;
 MushroomObject.prototype.step = ItemObject.prototype.step;
 
 MushroomObject.prototype.control = function() {
+  ItemObject.prototype.control.call(this);
   this.moveSpeed = this.dir ? -ItemObject.MOVE_SPEED_MAX : ItemObject.MOVE_SPEED_MAX;
 };
 
 MushroomObject.prototype.physics = ItemObject.prototype.physics;
+
+MushroomObject.prototype.bounce = ItemObject.prototype.bounce;
 
 MushroomObject.prototype.playerCollide = ItemObject.prototype.playerCollide;
 MushroomObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
