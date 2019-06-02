@@ -7,7 +7,7 @@ import org.infpls.royale.server.game.session.*;
 import org.infpls.royale.server.util.Oak;
 
 public class Controller {
-  private final RoyaleGame game;           // Parent
+  private final RoyaleCore game;           // Parent
   
   public final RoyaleSession session;      // Session. So we can send game data packets to players.
   public final short pid;                  // Player identifier. Used to id players with a small bit of data.
@@ -22,7 +22,7 @@ public class Controller {
   
   public boolean garbage;  // If flagged, we will delete this controler on next update.
   
-  public Controller(RoyaleGame game, RoyaleSession session, short pid) {
+  public Controller(RoyaleCore game, RoyaleSession session, short pid) {
     this.game = game;
     this.session = session; this.pid = pid;
     
@@ -52,7 +52,7 @@ public class Controller {
   /* Sends information to the client about the current gamestate */
   public void update(List<ByteMe.NETX> loc, List<ByteMe.NETX> glo) {
     if(updates.size() < 1) { return; }
-    
+    if(updates.size() > 1) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); }
     final List<ByteMe.NETX> proc = updates.remove();
     for(int i=0;i<proc.size();i++) {
       final ByteMe.NETX n = proc.get(i);
@@ -110,6 +110,8 @@ public class Controller {
   public void send(ByteBuffer bb) {
     session.sendBinary(bb);
   }
+  
+  public boolean isDead() { return dead; }
   
   public String getName() { return session.getUser(); }
   

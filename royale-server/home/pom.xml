@@ -55,6 +55,11 @@
       <version>2.8.0</version>
       <type>jar</type>
     </dependency>
+    <dependency> 
+      <groupId>org.infpls.royale.server</groupId> 
+      <artifactId>game</artifactId> 
+      <version>1.0</version> 
+    </dependency>
   </dependencies>
   
   <build>

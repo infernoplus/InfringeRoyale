@@ -20,6 +20,8 @@ public final class RoyaleSession {
   private final String sid;
   private final SessionThread sessionThread;
   private SessionState sessionState;
+  
+  public boolean readyVote;   // Kinda messy. Should really be a linked list in GameLobby instead.
  
   public RoyaleSession(final WebSocketSession webSocket, final DaoContainer dao) throws IOException {
     this.webSocket = webSocket;
@@ -27,6 +29,8 @@ public final class RoyaleSession {
     sid = Key.generate32();
 
     sessionThread = new SessionThread(this);
+    
+    readyVote = false;
     
     changeState("l");
   }

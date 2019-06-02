@@ -24,7 +24,7 @@ public class LobbyDao {
     cleanUp();
     for(int i=0;i<lobbies.size();i++) {
       final GameLobby lobby = lobbies.get(i);
-      if(!lobby.isFull()) { return lobby; }
+      if(!lobby.isFull() && !lobby.isLocked()) { return lobby; }
     }
     final GameLobby lobby = createLobby();
     return lobby;

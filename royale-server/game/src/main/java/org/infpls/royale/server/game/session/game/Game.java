@@ -31,7 +31,9 @@ public class Game extends SessionState {
     < g10 gamestate initial (on join)
     < g11 gamestate update
     < g12 player list update (when someone joins)
+    < g13 game start countdown timer update
     = g21 ping
+    > g50 vote ready
   */
   
   @Override
@@ -46,6 +48,7 @@ public class Game extends SessionState {
         case "g02" : { close(); break; }
         case "g03" : { clientReady(gson.fromJson(data, PacketG03.class)); break; }
         case "g21" : { ping(gson.fromJson(data, PacketG21.class)); break; }
+        case "g50" : { voteReady(gson.fromJson(data, PacketG50.class)); break; }
         
         /* Input Type Packets nxx */
         
@@ -71,6 +74,10 @@ public class Game extends SessionState {
   }
   
   private void ping(PacketG21 p) throws IOException { sendPacket(p); }
+  
+  private void voteReady(PacketG50 p) throws IOException {
+    lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.VOTE));
+  };
   
   @Override
   public void destroy() throws IOException {

@@ -27,9 +27,7 @@ StateGame.prototype.ready = function() {
 };
 
 // G01
-StateGame.prototype.load = function(p) {
-  if(app.ingame()) { app.menu.error.show("State error while loading game."); return; }
-  
+StateGame.prototype.load = function(p) {  
   var address = window.location.host;
   var that = this;
   
@@ -40,7 +38,7 @@ StateGame.prototype.load = function(p) {
     timeout: 5000,
     success: function(data) {
       app.menu.warn.show("Loading game...");
-      app.game = new Game(data);
+      app.load(data);
       app.menu.warn.show("Load done...");
       that.send({type: "g03"});
     },

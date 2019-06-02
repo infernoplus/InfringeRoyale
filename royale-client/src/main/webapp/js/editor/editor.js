@@ -19,7 +19,7 @@ function Editor(data) {
   this.frame = 0;
   this.delta = util.time.now();
   
-  this.resourceRaw = data.resource; // kept on hand for compile()
+  this.dataRaw = data; // kept on hand for compile()
   
   this.showRef = false;
   this.offsetRef = vec2.make(0, 0);
@@ -40,7 +40,8 @@ Editor.prototype.load = function(data) {
 
 Editor.prototype.compile = function() {
   var data = {
-    resource: this.resourceRaw,
+    type: this.dataRaw.type,
+    resource: this.dataRaw.resource,
     initial: this.world.initial,
     world: []
   };

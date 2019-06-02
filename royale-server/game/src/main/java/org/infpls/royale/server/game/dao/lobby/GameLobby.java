@@ -3,31 +3,40 @@ package org.infpls.royale.server.game.dao.lobby;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
-import org.infpls.royale.server.game.game.RoyaleGame;
 
+import org.infpls.royale.server.game.game.*;
 import org.infpls.royale.server.game.session.*;
 import org.infpls.royale.server.game.session.game.*;
 import org.infpls.royale.server.util.*;
 
 public abstract class GameLobby {
-  private final static String GAME_ID = "smb";
+  private final static String LOBBY_FILE = "lobby";
+  private final static String GAME_FILE = "smb";
+  
+  private final static int MIN_PLAYERS = 2;          // Min players needed to vote start
+  private final static int MAX_PLAYERS = 99;         // Max players, game starts automatically
+  private final static float MIN_VOTE_FRAC = .75f;   // Needs 75% ready vote to start early
+  private final static int MAX_AGE = 1440000;        // Max number of frames before we just close the lobby. This is 12 hours.
+  
+  private final static int START_DELAY = 150;
   
   protected final String lid; //Lobby ID
   
-  protected final int maxPlayers;
   protected final List<RoyaleSession> players, loading;
   
   private final GameLoop loop; /* Seperate timer thread to trigger game steps */
-  protected final RoyaleGame game; /* The actual game object */
+  protected RoyaleCore game; /* The actual game object */
   
   private final InputSync inputs; /* Packets that the game must handle are stored until a gamestep happens. This is for synchronization. */
   private final EventSync events; /* Second verse same as the first. */
   
+  private int startTimer;
+  private int age;
+  
+  protected boolean locked; // Prevents more people from joining
   protected boolean closed; // Clean this shit up!
   public GameLobby() throws IOException {
     lid = Key.generate32();
-    
-    maxPlayers = 99;
     
     players = new ArrayList();
     loading = new ArrayList();
@@ -35,9 +44,12 @@ public abstract class GameLobby {
     inputs = new InputSync();
     events = new EventSync();
     
+    startTimer = -1;
+    
+    locked = false;
     closed = false;
     
-    game = new RoyaleGame();
+    game = new RoyaleLobby();
 
     loop = new GameLoop(this);
   }
@@ -46,8 +58,11 @@ public abstract class GameLobby {
   public void start() { loop.start(); }
 
   public void step(final long tick) {
-    try {
+    try {      
       handleEvents();
+      
+      if(startTimer >= 0 && ++startTimer >= START_DELAY) { whereWeDroppin(); return; }
+      if(locked && (loading.size() + players.size() < 1 || ++age > MAX_AGE)) { close(); }
       
       game.input(inputs.pop());
       game.update();
@@ -75,6 +90,7 @@ public abstract class GameLobby {
         case JOIN : { joinEvent(evt.session); break; }
         case READY : { readyEvent(evt.session); break; }
         case DISCONNECT : { disconnectEvent(evt.session); break; }
+        case VOTE : { voteEvent(evt.session); break; }
       }
     }
   }
@@ -83,7 +99,7 @@ public abstract class GameLobby {
     try { if(isClosed() || loading.contains(session) || players.contains(session)) { session.close("Error joining lobby."); return; } }
     catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during player disconnect.", ioex); return; }
     loading.add(session);
-    sendPacket(new PacketG01(GAME_ID), session);
+    sendPacket(new PacketG01(LOBBY_FILE), session);
   }
   
   private void readyEvent(RoyaleSession session) throws IOException {
@@ -92,6 +108,8 @@ public abstract class GameLobby {
     catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during player disconnect.", ioex); return; }
     players.add(session);
     game.join(session);
+    
+    if(players.size() >= MAX_PLAYERS) { startTimer(); }
   }
   
   private void disconnectEvent(RoyaleSession session) {
@@ -100,9 +118,50 @@ public abstract class GameLobby {
     game.leave(session);
   }
   
+  private void voteEvent(RoyaleSession session) {
+    session.readyVote = true;
+    if(players.size() < MIN_PLAYERS || locked) { return; }
+    
+    int vr = 0;
+    for(int i=0;i<players.size();i++) {
+      if(players.get(i).readyVote) { vr++; }
+    }
+    
+    if((float)vr/(float)players.size() >= MIN_VOTE_FRAC) { startTimer(); }
+  }
+  
   protected void close(final String message) throws IOException {
     sendPacket(new PacketG06(message));
     close();
+  }
+  
+  /* Starts timer to start game. */
+  private void startTimer() {
+    if(locked) { return; }
+    locked = true;
+    startTimer = 0;
+  }
+  
+  /* When called, locks this lobby, tells clients to load the game data, and starts the battle royale match */
+  private void whereWeDroppin() {
+    startTimer = -1;
+    
+    game.destroy();
+    
+    for(int i=0;i<loading.size();i++) {
+      try { loading.get(i).close("Match started while client was loading."); }
+      catch(IOException ex) { Oak.log(Oak.Level.ERR, "GameLobby::whereWeDroppin()", "Error closing a loading client connection.", ex); }
+    }
+    
+    for(int i=0;i<players.size();i++) {
+      final RoyaleSession session = players.remove(i--);
+      try { if(isClosed()) { session.close("Error during game setup."); return; } }
+      catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during game setup.", ioex); return; }
+      loading.add(session);
+      sendPacket(new PacketG01(GAME_FILE), session);
+    }
+    
+    game = new RoyaleGame();
   }
   
   protected void close() throws IOException {
@@ -141,7 +200,8 @@ public abstract class GameLobby {
   public void pushEvent(final SessionEvent evt) { events.push(evt); }
   
   public String getLid() { return lid; }
-  public boolean isFull() { return loading.size() + players.size() >= maxPlayers; }
+  public boolean isFull() { return loading.size() + players.size() >= MAX_PLAYERS; }
+  public boolean isLocked() { return locked; }
   public boolean isClosed() { return closed; }
   
   /* @FIXME This might be the worst way to do this in the universe. It might be fine. No way to know really. 

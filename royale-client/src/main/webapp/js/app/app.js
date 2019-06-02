@@ -1,4 +1,5 @@
 "use strict";
+/* global Game, Lobby */
 
 /* Define Main Class */
 function App() {
@@ -26,6 +27,18 @@ App.prototype.init = function() {
     success: function(data) { serverResponse(data); },
     error: function() { serverError(); }
   });
+};
+
+/* Load a game from .game file */
+App.prototype.load = function(data) {
+  if(this.game instanceof Game) { this.menu.error.show("State error. Game already loaded."); return; }
+  if(this.game instanceof Lobby) { this.game.destroy(); }
+  
+  switch(data.type) {
+    case "game" : { this.game = new Game(data); break; }
+    case "lobby": { this.game = new Lobby(data); break; }
+    default : { this.menu.error.show("Critical error! Game file missing type!"); break; }
+  }
 };
 
 

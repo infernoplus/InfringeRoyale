@@ -73,7 +73,7 @@ FlagObject.prototype.setState = function(STATE) {
 };
 
 FlagObject.prototype.draw = function(sprites) {
-  sprites.push({pos: vec2.add(this.pos, FlagObject.OFFSET), reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00});
+  sprites.push({pos: vec2.add(this.pos, FlagObject.OFFSET), reverse: false, index: this.sprite.INDEX, mode: 0x00});
 };
 
 /* Register object class */

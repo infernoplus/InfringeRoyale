@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global PlayerObject, CoinObject */
+/* global PlayerObject, CoinObject, CheckObject */
 
 var shor2 = {}; // Two Shorts 32bits // Stored as an int32
 /* ======================================================================================== */
@@ -422,6 +422,34 @@ td32.TILE_PROPERTIES = {
             var ply = game.getPlayer();
             if(ply.pos.x >= x) { ply.pole(vec2.make(x,y)); }
           }
+        }
+      }
+    }
+  },
+  /* Vote Block */
+  0xF0: {
+    NAME: "VOTE BLOCK",
+    COLLIDE: true,
+    HIDDEN: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      if(game.pid === pid) { game.send({type: "g50"}); }
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.createObject(CheckObject.ID, level, zone, vec2.make(x,y+1), [shor2.encode(x,y)]);
+          td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          var rep = 98307; // Replacement td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.createObject(CheckObject.ID, level, zone, vec2.make(x,y+1), [shor2.encode(x,y)]);
+          td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          break;
         }
       }
     }

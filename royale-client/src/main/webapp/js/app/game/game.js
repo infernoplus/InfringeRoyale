@@ -28,6 +28,13 @@ function Game(data) {
   this.out = []; // Outgoing packets.
   
   this.ready = false;
+  this.startTimer = -1;          // If > 0 we draw a timer to the screen in display
+  this.startDelta = undefined;   // Millisecond time of the first frame of the game.
+  
+  this.remain = 0;               // Number of players still alive
+  
+  this.gameOverTimer = 0;
+  this.gameOver = false;
   
   /* Set inital camera position */
   var dim = this.getZone().dimensions();
@@ -68,12 +75,18 @@ Game.prototype.load = function(data) {
   }
 };
 
+/* Immiedately sends a json packet */
+Game.prototype.send = function(packet) {
+  app.net.send(packet);
+};
+
 /* Returns false if the packet is not of a type that we know how to handle */
 Game.prototype.handlePacket = function(packet) {
   /* Parse packet and apply */
   switch(packet.type) {
     /* Ingame Type Packets gxx */
     case "g12" : { this.updatePlayerList(packet); return true; }
+    case "g13" : { this.gameStartTimer(packet); return true; }
     /* Input Type Packets ixx */
     default : { return false; }
   }
@@ -82,6 +95,12 @@ Game.prototype.handlePacket = function(packet) {
 /* G12 */
 Game.prototype.updatePlayerList = function(packet) {
   this.players = packet.players;
+};
+
+/* G13*/
+Game.prototype.gameStartTimer = function(packet) {
+  if(packet.time > 0) { this.startTimer = packet.time; this.remain = this.players.length; }
+  else { this.doStart(); }
 };
 
 Game.prototype.handleBinary = function(data) {
@@ -133,6 +152,7 @@ Game.prototype.doNET011 = function(n) {
   if(n.pid === this.pid) { return; }
   var obj = this.getGhost(n.pid);
   if(obj) { obj.kill(); }
+  this.remain = this.getRemain();
 };
 
 /* UPDATE_PLAYER_OBJECT [0x12] */
@@ -164,6 +184,13 @@ Game.prototype.doNET020 = function(n) {
 Game.prototype.doNET030 = function(n) {
   if(n.pid === this.pid) { return; } // Toss out event if we were the ones who created it originally
   this.world.getZone(n.level, n.zone).update(this, n.pid, n.level, n.zone, n.pos.x, n.pos.y, n.type);
+};
+
+/* Starts the game */
+Game.prototype.doStart = function() {
+  this.startTimer = -1;
+  this.startDelta = util.time.now();
+  this.doSpawn();
 };
 
 /* Handle player input */
@@ -209,15 +236,6 @@ Game.prototype.doStep = function() {
     }
   }
   
-  /* Create a player object if we don't have one. */
-  if(!ply) {
-    var level = this.world.getInitialLevel();
-    var zone = this.world.getInitialZone();
-    var pos = zone.initial; // shor2
-    this.createObject(PlayerObject.ID, level.id, zone.id, shor2.decode(pos), [this.pid]);
-    this.out.push(NET010.encode(level, zone, pos));
-  }
-  
   /* Step & delete garbage */
   for(var i=0;i<this.objects.length;i++) {
     var obj = this.objects[i];
@@ -232,6 +250,24 @@ Game.prototype.doStep = function() {
   /* Step world to update bumps & effects & etc */
   this.world.step();
   
+  /* Triggers game over if player is dead for 15 frames. */
+  if(this.startDelta !== undefined && !this.gameOver && !ply) { if(++this.gameOverTimer > 15) { this.gameOver = true; this.gameOverTimer = 0; } }
+  /* Triggers page refresh after 5 seconds of a game over. */
+  else if(this.gameOver) { if(++this.gameOverTimer > 150) { app.close(); } }
+  else { this.gameOverTimer = 0; }
+};
+
+/* Create a player object for this client to control */
+Game.prototype.doSpawn = function() {
+  var ply = this.getPlayer();
+  
+  if(!ply) {
+    var level = this.world.getInitialLevel();
+    var zone = this.world.getInitialZone();
+    var pos = zone.initial; // shor2
+    this.createObject(PlayerObject.ID, level.id, zone.id, shor2.decode(pos), [this.pid]);
+    this.out.push(NET010.encode(level, zone, pos));
+  }
 };
 
 /* Push players state to the server */
@@ -300,7 +336,6 @@ Game.prototype.getGhost = function(pid) {
       return p;
     }
   }
-  return undefined;
 };
 
 /* Returns the player object that this client controls. Or undefined if one doesnt exist. */
@@ -311,7 +346,6 @@ Game.prototype.getPlayer = function() {
       return obj;
     }
   }
-  return undefined;
 };
 
 /* Returns the zone our character is in, or the last one we were in when we died, or the starting point. */
@@ -335,6 +369,17 @@ Game.prototype.getPlayerInfo = function(pid) {
   }
 };
 
+/* Get number of players who are still alive */
+Game.prototype.getRemain = function() {
+  var rm = 0;
+  for(var i=0;i<this.players.length;i++) {
+    var ply = this.players[i];
+    var obj = this.getGhost(ply.id);
+    if(obj && !obj.dead) { rm++; }
+  }
+  return rm;
+};
+
 /* Shows lives/level name screen then warps player to start of specified level. */
 /* Called when player reaches end of the level they are currently on. */
 Game.prototype.levelWarp = function(lid) {
@@ -344,7 +389,7 @@ Game.prototype.levelWarp = function(lid) {
 };
 
 Game.prototype.draw = function() {
-  if(this.ready) {
+  if(this.ready && this.startDelta !== undefined) {
     var now = util.time.now();
     if((now - this.delta) / Game.TICK_RATE > 0.75) {
       var initial = true;
@@ -363,6 +408,9 @@ Game.prototype.draw = function() {
       this.delta = now;
     }
   }
+  else {
+    this.display.draw();
+  }
   
   var that = this;
   this.frameReq = requestAnimFrameFunc.call(window, function() { that.draw(); }); // Javascript 🙄
@@ -370,4 +418,6 @@ Game.prototype.draw = function() {
 
 Game.prototype.destroy = function() {
   cancelAnimFrameFunc.call(window, this.frameReq);
+  this.input.destroy();
+  this.display.destroy();
 };

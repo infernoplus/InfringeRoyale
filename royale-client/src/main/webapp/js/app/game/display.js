@@ -1,5 +1,6 @@
 "use strict";
 /* global util, td32 */
+/* global Game, Lobby */
 
 function Display(game, container, canvas, resource) {
   this.game = game;
@@ -182,10 +183,21 @@ Display.prototype.drawUI = function() {
   var c = COIN[parseInt(this.game.frame/3) % COIN.length];
   var tex = this.resource.getTexture("obj");
   var ply = this.game.getPlayerInfo(this.game.pid);
+  
+  var level;
+  if(this.game.levelWarpId !== undefined) { level = this.game.world.getLevel(this.game.levelWarpId); }
+  else if(this.game.startDelta === undefined) { level = this.game.world.getInitialLevel(); }
+  
+  if(this.game.gameOver) {
+    context.fillStyle = "black";
+    context.fillRect(0,0,W,H);
     
-  if(this.game.levelWarpId) {
-    var level = this.game.world.getLevel(this.game.levelWarpId);
-
+    context.fillStyle = "white";
+    context.font = "32px SmbWeb";
+    context.textAlign = "center";
+    context.fillText("GAME OVER", W*.5, H*.5);
+  }
+  else if(level) {
     context.fillStyle = "black";
     context.fillRect(0,0,W,H);
     
@@ -193,6 +205,12 @@ Display.prototype.drawUI = function() {
     context.font = "32px SmbWeb";
     context.textAlign = "center";
     context.fillText(level.name, W*.5, H*.5);
+    
+    if(this.game.startTimer >= 0) {
+      context.font = "24px SmbWeb";
+      context.textAlign = "center";
+      context.fillText("GAME STARTS IN: " + parseInt(this.game.startTimer/30), W*.5, (H*.5)+40);
+    }
   }
   
   context.fillStyle = "white";
@@ -202,8 +220,14 @@ Display.prototype.drawUI = function() {
   var st = util.sprite.getSprite(tex, c);
   context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, 4, 40, 24, 24);
   context.fillText("x99", 30, 64);
-  var txt = "99 PLAYERS REMAIN";
-  context.fillText(txt, W-context.measureText(txt).width-8, 32);
+  if(this.game instanceof Game) {
+    var txt = this.game.remain + " PLAYERS REMAIN";
+    context.fillText(txt, W-context.measureText(txt).width-8, 32);
+  }
+  else if(this.game instanceof Lobby) {
+    var txt = this.game.players.length + " / 99 PLAYERS";
+    context.fillText(txt, W-context.measureText(txt).width-8, 32);
+  }
 };
 
 Display.prototype.drawLoad = function() {
@@ -218,4 +242,8 @@ Display.prototype.drawLoad = function() {
   context.fillStyle = "white";
   context.textAlign = "center";
   context.fillText("Loading Resources...", W*.5, H*.5);
+};
+
+Display.prototype.destroy = function() {
+  
 };
