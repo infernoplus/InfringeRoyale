@@ -15,10 +15,12 @@ public class Controller {
   public final Queue<List<ByteMe.NETX>> updates = new LinkedList();
 
   /* Player State Info */
-  public boolean dead;
-  public byte level, zone;
-  public Vec2 position;
-  public byte sprite;
+  protected boolean dead;
+  protected byte level, zone;
+  protected Vec2 position;
+  protected byte sprite;
+  
+  protected byte result;
   
   public boolean garbage;  // If flagged, we will delete this controler on next update.
   
@@ -31,6 +33,8 @@ public class Controller {
     zone = 0x00;
     position = null;
     sprite = 0x00;
+    
+    result = 0;
     
     garbage = false;
   }
@@ -52,17 +56,22 @@ public class Controller {
   /* Sends information to the client about the current gamestate */
   public void update(List<ByteMe.NETX> loc, List<ByteMe.NETX> glo) {
     if(updates.size() < 1) { return; }
-    if(updates.size() > 1) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); }
-    final List<ByteMe.NETX> proc = updates.remove();
-    for(int i=0;i<proc.size();i++) {
-      final ByteMe.NETX n = proc.get(i);
-      switch(n.designation) {
-        case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
-        case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
-        case 0x12 : { process012((ByteMe.NET012)n); loc.add(n); break; }
-        case 0x13 : { process013((ByteMe.NET013)n); glo.add(n); break; }
-        case 0x20 : { process020((ByteMe.NET020)n); glo.add(n); break; }
-        case 0x30 : { process030((ByteMe.NET030)n); glo.add(n); break; }
+    if(updates.size() > 5) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); }   /* @TODO: DELETE THIS LINE */
+    /* Process client input, if there is more than 3 updates in the queue we 'catch up' by processing 2 updates per tick instead of 1 */
+    int lm = Math.max(1, Math.min(2, updates.size()-1));
+    for(int j=0;j<updates.size()&&j<lm;j++) {
+      final List<ByteMe.NETX> proc = updates.remove();
+      for(int i=0;i<proc.size();i++) {
+        final ByteMe.NETX n = proc.get(i);
+        switch(n.designation) {
+          case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
+          case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
+          case 0x12 : { process012((ByteMe.NET012)n); loc.add(n); break; }
+          case 0x13 : { process013((ByteMe.NET013)n); glo.add(n); break; }
+          case 0x18 : { glo.add(process018((ByteMe.NET018)n)); break; }
+          case 0x20 : { process020((ByteMe.NET020)n); glo.add(n); break; }
+          case 0x30 : { process030((ByteMe.NET030)n); glo.add(n); break; }
+        }
       }
     }
   }
@@ -91,6 +100,12 @@ public class Controller {
   /* PLAYER_OBJECT_EVENT */
   public void process013(ByteMe.NET013 n) {
     
+  }
+  
+    /* PLAYER_RESULT_REQUEST */
+  public ByteMe.NET018 process018(ByteMe.NET018 n) {
+    result = game.winRequest();
+    return new ByteMe.NET018(n.pid, result);
   }
   
   /* OBJECT_EVENT_TRIGGER */

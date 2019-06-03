@@ -1,7 +1,7 @@
 "use strict";
 /* global util, vec2, squar, td32 */
-/* global GameObject, MushroomObject, FlowerObject, StarObject, LifeObject, CoinObject, FireballProj */
-/* global NET011, NET013 */
+/* global GameObject, MushroomObject, FlowerObject, StarObject, LifeObject, CoinObject, AxeObject, FireballProj */
+/* global NET011, NET013, NET018, NET020 */
 
 function PlayerObject(game, level, zone, pos, pid) {
   GameObject.call(this, game, level, zone, pos);
@@ -68,6 +68,7 @@ PlayerObject.DEAD_FREEZE_TIME = 7;
 PlayerObject.DEAD_TIME = 30;
 PlayerObject.DEAD_UP_FORCE = 0.65;
 
+PlayerObject.RUN_SPEED_MAX = 0.315;
 PlayerObject.MOVE_SPEED_MAX = 0.215;
 PlayerObject.MOVE_SPEED_ACCEL = 0.0125;
 PlayerObject.MOVE_SPEED_DECEL = 0.0225;
@@ -215,6 +216,7 @@ PlayerObject.prototype.update = function(data) {
 PlayerObject.prototype.trigger = function(type) {
   switch(type) {
     case 0x01 : { this.attack(); break; }
+    case 0x02 : { this.star(); break; }
   }
 };
 
@@ -261,8 +263,9 @@ PlayerObject.prototype.step = function() {
   }
   
   /* Anim */
-  this.anim++;
-  this.sprite = this.state.SPRITE[parseInt(this.anim/PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length];
+  if(this.isState(PlayerObject.SNAME.RUN)) { this.anim += Math.max(.5, Math.abs(this.moveSpeed*5)); }
+  else { this.anim++; }
+  this.sprite = this.state.SPRITE[parseInt(parseInt(this.anim)/PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Dead */
   if(this.isState(PlayerObject.SNAME.DEAD) || this.isState(PlayerObject.SNAME.DEADGHOST)) {
@@ -349,7 +352,12 @@ PlayerObject.prototype.autoMove = function() {
   this.btnD = [0,0];
   this.btnA = false; this.btnB = false;
   
-  this.btnD = [1,0];
+  if(Math.abs(this.pos.x-this.autoTarget.x) >= 0.1) {
+    this.btnD = [this.pos.x-this.autoTarget.x<=0?1:-1,0];
+  }
+  else if(Math.abs(this.moveSpeed) < 0.01){
+    this.btnA = this.pos.y-this.autoTarget.y<-.5;
+  }
 };
 
 PlayerObject.prototype.control = function() {
@@ -367,7 +375,7 @@ PlayerObject.prototype.control = function() {
       this.setState(PlayerObject.SNAME.SLIDE);
     }
     else {
-      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, PlayerObject.MOVE_SPEED_MAX);
+      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, this.btnB?PlayerObject.RUN_SPEED_MAX:PlayerObject.MOVE_SPEED_MAX);
       this.setState(PlayerObject.SNAME.RUN);
     }
     this.reverse = this.btnD[0] >= 0;
@@ -584,9 +592,18 @@ PlayerObject.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
     if(obj === this) { continue; }
-    if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
+    if(obj.level === this.level && obj.zone === this.zone && !obj.dead && obj.dim) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) {
+        if(this.starTimer > 0 && obj.bonk) {
+          /* Touch something with Star */
+          obj.bonk();
+          this.game.out.push(NET020.encode(obj.level, obj.zone, obj.oid, 0x01));
+        }
+        if(obj instanceof PlayerObject && obj.starTimer > 0) {
+          /* Touch other player who has Star */
+          this.kill();
+        }
         if(this.lastPos.y > obj.pos.y + obj.dim.y - obj.fallSpeed) {
           /* Stomped */
           if(obj.playerStomp) { obj.playerStomp(this); }
@@ -617,7 +634,7 @@ PlayerObject.prototype.bounce = function() {
 };
 
 PlayerObject.prototype.damage = function(obj) {
-  if(this.starTimer > 0 || this.damageTimer > 0) { return; }
+  if(this.damageTimer > 0 || this.starTimer > 0) { return; }
   if(this.power > 0) { this.transform(0); this.damageTimer = PlayerObject.DAMAGE_TIME; return; }
   this.kill();
 };
@@ -625,9 +642,24 @@ PlayerObject.prototype.damage = function(obj) {
 PlayerObject.prototype.powerup = function(obj) {
   if(obj instanceof MushroomObject && this.power < 1) { this.transform(1); return; }
   if(obj instanceof FlowerObject && this.power < 2) { this.transform(2); return; }
-  if(obj instanceof StarObject) { this.starTimer = PlayerObject.STAR_LENGTH; return; }
+  if(obj instanceof StarObject) { this.star(); this.game.out.push(NET013.encode(0x02)); return; }
   if(obj instanceof LifeObject) { return; }
   if(obj instanceof CoinObject) { return; }
+  if(obj instanceof AxeObject) { this.game.out.push(NET018.encode()); return; }  // Asks server what result to get from picking up the axe and 'winning'
+};
+
+/* This essentially is the win state. */
+/* Result is the numerical place we came in. 1 being the best (first place) */
+PlayerObject.prototype.axe = function(result) {
+  var txt;
+  if(result <= 4) { txt = this.game.getText(this.level, this.zone, result); }
+  else { txt = this.game.getText(this.level, this.zone, "too bad"); }
+  
+  if(txt) { this.autoTarget = vec2.add(txt.pos, vec2.make(0., -1.6)); }
+};
+
+PlayerObject.prototype.star = function() {
+  this.starTimer = PlayerObject.STAR_LENGTH;
 };
 
 PlayerObject.prototype.transform = function(to) {

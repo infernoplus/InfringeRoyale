@@ -9,6 +9,7 @@ public class RoyaleGame extends RoyaleCore {
   
   private final static int START_DELAY = 450;
   
+  private byte place = 0x00;
   
   private int startTimer;
   
@@ -33,4 +34,10 @@ public class RoyaleGame extends RoyaleCore {
   public void update() throws IOException {
     super.update();
   } 
+  
+  @Override
+  public byte winRequest() {
+    place = (byte)Math.min(place+1, 99);
+    return place;
+  }
 }

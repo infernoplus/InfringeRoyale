@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, ItemObject */
+/* global GameObject, ItemObject, BowserObject */
 /* global NET011, NET020 */
 
 function AxeObject(game, level, zone, pos, oid) {
@@ -8,10 +8,14 @@ function AxeObject(game, level, zone, pos, oid) {
   
   this.state = AxeObject.STATE.IDLE;
   this.sprite = this.state.SPRITE[0];
+  
+  this.used = false;
+  
+  this.dim = vec2.make(1.,3.);
 }
 
 /* === STATIC =============================================================== */
-AxeObject.ASYNC = false;
+AxeObject.ASYNC = true;
 AxeObject.ID = 0x55;
 AxeObject.NAME = "AXE"; // Used by editor
 
@@ -42,14 +46,25 @@ for(var i=0;i<AxeObject.STATE_LIST.length;i++) {
 
 /* === INSTANCE ============================================================= */
 
-AxeObject.prototype.update = ItemObject.prototype.update;
+AxeObject.prototype.update = function(event) { /* ASYNC */ };
 AxeObject.prototype.step = ItemObject.prototype.step;
 
 AxeObject.prototype.control = function() { };
 
 AxeObject.prototype.physics = ItemObject.prototype.physics;
 
-AxeObject.prototype.playerCollide = ItemObject.prototype.playerCollide;
+AxeObject.prototype.playerCollide = function(p) {
+  if(this.dead || this.garbage || this.used) { return; }
+  p.powerup(this);
+  this.used = true;
+  
+  /* Find bowser in this zone, and end him rightly */
+  for(var i=0;i<this.game.objects.length;i++) {
+    var obj = this.game.objects[i];
+    if(obj instanceof BowserObject && obj.level === this.level && obj.zone === obj.zone && !obj.dead) { obj.bonk(); return; }
+  }
+};
+
 AxeObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
 AxeObject.prototype.playerBump = ItemObject.prototype.playerBump;
 

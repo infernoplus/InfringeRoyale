@@ -105,6 +105,8 @@ public abstract class RoyaleCore {
     return null;
   }
   
+  public abstract byte winRequest();
+  
   public void send(Packet p) {
     for(int i=0;i<controllers.size();i++) {
       final Controller controller = controllers.get(i);

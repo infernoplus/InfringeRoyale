@@ -203,7 +203,7 @@ KoopaObject.prototype.interaction = function() {
     if(obj === this || obj instanceof PlayerObject || obj.dead || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
     if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
-      if(hit) { obj.damage(); }  // We don't sync this event since it's not a direct player interaction. It *should* synchronize naturally though.
+      if(hit) { obj.damage(this); }  // We don't sync this event since it's not a direct player interaction. It *should* synchronize naturally though.
     }
   }
 };
@@ -238,7 +238,7 @@ KoopaObject.prototype.playerCollide = function(p) {
     this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x10:0x11));
     this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME;
   }
-  else if(this.immuneTimer <= 0) { p.damage(); }
+  else if(this.immuneTimer <= 0) { p.damage(this); }
 };
 
 KoopaObject.prototype.playerStomp = function(p) {
@@ -252,7 +252,7 @@ KoopaObject.prototype.playerStomp = function(p) {
 
 KoopaObject.prototype.playerBump = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.damage();
+  p.damage(this);
 };
 
 KoopaObject.prototype.kill = function() { };

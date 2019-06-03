@@ -133,17 +133,17 @@ PlantObject.prototype.bonk = function() {
 
 PlantObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.damage();
+  p.damage(this);
 };
 
 PlantObject.prototype.playerStomp = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.damage();
+  p.damage(this);
 };
 
 PlantObject.prototype.playerBump = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.damage();
+  p.damage(this);
 };
 
 PlantObject.prototype.kill = function() { };

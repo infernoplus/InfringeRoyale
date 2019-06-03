@@ -50,10 +50,12 @@ Lobby.prototype.getRemain = Game.prototype.getRemain;
 
 Lobby.prototype.levelWarp = Game.prototype.levelWarp;
 
-Lobby.prototype.draw = function() {
+Lobby.prototype.loop = function() {
   if(this.lobbyTimer > 0) { this.lobbyTimer--; }
-  else { this.doStart(); }
-  Game.prototype.draw.call(this);
+  else if(this.startDelta === undefined) { this.doStart(); }
+  Game.prototype.loop.call(this);
 };
+
+Lobby.prototype.draw = Game.prototype.draw;
 
 Lobby.prototype.destroy = Game.prototype.destroy;

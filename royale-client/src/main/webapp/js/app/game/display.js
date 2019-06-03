@@ -1,6 +1,7 @@
 "use strict";
 /* global util, td32 */
 /* global Game, Lobby */
+/* global TextObject */
 
 function Display(game, container, canvas, resource) {
   this.game = game;
@@ -75,10 +76,16 @@ Display.prototype.drawMap = function(depth) {
   
   var tex = this.resource.getTexture("map");
   var zone = this.game.getZone();
+  var dim = zone.dimensions();
+  
+  /* Culling */
+  var w = ((this.canvas.width/Display.TEXRES)*.55)/this.camera.scale;
+  var cx0 = Math.max(0, Math.min(dim.x, parseInt(this.camera.pos.x - w)));
+  var cx1 = Math.max(0, Math.min(dim.x, parseInt(this.camera.pos.x + w)));
   
   for(var i=0;i<zone.data.length;i++) {
     var row = zone.data[i];
-    for(var j=0;j<row.length;j++) {
+    for(var j=cx0;j<cx1;j++) {
       var t = row[j];
       var td = td32.decode16(t);
       if(td.depth !== depth) { continue; }
@@ -101,10 +108,12 @@ Display.prototype.drawObject = function() {
   var dim = zone.dimensions();
   
   var sprites = [];
+  var texts = [];
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
     if(obj.level === zone.level && obj.zone === zone.id && obj.pid !== this.game.pid) {
-      obj.draw(sprites);
+      if(obj instanceof TextObject) { obj.write(texts); }
+      else { obj.draw(sprites); }
     }
   }
   
@@ -136,6 +145,17 @@ Display.prototype.drawObject = function() {
     
     if(rx || ry) { context.restore(); }
     if(rest) { context.restore(); }
+  }
+  
+  for(var i=0;i<texts.length;i++) {
+    var txt = texts[i];
+    var x = (Display.TEXRES*txt.pos.x)+(Display.TEXRES*.5);
+    var y = (Display.TEXRES*(dim.y-txt.pos.y-1.))+(Display.TEXRES*.5);
+    
+    context.fillStyle = txt.color;
+    context.font = (txt.size*Display.TEXRES) + "px SmbWeb";
+    context.textAlign = "center";
+    context.fillText(txt.text, x, y);
   }
 };
 
@@ -213,20 +233,28 @@ Display.prototype.drawUI = function() {
     }
   }
   
-  context.fillStyle = "white";
-  context.font = "24px SmbWeb";
-  context.textAlign = "left";
-  context.fillText((ply?ply.name:"INFRINGIO"), 8, 32);
-  var st = util.sprite.getSprite(tex, c);
-  context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, 4, 40, 24, 24);
-  context.fillText("x99", 30, 64);
-  if(this.game instanceof Game) {
-    var txt = this.game.remain + " PLAYERS REMAIN";
-    context.fillText(txt, W-context.measureText(txt).width-8, 32);
+  if(this.game.victory > 0) {
+    context.fillStyle = "white";
+    context.font = "32px SmbWeb";
+    context.textAlign = "center";
+    context.fillText((this.game.victory<=4?"VICTORY ROYALE #":"TOO BAD #") + this.game.victory, W*.5, 40);
   }
-  else if(this.game instanceof Lobby) {
-    var txt = this.game.players.length + " / 99 PLAYERS";
-    context.fillText(txt, W-context.measureText(txt).width-8, 32);
+  else {
+    context.fillStyle = "white";
+    context.font = "24px SmbWeb";
+    context.textAlign = "left";
+    context.fillText((ply?ply.name:"INFRINGIO"), 8, 32);
+    var st = util.sprite.getSprite(tex, c);
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, 4, 40, 24, 24);
+    context.fillText("x"+this.game.coins, 30, 64);
+    if(this.game instanceof Game) {
+      var txt = this.game.remain + " PLAYERS REMAIN";
+      context.fillText(txt, W-context.measureText(txt).width-8, 32);
+    }
+    else if(this.game instanceof Lobby) {
+      var txt = this.game.players.length + " / 99 PLAYERS";
+      context.fillText(txt, W-context.measureText(txt).width-8, 32);
+    }
   }
 };
 

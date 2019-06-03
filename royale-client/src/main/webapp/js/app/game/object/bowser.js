@@ -200,7 +200,7 @@ BowserObject.prototype.attack = function() {
 
 BowserObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
-  p.kill();
+  p.damage(this);
 };
 
 BowserObject.prototype.playerStomp = BowserObject.prototype.playerCollide;

@@ -3,7 +3,7 @@
 /* global util, shor2, vec2, td32, MERGE_BYTE */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, FlagObject */
+/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, FlagObject, TextObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
@@ -22,6 +22,7 @@ function Game(data) {
   this.load(data);
   
   this.frame = 0;
+  this.lastDraw = 0;
   this.delta = util.time.now();
   this.buffer = [[],[]];  // Frame Delay Lag Compensation Buffer. 3 Blank frames to start.
   
@@ -33,6 +34,9 @@ function Game(data) {
   
   this.remain = 0;               // Number of players still alive
   
+  this.coins = 0;
+  
+  this.victory = 0;
   this.gameOverTimer = 0;
   this.gameOver = false;
   
@@ -46,6 +50,7 @@ function Game(data) {
   
   var that = this;
   this.frameReq = requestAnimFrameFunc.call(window, function() { that.draw(); }); // Javascript 🙄
+  this.loopReq = setTimeout(function( ){ that.loop(); }, 2);
 };
 
 Game.TICK_RATE = 33;
@@ -127,6 +132,7 @@ Game.prototype.doUpdate = function(data) {
       case 0x11 : { this.doNET011(n); break; }
       case 0x12 : { this.doNET012(n); break; }
       case 0x13 : { this.doNET013(n); break; }
+      case 0x18 : { this.doNET018(n); break; }
       case 0x20 : { this.doNET020(n); break; }
       case 0x30 : { this.doNET030(n); break; }
     }
@@ -171,6 +177,14 @@ Game.prototype.doNET013 = function(n) {
   obj.trigger(n.type);
 };
 
+/* PLAYER_RESULT_REQUEST [0x18] */
+Game.prototype.doNET018 = function(n) {
+  if(n.pid !== this.pid || n.result <= 0x00) { return; }
+  var ply = this.getPlayer();
+  if(ply) { ply.axe(n.result); }
+  this.victory = n.result;
+};
+
 /* OBJECT_EVENT_TRIGGER [0x20] */
 Game.prototype.doNET020 = function(n) {
   if(n.pid === this.pid) { return; }                  // Don't repeat events that we reported.
@@ -211,7 +225,7 @@ Game.prototype.doInput = function() {
   if(keys[65] || keys[37]) { dir[0]--; } // A or LEFT
   if(keys[68] || keys[39]) { dir[0]++; } // D or RIGHT
   var a = keys[32] || keys[17]; // SPACE or RIGHT CONTROL
-  var b = keys[70] || keys[45]; // F or num0
+  var b = keys[16] || keys[45]; // Shift or num0
   
   if(mous.spin) { this.display.camera.zoom(mous.spin); } // Mouse wheel -> Camera zoom
   
@@ -255,6 +269,9 @@ Game.prototype.doStep = function() {
   /* Triggers page refresh after 5 seconds of a game over. */
   else if(this.gameOver) { if(++this.gameOverTimer > 150) { app.close(); } }
   else { this.gameOverTimer = 0; }
+  
+  this.lastDraw = this.frame;
+  this.frame++;
 };
 
 /* Create a player object for this client to control */
@@ -311,6 +328,14 @@ Game.prototype.getFlag = function(level, zone) {
     if(obj.level === level && obj.zone === zone && obj instanceof FlagObject) {
       return obj;
     }
+  }
+};
+
+/* Returns first textobject in the given zone with the given text */
+Game.prototype.getText = function(level, zone, text) {
+  for(var i=0;i<this.objects.length;i++) {
+    var obj = this.objects[i];
+    if(obj && obj.level === level && obj.zone === zone && obj instanceof TextObject && obj.text === text.toString()) { return obj; }
   }
 };
 
@@ -388,29 +413,38 @@ Game.prototype.levelWarp = function(lid) {
   this.getPlayer().hide();
 };
 
-Game.prototype.draw = function() {
+/* When this client player collects a coin */
+Game.prototype.coinage = function() {
+  this.coins = Math.min(99, this.coins+1);
+};
+
+Game.prototype.loop = function() {
   if(this.ready && this.startDelta !== undefined) {
     var now = util.time.now();
-    if((now - this.delta) / Game.TICK_RATE > 0.75) {
+    var target = parseInt((now-this.startDelta)/Game.TICK_RATE);  // Frame we should be on
+    
+    if(target > this.frame) {
       var initial = true;
       while(this.buffer.length > Game.FDLC_TARGET || (initial && this.buffer.length > 0)) {
-          var data = this.buffer.shift();
-          this.doUpdate(data);
-          initial = false;
+        var data = this.buffer.shift();
+        this.doUpdate(data);
+        initial = false;
       }
       
       this.doInput();
-      this.doStep();
-      this.display.draw();
+      while(target > this.frame) { this.doStep(); }
       this.doPush();
       
-      this.frame++;
       this.delta = now;
     }
   }
-  else {
-    this.display.draw();
-  }
+  
+  var that = this;
+  this.loopReq = setTimeout(function( ){ that.loop(); }, 2);
+};
+
+Game.prototype.draw = function() {
+  if(this.lastDraw !== this.frame || this.startDelta === undefined) { this.display.draw(); }
   
   var that = this;
   this.frameReq = requestAnimFrameFunc.call(window, function() { that.draw(); }); // Javascript 🙄
@@ -418,6 +452,7 @@ Game.prototype.draw = function() {
 
 Game.prototype.destroy = function() {
   cancelAnimFrameFunc.call(window, this.frameReq);
+  clearTimeout(this.loopReq);
   this.input.destroy();
   this.display.destroy();
 };

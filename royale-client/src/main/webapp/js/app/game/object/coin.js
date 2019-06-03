@@ -70,6 +70,7 @@ CoinObject.prototype.step = function() {
 CoinObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
   this.kill();
+  if(p.pid === this.game.pid) { this.game.coinage(); }
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
 };
 

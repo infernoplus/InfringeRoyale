@@ -248,7 +248,7 @@ TroopaObject.prototype.playerCollide = function(p) {
     this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x10:0x11));
     this.kickTimer = KoopaObject.PLAYER_KICK_IMMUNE_TIME;
   }
-  else if(this.kickTimer <= 0) { p.damage(); }
+  else if(this.kickTimer <= 0) { p.damage(this); }
 };
 TroopaObject.prototype.playerStomp = KoopaObject.prototype.playerStomp;
 

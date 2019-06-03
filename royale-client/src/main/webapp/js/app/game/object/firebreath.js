@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject */
+/* global GameObject, PlayerObject */
 /* global NET011, NET020 */
 
 /* Bowser Firebreath Projectile Object */
@@ -100,7 +100,7 @@ FireBreathProj.prototype.interaction = function() {
     if(obj.level === this.level && obj.zone === this.zone) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) {
-        obj.damage();
+        obj.damage(this);
         this.kill();
         return;
       }
