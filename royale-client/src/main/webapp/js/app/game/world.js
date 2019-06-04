@@ -82,7 +82,7 @@ Level.prototype.getWarp = function(wid) {
     var zon = this.zones[j];
     for(var k=0;k<zon.warp.length;k++) {
       var wrp = zon.warp[k];
-      if(wrp.id === wid) { return {level: this.id, zone: zon.id, pos: shor2.decode(wrp.pos)}; }
+      if(wrp.id === wid) { return {level: this.id, zone: zon.id, pos: shor2.decode(wrp.pos), data: wrp.data}; }
     }
   }
 };

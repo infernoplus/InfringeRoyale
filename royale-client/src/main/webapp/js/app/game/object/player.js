@@ -303,23 +303,23 @@ PlayerObject.prototype.step = function() {
   if(this.pipeTimer > 0) {
     this.pipeTimer--;
     switch(this.pipeDir) {
-      case 0 : { this.pos.y += PlayerObject.PIPE_SPEED; break; }
-      case 1 : { this.pos.y -= PlayerObject.PIPE_SPEED; break; }
-      case 2 : { this.pos.x -= PlayerObject.PIPE_SPEED; break; }
-      case 3 : { this.pos.x += PlayerObject.PIPE_SPEED; break; }
+      case 1 : { this.pos.y += PlayerObject.PIPE_SPEED; break; }
+      case 2 : { this.pos.y -= PlayerObject.PIPE_SPEED; break; }
+      case 3 : { this.pos.x -= PlayerObject.PIPE_SPEED; break; }
+      case 4 : { this.pos.x += PlayerObject.PIPE_SPEED; break; }
     }
     if(this.pipeTimer <= 0 && this.pipeWarp) {
       this.warp(this.pipeWarp);
       this.pipeWarp = undefined;
-      if(this.pipeExt < 0) { return; }
+      switch(this.pipeExt) {
+        case 1 : { this.pos.y -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 2 : { this.pos.y += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 3 : { this.pos.x -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
+        case 4 : { this.pos.x += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
+        default : { return; }
+      }
       this.pipeTimer = PlayerObject.PIPE_TIME;
       this.pipeDir = this.pipeExt; 
-      switch(this.pipeDir) {
-        case 0 : { this.pos.y -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
-        case 1 : { this.pos.y += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
-        case 2 : { this.pos.x -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
-        case 3 : { this.pos.x += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); break; }
-      }
     }
     return;
   }
@@ -680,13 +680,14 @@ PlayerObject.prototype.warp = function(wid) {
   this.grounded = false;
 };
 
-/* ent/ext = up, down, left, right [0,1,2,3] */
-PlayerObject.prototype.pipe = function(ent, ext, wid) {
-  if(ent === 0 || ent === 1) { this.setState(PlayerObject.SNAME.STAND); }
+/* ent/ext = null, up, down, left, right [0,1,2,3,4] */
+PlayerObject.prototype.pipe = function(ent, wid) {
+  if(ent === 1 || ent === 2) { this.setState(PlayerObject.SNAME.STAND); }
+  var wrp = this.game.world.getLevel(this.level).getWarp(wid);
   this.pipeWarp = wid;
   this.pipeTimer = PlayerObject.PIPE_TIME;
   this.pipeDir = ent;
-  this.pipeExt = ext;
+  this.pipeExt = wrp.data;
 };
 
 PlayerObject.prototype.pole = function(p) {

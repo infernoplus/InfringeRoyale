@@ -10,8 +10,11 @@ function ToolWarp(editor) {
   this.valId = document.getElementById("editor-tool-warp-id");
   this.valPos = document.getElementById("editor-tool-warp-pos");
   
+  this.valData = document.getElementById("editor-tool-warp-data");
+  
   var tmp = this;
   this.valId.onchange = function() { tmp.update(); };
+  this.valData.onchange = function() { tmp.update(); };
   
   this.moveTimer = 0;
   this.mmbx = false;
@@ -51,7 +54,7 @@ ToolWarp.prototype.input = function(imp, mous, keys) {
   if(mous.mmb && !this.mmbx) {
     this.mmbx = true;
     var pos = shor2.encode(g.x, g.y);
-    var wrp = {id: parseInt(Math.random()*255), pos: pos};
+    var wrp = {id: parseInt(Math.random()*255), pos: pos, data: 0};
     this.zone.warp.push(wrp);
     this.select(wrp);
     return;
@@ -62,10 +65,11 @@ ToolWarp.prototype.input = function(imp, mous, keys) {
 ToolWarp.prototype.update = function() {
   try {
     var id = Math.max(0, Math.min(255, parseInt(this.valId.value)));
+    var data = Math.max(0, Math.min(255, parseInt(this.valData.value)));
     
-    if(isNaN(id)) { throw "oof"; }
+    if(isNaN(id) || isNaN(data)) { throw "oof"; }
     
-    if(this.selected) { this.selected.id = id; }
+    if(this.selected) { this.selected.id = id; this.selected.data = data; }
   }
   catch(ex) { return; }
 };
@@ -75,6 +79,7 @@ ToolWarp.prototype.select = function(warp) {
   
   this.valId.value = warp.id;
   this.valPos.innerHTML = warp.pos;
+  this.valData.value = warp.data;
 };
 
 ToolWarp.prototype.move = function(x,y) {

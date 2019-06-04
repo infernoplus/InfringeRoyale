@@ -28,7 +28,7 @@ FireBreathProj.ID = 0xA2;
 FireBreathProj.NAME = "FIRE BREATH PROJECTILE"; // Used by editor
 
 FireBreathProj.ANIMATION_RATE = 2;
-FireBreathProj.SOFFSET = vec2.make(-1., -.25); // Difference between position of sprite and hitbox.
+FireBreathProj.SOFFSET = vec2.make(-.5, -.25); // Difference between position of sprite and hitbox.
 
 FireBreathProj.LIFE_MAX = 175;
 FireBreathProj.DEAD_ANIM_LENGTH = 3;

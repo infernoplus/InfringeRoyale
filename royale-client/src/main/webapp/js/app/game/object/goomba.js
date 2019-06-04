@@ -24,8 +24,15 @@ function GoombaObject(game, level, zone, pos, oid, variant) {
   this.fallSpeed = 0;
   this.grounded = false;
   
+  /* Var */
+  this.hide = false;
+  this.hideTimer = 0;
+  this.proxHit = false;    // So we don't send an enable event every single frame while waiting for server response.
+  
   /* Control */
-  this.dir = false; /* false = left, true = right */
+  this.dir = true; /* false = right, true = left */
+  
+  this.disable();
 }
 
 
@@ -36,6 +43,9 @@ GoombaObject.NAME = "GOOMBA"; // Used by editor
 
 GoombaObject.ANIMATION_RATE = 3;
 GoombaObject.VARIANT_OFFSET = 0x50;   //5 rows down in the sprite sheet
+
+GoombaObject.ENABLE_FADE_TIME = 15;
+GoombaObject.ENABLE_DIST = 26;          // Distance to player needed for proximity to trigger and the enemy to be enabled
 
 GoombaObject.DEAD_TIME = 60;
 GoombaObject.BONK_TIME = 90;
@@ -82,10 +92,15 @@ GoombaObject.prototype.update = function(event) {
   switch(event) {
     case 0x00 : { this.kill(); break; }
     case 0x01 : { this.bonk(); break; }
+    case 0xA0 : { this.enable(); break; }
   }
 };
 
 GoombaObject.prototype.step = function() {
+  /* Disabled */
+  if(this.hide) { this.proximity(); return; }
+  else if(this.hideTimer > 0) { this.hideTimer--; }
+  
   /* Bonked */
   if(this.state === GoombaObject.STATE.BONK) {
     if(this.bonkTimer++ > GoombaObject.BONK_TIME) { this.destroy(); return; }
@@ -178,7 +193,26 @@ GoombaObject.prototype.physics = function() {
   if(changeDir) { this.dir = !this.dir; }
 };
 
-GoombaObject.prototype.damage = function(p) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); };
+/* Tests against client player to see if they are near enough that we should enable this enemy. */
+/* On a successful test we send a object event 0xA0 to the server to trigger this enemy being enabled for all players */
+GoombaObject.prototype.proximity = function() {
+  var ply = this.game.getPlayer();
+  if(ply && !ply.dead && ply.level === this.level && ply.zone === this.zone && !this.proxHit && vec2.distance(ply.pos, this.pos) < GoombaObject.ENABLE_DIST) {
+    this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0xA0));
+    this.proxHit = true;
+  }
+};
+
+GoombaObject.prototype.enable = function() {
+  this.hide = false;
+  this.hideTimer = GoombaObject.ENABLE_FADE_TIME;
+};
+
+GoombaObject.prototype.disable = function() {
+  this.hide = true;
+};
+
+GoombaObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); } };
 
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
 /* Generally triggred by shells, fireballs, etc */
@@ -223,8 +257,12 @@ GoombaObject.prototype.setState = function(STATE) {
 };
 
 GoombaObject.prototype.draw = function(sprites) {
+  /* Disabled */
+  if(this.hide) { return; }
+
   var mod;
   if(this.state === GoombaObject.STATE.BONK) { mod = 0x03; }
+  else if(this.hideTimer > 0) { mod = 0xA0 + parseInt((1.-(this.hideTimer/GoombaObject.ENABLE_FADE_TIME))*32.); }
   else { mod = 0x00; }
   
   if(this.sprite.INDEX instanceof Array) {

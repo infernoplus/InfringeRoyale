@@ -187,7 +187,7 @@ Game.prototype.doNET018 = function(n) {
 
 /* OBJECT_EVENT_TRIGGER [0x20] */
 Game.prototype.doNET020 = function(n) {
-  if(n.pid === this.pid) { return; }                  // Don't repeat events that we reported.
+  if(n.pid === this.pid && n.type < 0xA0) { return; }                  // Don't repeat events that we reported, unless they fall into the 'explicit sync' category.
   var obj = this.getObject(n.level, n.zone, n.oid);
   if(obj) {
     obj.update(n.type);
@@ -224,7 +224,7 @@ Game.prototype.doInput = function() {
   if(keys[83] || keys[40]) { dir[1]--; } // S or DOWN
   if(keys[65] || keys[37]) { dir[0]--; } // A or LEFT
   if(keys[68] || keys[39]) { dir[0]++; } // D or RIGHT
-  var a = keys[32] || keys[17]; // SPACE or RIGHT CONTROL
+  var a = keys[32]; // SPACE
   var b = keys[16] || keys[45]; // Shift or num0
   
   if(mous.spin) { this.display.camera.zoom(mous.spin); } // Mouse wheel -> Camera zoom

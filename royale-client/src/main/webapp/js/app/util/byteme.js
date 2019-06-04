@@ -373,7 +373,7 @@ td32.TILE_PROPERTIES = {
             else if(r.definition === this) { cx = x+1; }
             else { return; }
             
-            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.5) { ply.pipe(1, -1, td.data); }
+            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.5) { ply.pipe(2, td.data); }
           }
         }
       }
@@ -381,7 +381,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Warp Pipe Horiz */
   0x53: {
-    NAME: "WARP PIPE HORIZ",
+    NAME: "WARP PIPE RIGHT",
     COLLIDE: true,
     HIDDEN: false,
     ASYNC: true,
@@ -390,7 +390,7 @@ td32.TILE_PROPERTIES = {
         /* Push */
         case 0x02 : {
           if(game.pid === pid) {
-            game.getPlayer().pipe(3, 0, td.data);
+            game.getPlayer().pipe(4, td.data);
           }
         }
       }

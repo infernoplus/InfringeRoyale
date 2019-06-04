@@ -25,11 +25,17 @@ function TroopaObject(game, level, zone, pos, oid, fly, variant) {
   this.grounded = false;
   
   /* Var */
-  this.kickTimer = 0;
+  this.hide = false;
+  this.hideTimer = 0;
+  this.proxHit = false;    // So we don't send an enable event every single frame while waiting for server response.
+  
+  this.immuneTimer = 0;
   
   /* Control */
   this.rev = false; /* false -> loc[0], true -> loc[1] */
-  this.dir = false; /* false = left, true = right */
+  this.dir = true; /* false = right, true = left */
+  
+  this.disable();
 }
 
 
@@ -103,7 +109,7 @@ TroopaObject.prototype.step = function() {
   }
   
   /* Normal Gameplay */
-  if(this.kickTimer > 0) { this.kickTimer--; }
+  if(this.immuneTimer > 0) { this.immuneTimer--; }
   
   this.control();
   this.physics();
@@ -218,6 +224,12 @@ TroopaObject.prototype.checkGround = function() {
   return tile.definition.COLLIDE;
 };
 
+/* Tests against client player to see if they are near enough that we should enable this enemy. */
+/* On a successful test we send a object event 0xA0 to the server to trigger this enemy being enabled for all players */
+TroopaObject.prototype.proximity = KoopaObject.prototype.proximity;
+TroopaObject.prototype.enable = KoopaObject.prototype.enable;
+TroopaObject.prototype.disable = KoopaObject.prototype.disable;
+
 TroopaObject.prototype.damage = KoopaObject.prototype.damage;
 
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
@@ -246,9 +258,9 @@ TroopaObject.prototype.playerCollide = function(p) {
     var dir = p.pos.x-this.pos.x > 0;
     this.stomped(dir);
     this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir?0x10:0x11));
-    this.kickTimer = KoopaObject.PLAYER_KICK_IMMUNE_TIME;
+    this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME;
   }
-  else if(this.kickTimer <= 0) { p.damage(this); }
+  else if(this.immuneTimer <= 0) { p.damage(this); }
 };
 TroopaObject.prototype.playerStomp = KoopaObject.prototype.playerStomp;
 
@@ -263,6 +275,7 @@ TroopaObject.prototype.setState = KoopaObject.prototype.setState;
 TroopaObject.prototype.draw = function(sprites) {
   var mod;
   if(this.state === TroopaObject.STATE.BONK) { mod = 0x03; }
+  else if(this.hideTimer > 0) { mod = 0xA0 + parseInt((1.-(this.hideTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }
   else { mod = 0x00; }
   
   if(this.sprite.INDEX instanceof Array) {

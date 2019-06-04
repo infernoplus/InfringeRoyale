@@ -24,10 +24,16 @@ function KoopaObject(game, level, zone, pos, oid, fly, variant) {
   this.grounded = false;
   
   /* Var */
+  this.hide = false;
+  this.hideTimer = 0;
+  this.proxHit = false;    // So we don't send an enable event every single frame while waiting for server response.
+  
   this.immuneTimer = 0;
   
   /* Control */
-  this.dir = false; /* false = left, true = right */
+  this.dir = true; /* false = right, true = left */
+  
+  this.disable();
 }
 
 
@@ -38,6 +44,9 @@ KoopaObject.NAME = "KOOPA"; // Used by editor
 
 KoopaObject.ANIMATION_RATE = 3;
 KoopaObject.VARIANT_OFFSET = 0x20; //2 rows down in the sprite sheet
+
+KoopaObject.ENABLE_FADE_TIME = 15;
+KoopaObject.ENABLE_DIST = 26;          // Distance to player needed for proximity to trigger and the enemy to be enabled
 
 KoopaObject.BONK_TIME = 90;
 KoopaObject.BONK_IMP = vec2.make(0.25, 0.4);
@@ -96,10 +105,15 @@ KoopaObject.prototype.update = function(event) {
     case 0x01 : { this.bonk(); break; }
     case 0x10 : { this.stomped(true); break; }
     case 0x11 : { this.stomped(false); break; }
+    case 0xA0 : { this.enable(); break; }
   }
 };
 
 KoopaObject.prototype.step = function() {
+  /* Disabled */
+  if(this.hide) { this.proximity(); return; }
+  else if(this.hideTimer > 0) { this.hideTimer--; }
+  
   /* Bonked */
   if(this.state === KoopaObject.STATE.BONK) {
     if(this.bonkTimer++ > KoopaObject.BONK_TIME) { this.destroy(); return; }
@@ -208,7 +222,26 @@ KoopaObject.prototype.interaction = function() {
   }
 };
 
-KoopaObject.prototype.damage = function(p) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); };
+/* Tests against client player to see if they are near enough that we should enable this enemy. */
+/* On a successful test we send a object event 0xA0 to the server to trigger this enemy being enabled for all players */
+KoopaObject.prototype.proximity = function() {
+  var ply = this.game.getPlayer();
+  if(ply && !ply.dead && ply.level === this.level && ply.zone === this.zone && !this.proxHit && vec2.distance(ply.pos, this.pos) < KoopaObject.ENABLE_DIST) {
+    this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0xA0));
+    this.proxHit = true;
+  }
+};
+
+KoopaObject.prototype.enable = function() {
+  this.hide = false;
+  this.hideTimer = KoopaObject.ENABLE_FADE_TIME;
+};
+
+KoopaObject.prototype.disable = function() {
+  this.hide = true;
+};
+
+KoopaObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); } };
 
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
 /* Generally triggred by shells, fireballs, etc */
@@ -271,6 +304,7 @@ KoopaObject.prototype.setState = function(STATE) {
 KoopaObject.prototype.draw = function(sprites) {
   var mod;
   if(this.state === KoopaObject.STATE.BONK) { mod = 0x03; }
+  else if(this.hideTimer > 0) { mod = 0xA0 + parseInt((1.-(this.hideTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }
   else { mod = 0x00; }
   
   if(this.sprite.INDEX instanceof Array) {

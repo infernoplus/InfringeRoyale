@@ -135,6 +135,7 @@ Display.prototype.drawObject = function() {
       case 0x01 : { context.save(); rest = true; context.globalAlpha = .5; break; }  // 50% Transparent
       case 0x02 : { if(parseInt(this.game.frame*.5) % 2 === 0) { context.save(); rest = true; context.globalCompositeOperation = "lighter"; } break; }  // Flashing Composite
       case 0x03 : { ry = true; break; } // Vertical mirror
+      default : { if(sprite.mode >= 0xA0 && sprite.mode < 0xC0) { context.save(); rest = true; context.globalAlpha = parseFloat(sprite.mode-0xA0)/32.; break; } } // Transparency settings
     }
     
     if(rx || ry) { context.save(); context.scale(rx?-1.:1., ry?-1.:1.); }

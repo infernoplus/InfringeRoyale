@@ -80,7 +80,7 @@ FireObject.prototype.physics = function() {
   
   /* Hacky but... whatever */
   var plyr = this.game.getPlayer();
-  if(plyr && plyr.level === this.level && plyr.zone === this.zone)
+  if(plyr && !plyr.dead && plyr.level === this.level && plyr.zone === this.zone)
   for(var i=0;i<FireObject.PARTS;i++) {
     var pos = vec2.add(vec2.add(this.pos, FireObject.OFFSET), vec2.scale(vec, FireObject.SPACING*i));
     var hit = squar.intersection(plyr.pos, plyr.dim, pos, this.dim);
