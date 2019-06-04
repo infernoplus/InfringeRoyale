@@ -11,7 +11,7 @@ import org.infpls.royale.server.util.*;
 
 public abstract class GameLobby {
   private final static String LOBBY_FILE = "lobby";
-  private final static String GAME_FILE = "smb";
+  private final static String GAME_FILE = "world-1";
   
   private final static int MIN_PLAYERS = 2;          // Min players needed to vote start
   private final static int MAX_PLAYERS = 99;         // Max players, game starts automatically

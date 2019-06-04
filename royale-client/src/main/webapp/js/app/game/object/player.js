@@ -49,7 +49,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   /* Control */
   this.btnD = [0,0]; // D-Pad
   this.btnA = false;
-  this.btnB = false;
+  this.btnB = false; this.btnBde = false; // Pressed
   
   /* State */
   this.setState(PlayerObject.SNAME.STAND);
@@ -410,10 +410,11 @@ PlayerObject.prototype.control = function() {
   
   if(!this.grounded) { this.setState(PlayerObject.SNAME.FALL); }
   
-  if(this.btnB && this.power === 2 && !this.isState(PlayerObject.SNAME.DOWN) && !this.isState(PlayerObject.SNAME.SLIDE) && this.attackTimer < 1 && this.attackCharge >= PlayerObject.ATTACK_CHARGE) {
+  if(this.btnB && !this.btnBde && this.power === 2 && !this.isState(PlayerObject.SNAME.DOWN) && !this.isState(PlayerObject.SNAME.SLIDE) && this.attackTimer < 1 && this.attackCharge >= PlayerObject.ATTACK_CHARGE) {
     this.attack();
     this.game.out.push(NET013.encode(0x01));
   }
+  this.btnBde = this.btnB;
   
   if(this.attackTimer > 0 && this.power === 2 && (this.isState(PlayerObject.SNAME.STAND) || this.isState(PlayerObject.SNAME.RUN))) {
     this.setState(PlayerObject.SNAME.ATTACK);
