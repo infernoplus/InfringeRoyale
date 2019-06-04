@@ -1,0 +1,3 @@
+#!/bin/bash
+
+$(yarn bin)/tslint src/**/*.ts --project src/tsconfig.node.json

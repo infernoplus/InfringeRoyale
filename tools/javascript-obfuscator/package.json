@@ -1,0 +1,122 @@
+{
+  "name": "javascript-obfuscator",
+  "version": "0.18.2",
+  "description": "JavaScript obfuscator",
+  "keywords": [
+    "obfuscator",
+    "obfuscation",
+    "uglify",
+    "crush",
+    "code protection",
+    "javascript obfuscator",
+    "js obfuscator"
+  ],
+  "engines": {
+    "node": ">=6.11.5"
+  },
+  "main": "dist/index.js",
+  "browser": "dist/index.browser.js",
+  "bin": {
+    "javascript-obfuscator": "./bin/javascript-obfuscator"
+  },
+  "types": "index.d.ts",
+  "dependencies": {
+    "@babel/runtime": "7.0.0-rc.1",
+    "chalk": "2.4.1",
+    "chance": "1.0.16",
+    "class-validator": "0.9.1",
+    "commander": "2.17.1",
+    "escodegen-wallaby": "1.6.19",
+    "espree": "4.0.0",
+    "estraverse": "4.2.0",
+    "inversify": "4.13.0",
+    "js-string-escape": "1.0.1",
+    "md5": "2.2.1",
+    "mkdirp": "0.5.1",
+    "multimatch": "2.1.0",
+    "opencollective": "1.0.3",
+    "reflect-metadata": "0.1.12",
+    "source-map-support": "0.5.8",
+    "string-template": "1.0.0",
+    "tslib": "1.9.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.0.0-rc.1",
+    "@babel/core": "7.0.0-rc.1",
+    "@babel/plugin-transform-runtime": "7.0.0-rc.1",
+    "@babel/preset-env": "7.0.0-rc.1",
+    "@types/chai": "4.1.4",
+    "@types/chance": "1.0.1",
+    "@types/escodegen": "0.0.6",
+    "@types/estraverse": "0.0.6",
+    "@types/estree": "0.0.38",
+    "@types/md5": "2.1.32",
+    "@types/mkdirp": "0.5.2",
+    "@types/mocha": "5.2.5",
+    "@types/multimatch": "2.1.2",
+    "@types/node": "10.5.8",
+    "@types/rimraf": "2.0.2",
+    "@types/sinon": "5.0.1",
+    "@types/string-template": "1.0.2",
+    "@types/webpack-env": "1.13.6",
+    "awesome-typescript-loader": "5.2.0",
+    "babel-loader": "8.0.0-beta.3",
+    "chai": "4.1.2",
+    "coveralls": "3.0.2",
+    "istanbul": "1.1.0-alpha.1",
+    "mocha": "5.2.0",
+    "pjson": "1.0.9",
+    "pre-commit": "1.2.2",
+    "rimraf": "2.6.2",
+    "sinon": "6.1.5",
+    "threads": "0.12.0",
+    "ts-node": "6.1.0",
+    "tslint": "5.11.0",
+    "tslint-eslint-rules": "5.3.1",
+    "tslint-language-service": "0.9.9",
+    "tslint-microsoft-contrib": "5.2.0",
+    "tslint-webpack-plugin": "1.2.2",
+    "typescript": "3.0.1",
+    "webpack": "4.16.5",
+    "webpack-cli": "3.1.0",
+    "webpack-node-externals": "1.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/javascript-obfuscator/javascript-obfuscator.git"
+  },
+  "scripts": {
+    "start": "scripts/start",
+    "webpack:prod": "scripts/webpack-prod",
+    "webpack:dev": "scripts/webpack-dev",
+    "build": "scripts/build",
+    "watch": "scripts/watch",
+    "removeCacheDir": "scripts/remove-cache-dir",
+    "test:compile": "scripts/test-compile",
+    "test:dev": "scripts/test-dev",
+    "test:devCompilePerformance": "scripts/test-dev-compile-performance",
+    "test:devRuntimePerformance": "scripts/test-dev-runtime-performance",
+    "test:full": "scripts/test-full",
+    "test:coveralls": "scripts/test-coveralls",
+    "test:mocha": "scripts/test-mocha",
+    "test:removeTmpDir": "scripts/test-remove-tmp-dir",
+    "test": "scripts/test",
+    "tslint": "scripts/tslint",
+    "travis": "scripts/travis",
+    "git:addFiles": "scripts/git-add-files",
+    "postinstall": "opencollective postinstall"
+  },
+  "pre-commit": [
+    "build",
+    "git:addFiles"
+  ],
+  "author": {
+    "name": "Timofey Kachalov"
+  },
+  "license": "BSD-2-Clause",
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/javascript-obfuscator",
+    "logo": "https://opencollective.com/opencollective/logo.txt"
+  }
+}

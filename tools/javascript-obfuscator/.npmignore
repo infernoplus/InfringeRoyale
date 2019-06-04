@@ -1,0 +1,7 @@
+.awcache
+.github
+.idea
+coverage
+images
+test/fixtures/compile-performance.js
+test-tmp
