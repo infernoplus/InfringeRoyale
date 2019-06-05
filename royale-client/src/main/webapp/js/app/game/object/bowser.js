@@ -212,6 +212,7 @@ BowserObject.prototype.damage = function(p) { if(!this.dead) { if(--this.health 
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
 /* Generally triggred by shells, fireballs, etc */
 BowserObject.prototype.bonk = function() {
+  if(this.dead) { return; }
   this.setState(BowserObject.STATE.BONK);
   this.moveSpeed = BowserObject.BONK_IMP.x;
   this.fallSpeed = BowserObject.BONK_IMP.y;

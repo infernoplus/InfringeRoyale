@@ -235,6 +235,7 @@ TroopaObject.prototype.damage = KoopaObject.prototype.damage;
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
 /* Generally triggred by shells, fireballs, etc */
 TroopaObject.prototype.bonk = function() {
+  if(this.dead) { return; }
   this.setState(TroopaObject.STATE.BONK);
   this.moveSpeed = KoopaObject.BONK_IMP.x;
   this.fallSpeed = KoopaObject.BONK_IMP.y;
