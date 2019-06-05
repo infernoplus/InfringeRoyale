@@ -666,7 +666,7 @@ PlayerObject.prototype.powerup = function(obj) {
 /* Result is the numerical place we came in. 1 being the best (first place) */
 PlayerObject.prototype.axe = function(result) {
   var txt;
-  if(result <= 4) { txt = this.game.getText(this.level, this.zone, result); }
+  if(result <= 3) { txt = this.game.getText(this.level, this.zone, result); }
   else { txt = this.game.getText(this.level, this.zone, "too bad"); }
   
   if(txt) { this.autoTarget = vec2.add(txt.pos, vec2.make(0., -1.6)); }
