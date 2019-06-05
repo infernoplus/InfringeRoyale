@@ -125,6 +125,7 @@ PlantObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); this.
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
 /* Generally triggred by shells, fireballs, etc */
 PlantObject.prototype.bonk = function() {
+  if(this.dead) { return; }
   this.setState(PlantObject.STATE.BONK);
   this.moveSpeed = PlantObject.BONK_IMP.x;
   this.fallSpeed = PlantObject.BONK_IMP.y;

@@ -37,6 +37,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.pipeTimer = 0;        // Timer for warp pipe animation
   this.pipeDir = -1;  // Direction of current anim.  null up down left right = -1 0 1 2 3
   this.pipeExt = -1;  // Direction of the exit pipe. null up down left right = -1 0 1 2 3
+  this.pipeDelay = 0;
   
   this.poleTimer = 0; // Timer used for flag pole
   this.poleWait = false;  // True when waiting for flag to come all the way down
@@ -49,7 +50,9 @@ function PlayerObject(game, level, zone, pos, pid) {
   /* Control */
   this.btnD = [0,0]; // D-Pad
   this.btnA = false;
-  this.btnB = false; this.btnBde = false; // Pressed
+  this.btnB = false;
+  this.btnBg = false; // More hacky stuff. last b state while grounded
+  this.btnBde = false; // Pressed
   
   /* State */
   this.setState(PlayerObject.SNAME.STAND);
@@ -79,7 +82,8 @@ PlayerObject.FALL_SPEED_MAX = 0.45;
 PlayerObject.FALL_SPEED_ACCEL = 0.085;
 PlayerObject.BOUNCE_LENGTH_MIN = 1;
 PlayerObject.JUMP_LENGTH_MIN = 3;
-PlayerObject.JUMP_LENGTH_MAX = 9;
+PlayerObject.JUMP_LENGTH_MAX = 7;
+PlayerObject.JUMP_SPEED_INC_THRESHOLD = [0.1, 0.2, 0.25];
 PlayerObject.JUMP_DECEL = 0.005;
 PlayerObject.BLOCK_BUMP_THRESHOLD = 0.12;
 
@@ -99,6 +103,7 @@ PlayerObject.ATTACK_ANIM_LENGTH = 3;
 PlayerObject.PIPE_TIME = 30;
 PlayerObject.PIPE_SPEED = 0.06;
 PlayerObject.PIPE_EXT_OFFSET = vec2.make(.5,0.); // Horizontal offset from warp point when exiting warp pipe.
+PlayerObject.PIPE_DELAY = 85;
 
 PlayerObject.POLE_DELAY = 15;
 PlayerObject.POLE_SLIDE_SPEED = 0.15;
@@ -300,14 +305,15 @@ PlayerObject.prototype.step = function() {
   }
   
   /* Warp Pipe */
+  if(this.pipeDelay > 0) { this.pipeDelay--; return; }
   if(this.pipeTimer > 0) {
-    this.pipeTimer--;
     switch(this.pipeDir) {
       case 1 : { this.pos.y += PlayerObject.PIPE_SPEED; break; }
       case 2 : { this.pos.y -= PlayerObject.PIPE_SPEED; break; }
       case 3 : { this.pos.x -= PlayerObject.PIPE_SPEED; break; }
       case 4 : { this.pos.x += PlayerObject.PIPE_SPEED; break; }
     }
+    if(--this.pipeTimer === 1 && this.pipeWarp) { this.pipeDelay = PlayerObject.PIPE_DELAY; }
     if(this.pipeTimer <= 0 && this.pipeWarp) {
       this.warp(this.pipeWarp);
       this.pipeWarp = undefined;
@@ -319,7 +325,8 @@ PlayerObject.prototype.step = function() {
         default : { return; }
       }
       this.pipeTimer = PlayerObject.PIPE_TIME;
-      this.pipeDir = this.pipeExt; 
+      this.pipeDir = this.pipeExt;
+      this.pipeDelay = PlayerObject.PIPE_DELAY;
     }
     return;
   }
@@ -361,6 +368,8 @@ PlayerObject.prototype.autoMove = function() {
 };
 
 PlayerObject.prototype.control = function() {
+  if(this.grounded) { this.btnBg = this.btnB; }
+  
   if(this.isState(PlayerObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).DIM)) {
     if(this.btnD[1] !== -1) {
       this.moveSpeed = (this.moveSpeed + PlayerObject.STUCK_SLIDE_SPEED) * .5; // Rirp
@@ -375,7 +384,7 @@ PlayerObject.prototype.control = function() {
       this.setState(PlayerObject.SNAME.SLIDE);
     }
     else {
-      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, this.btnB?PlayerObject.RUN_SPEED_MAX:PlayerObject.MOVE_SPEED_MAX);
+      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, this.btnBg?PlayerObject.RUN_SPEED_MAX:PlayerObject.MOVE_SPEED_MAX);
       this.setState(PlayerObject.SNAME.RUN);
     }
     this.reverse = this.btnD[0] >= 0;
@@ -394,11 +403,14 @@ PlayerObject.prototype.control = function() {
     }
   }
   
+  var jumpMax = PlayerObject.JUMP_LENGTH_MAX;
+  for(var i=0;i<PlayerObject.JUMP_SPEED_INC_THRESHOLD.length&&Math.abs(this.moveSpeed)>=PlayerObject.JUMP_SPEED_INC_THRESHOLD[i];i++) { jumpMax++; }
+  
   if(this.btnA) {
     if(this.grounded) {
       this.jumping = 0;
     }
-    if(this.jumping > PlayerObject.JUMP_LENGTH_MAX) {
+    if(this.jumping > jumpMax) {
       this.jumping = -1;
     }
   }
