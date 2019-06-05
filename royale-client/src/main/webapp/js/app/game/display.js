@@ -238,7 +238,7 @@ Display.prototype.drawUI = function() {
     context.fillStyle = "white";
     context.font = "32px SmbWeb";
     context.textAlign = "center";
-    context.fillText((this.game.victory<=4?"VICTORY ROYALE #":"TOO BAD #") + this.game.victory, W*.5, 40);
+    context.fillText((this.game.victory<=3?"VICTORY ROYALE #":"TOO BAD #") + this.game.victory, W*.5, 40);
   }
   else {
     context.fillStyle = "white";
