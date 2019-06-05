@@ -15,7 +15,7 @@ public abstract class GameLobby {
   
   private final static int MIN_PLAYERS = 2;          // Min players needed to vote start
   private final static int MAX_PLAYERS = 99;         // Max players, game starts automatically
-  private final static float MIN_VOTE_FRAC = .75f;   // Needs 75% ready vote to start early
+  private final static float MIN_VOTE_FRAC = .90f;   // Needs 75% ready vote to start early
   private final static int MAX_AGE = 1440000;        // Max number of frames before we just close the lobby. This is 12 hours.
   
   private final static int START_DELAY = 150;

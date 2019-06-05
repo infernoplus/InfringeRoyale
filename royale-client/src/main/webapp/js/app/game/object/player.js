@@ -93,7 +93,7 @@ PlayerObject.GENERIC_INDEX = 0x60;
 PlayerObject.DAMAGE_TIME = 45;
 PlayerObject.TRANSFORM_TIME = 18;
 PlayerObject.TRANSFORM_ANIMATION_RATE = 2;
-PlayerObject.STAR_LENGTH = 450;
+PlayerObject.STAR_LENGTH = 360;
 PlayerObject.PROJ_OFFSET = vec2.make(0.75, 1.5);
 PlayerObject.MAX_CHARGE = 60;
 PlayerObject.ATTACK_DELAY = 7;
@@ -226,6 +226,8 @@ PlayerObject.prototype.trigger = function(type) {
 };
 
 PlayerObject.prototype.step = function() {
+  if(this.starTimer > 0) { this.starTimer--; }
+  
   /* Ghost playback */
   if(this.isState(PlayerObject.SNAME.GHOST)) { return; }
   
@@ -335,7 +337,6 @@ PlayerObject.prototype.step = function() {
   this.lastPos = this.pos;
   
   if(this.damageTimer > 0) { this.damageTimer--; }
-  if(this.starTimer > 0) { this.starTimer--; }
   if(this.attackCharge < PlayerObject.MAX_CHARGE) { this.attackCharge++; }
   if(this.attackTimer > 0) { this.attackTimer--; }
   
