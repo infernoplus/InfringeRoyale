@@ -22,6 +22,7 @@ function KoopaObject(game, level, zone, pos, oid, fly, variant) {
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.grounded = false;
+  this.jump = -1;
   
   /* Var */
   this.hide = false;
@@ -56,10 +57,13 @@ KoopaObject.BONK_FALL_SPEED = 0.5;
 KoopaObject.PLAYER_IMMUNE_TIME = 6;  // Player is immune to damage for this many frames after bouncing off or kicking this enemy
 
 KoopaObject.MOVE_SPEED_MAX = 0.075;
-KoopaObject.SHELL_MOVE_SPEED_MAX = 0.275;
+KoopaObject.SHELL_MOVE_SPEED_MAX = 0.35;
 
 KoopaObject.FALL_SPEED_MAX = 0.35;
 KoopaObject.FALL_SPEED_ACCEL = 0.085;
+
+KoopaObject.JUMP_LENGTH_MAX = 20;
+KoopaObject.JUMP_DECEL = 0.025;
 
 KoopaObject.TRANSFORM_TIME = 175;
 KoopaObject.TRANSFORM_THRESHOLD = 75;
@@ -144,13 +148,28 @@ KoopaObject.prototype.step = function() {
 };
 
 KoopaObject.prototype.control = function() {
-  if(this.state === KoopaObject.STATE.FLY) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
-  if(this.state === KoopaObject.STATE.RUN) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
-  if(this.state === KoopaObject.STATE.SPIN) { this.moveSpeed = this.dir ? -KoopaObject.SHELL_MOVE_SPEED_MAX : KoopaObject.SHELL_MOVE_SPEED_MAX; }
-  if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) { this.moveSpeed = 0; }
+  if(this.state === KoopaObject.STATE.FLY) {
+    this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX;
+    if(this.grounded) { this.jump = 0; }
+  }
+  else if(this.state === KoopaObject.STATE.RUN) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
+  else if(this.state === KoopaObject.STATE.SPIN) { this.moveSpeed = this.dir ? -KoopaObject.SHELL_MOVE_SPEED_MAX : KoopaObject.SHELL_MOVE_SPEED_MAX; }
+  else if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) { this.moveSpeed = 0; }
+  
+  if(this.jump > KoopaObject.JUMP_LENGTH_MAX) { this.jump = -1; }
 };
 
 KoopaObject.prototype.physics = function() {
+  if(this.jump !== -1) {
+    this.fallSpeed = KoopaObject.FALL_SPEED_MAX - (this.jump*KoopaObject.JUMP_DECEL);
+    this.jump++;
+    this.grounded = false;
+  }
+  else {
+    if(this.grounded) { this.fallSpeed = 0; }
+    this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
+  }
+  
   if(this.grounded) {
     this.fallSpeed = 0;
   }
@@ -201,7 +220,7 @@ KoopaObject.prototype.physics = function() {
       }
       else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
         movy.y = tile.pos.y - this.dim.y;
-        this.jumping = -1;
+        this.jump = -1;
         this.fallSpeed = 0;
       }
     }
@@ -255,7 +274,7 @@ KoopaObject.prototype.bonk = function() {
 
 /* dir (true = left, false = right) */
 KoopaObject.prototype.stomped = function(dir) {
-  if(this.state === KoopaObject.STATE.FLY) { this.setState(KoopaObject.STATE.RUN); }
+  if(this.state === KoopaObject.STATE.FLY) { this.setState(KoopaObject.STATE.RUN); this.jump = -1; }
   else if(this.state === KoopaObject.STATE.RUN) { this.setState(KoopaObject.STATE.SHELL); this.transformTimer = KoopaObject.TRANSFORM_TIME; }
   else if(this.state === KoopaObject.STATE.SPIN) { this.setState(KoopaObject.STATE.SHELL); this.transformTimer = KoopaObject.TRANSFORM_TIME; }
   else if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) {
@@ -312,7 +331,7 @@ KoopaObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        var sp = s[!mod?i:(s.length-1-i)][j];
+        var sp = s[mod!==0x03?i:(s.length-1-i)][j];
         switch(this.variant) {
           case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
           default : { break; }

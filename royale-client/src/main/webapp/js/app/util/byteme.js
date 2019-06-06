@@ -278,6 +278,37 @@ td32.TILE_PROPERTIES = {
       }
     }
   },
+  /* Vine Block */
+  0x18: {
+    NAME: "VINE BLOCK",
+    COLLIDE: true,
+    HIDDEN: false,
+    ASYNC: false,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Small bump */
+        case 0x10 : {
+          if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+          var rep = 98307; // Replacement td32 data for tile.
+          var vin = td32.data(10813796, td.data); // Vine td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).grow(x,y+1,vin);
+          td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          break;
+        }
+        /* Big bump */
+        case 0x11 : {
+          if(game.pid === pid) { game.coinage(); game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+          var rep = 98307; // Replacement td32 data for tile.
+          var vin = td32.data(10813796, td.data); // Vine td32 data for tile.
+          game.world.getZone(level, zone).replace(x,y,rep);
+          game.world.getZone(level, zone).grow(x,y+1,vin);
+          td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          break;
+        }
+      }
+    }
+  },
   /* Item Block Invisible */
   0x15: {
     NAME: "ITEM BLOCK INVISIBLE",
@@ -373,7 +404,7 @@ td32.TILE_PROPERTIES = {
             else if(r.definition === this) { cx = x+1; }
             else { return; }
             
-            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.5) { ply.pipe(2, td.data); }
+            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) { ply.pipe(2, td.data); }
           }
         }
       }
@@ -426,6 +457,24 @@ td32.TILE_PROPERTIES = {
           if(game.pid === pid) {
             var ply = game.getPlayer();
             if(ply.pos.x >= x) { ply.pole(vec2.make(x,y)); }
+          }
+        }
+      }
+    }
+  },
+  /* Vine */
+  0xA5: {
+    NAME: "VINE",
+    COLLIDE: false,
+    HIDDEN: false,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Touch */
+        case 0x00 : {
+          if(game.pid === pid) {
+            var ply = game.getPlayer();
+            if(ply.pos.x >= x && ply.pos.x <= x+1.) { ply.vine(vec2.make(x,y), td.data); }
           }
         }
       }

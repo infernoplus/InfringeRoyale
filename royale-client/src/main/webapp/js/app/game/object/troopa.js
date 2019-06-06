@@ -283,7 +283,7 @@ TroopaObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        var sp = s[!mod?i:(s.length-1-i)][j];
+        var sp = s[mod!==0x03?i:(s.length-1-i)][j];
         switch(this.variant) {
           case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
           default : { break; }

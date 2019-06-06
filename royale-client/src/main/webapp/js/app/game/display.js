@@ -56,6 +56,7 @@ Display.prototype.draw = function() {
   var dim = zone.dimensions();
   
   context.save();
+  context.translate(.5, .5);
   context.translate(this.canvas.width*.5, this.canvas.height*.5);
   context.scale(this.camera.scale, this.camera.scale);
   context.translate(-this.camera.pos.x*Display.TEXRES, -this.camera.pos.y*Display.TEXRES);

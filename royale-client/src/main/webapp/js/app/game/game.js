@@ -3,7 +3,7 @@
 /* global util, shor2, vec2, td32, MERGE_BYTE */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, FlagObject, TextObject */
+/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, BusObject, FlagObject, TextObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
@@ -346,7 +346,7 @@ Game.prototype.getPlatforms = function() {
   var plts = [];
   for(var i=0;i<this.objects.length;i++) {
     var obj = this.objects[i];
-    if(obj instanceof PlatformObject && obj.level === zon.level && obj.zone === zon.id) {
+    if((obj instanceof PlatformObject || obj instanceof BusObject) && obj.level === zon.level && obj.zone === zon.id) {
       plts.push(obj);
     }
   }

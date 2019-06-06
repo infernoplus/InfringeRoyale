@@ -102,6 +102,7 @@ function Zone(level, data) {
   
   this.bumped = [];
   this.effects = [];
+  this.vines = [];
 }
 
 Zone.prototype.update = function(game, pid, level, zone, x, y, type) {
@@ -111,6 +112,7 @@ Zone.prototype.update = function(game, pid, level, zone, x, y, type) {
 };
 
 Zone.prototype.step = function() {
+  /* Update Bumps */
   for(var i=0;i<this.bumped.length;i++) {
     var e = this.bumped[i];
     var td = td32.decode(this.data[e.y][e.x]);
@@ -121,10 +123,19 @@ Zone.prototype.step = function() {
       this.bumped.splice(i--,1);
     }
   }
+  
+  /* Update effects */
   for(var i=0;i<this.effects.length;i++) {
     var fx = this.effects[i];
     if(fx.garbage) { this.effects.splice(i--,1); }
     else { fx.step(); }
+  }
+  
+  /* Grow vines */
+  for(var i=0;i<this.vines.length;i++) {
+    var vn = this.vines[i];
+    if(vn.y < 0) { this.vines.splice(i--, 1); continue; }
+    this.data[vn.y--][vn.x] = vn.td;
   }
 };
 
@@ -143,6 +154,11 @@ Zone.prototype.bump = function(x,y) {
 Zone.prototype.replace = function(x,y,td) {
   var yo = this.dimensions().y-1-y;
   this.data[yo][x] = td;
+};
+
+Zone.prototype.grow = function(x,y,td) {
+  var yo = this.dimensions().y-1-y;
+  this.vines.push({x: x, y: yo, td: td});
 };
 
 Zone.prototype.break = function(x,y,td) {
