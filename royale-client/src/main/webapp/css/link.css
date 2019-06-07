@@ -1,0 +1,39 @@
+.link {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin: 0px;
+  padding: 0px;
+  height: 36px;
+  background-color: rgba(0, 0, 0, 0.0);
+}
+
+.link-twit {
+  cursor: pointer;
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  background-image: url(../img/home/twit.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 36px 36px;
+}
+
+.link-twit:hover {
+  background-image: url(../img/home/twit-inv.png);
+}
+
+.link-patr {
+  cursor: pointer;
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  background-image: url(../img/home/patr.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 36px 36px;
+}
+
+.link-patr:hover {
+  background-image: url(../img/home/patr-inv.png);
+}
