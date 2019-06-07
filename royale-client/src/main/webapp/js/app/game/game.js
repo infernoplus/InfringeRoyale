@@ -34,6 +34,7 @@ function Game(data) {
   
   this.remain = 0;               // Number of players still alive
   
+  this.lives = 0;
   this.coins = 0;
   
   this.victory = 0;
@@ -58,6 +59,8 @@ Game.FDLC_TARGET = 3;
 Game.FDLC_MAX = Game.FDLC_TARGET+2;
 
 Game.LEVEL_WARP_TIME = 60;
+
+Game.COINS_TO_LIFE = 50;
 
 Game.prototype.load = function(data) {
   app.menu.load.show();
@@ -179,7 +182,18 @@ Game.prototype.doNET013 = function(n) {
 
 /* PLAYER_RESULT_REQUEST [0x18] */
 Game.prototype.doNET018 = function(n) {
-  if(n.pid !== this.pid || n.result <= 0x00) { return; }
+  if(n.result <= 0x00) { return; }
+
+  var obj = this.getGhost(n.pid);
+  if(obj) { 
+    var txt = this.getText(obj.level, obj.zone, n.result.toString());
+    if(txt) {
+      var nam = this.getPlayerInfo(n.pid).name;
+      this.createObject(TextObject.ID, txt.level, txt.zone, vec2.add(txt.pos, vec2.make(0, -3)), [undefined, -0.1, 0.25, "#FFFFFF", nam]);
+    }
+  }
+
+  if(n.pid !== this.pid) { return; }
   var ply = this.getPlayer();
   if(ply) { ply.axe(n.result); }
   this.victory = n.result;
@@ -264,8 +278,11 @@ Game.prototype.doStep = function() {
   /* Step world to update bumps & effects & etc */
   this.world.step();
   
-  /* Triggers game over if player is dead for 15 frames. */
-  if(this.startDelta !== undefined && !this.gameOver && !ply) { if(++this.gameOverTimer > 15) { this.gameOver = true; this.gameOverTimer = 0; } }
+  /* Triggers game over if player is dead for 15 frames and has zero lives. If we have a life we respawn instead. */
+  if(this.startDelta !== undefined && !this.gameOver && !ply) {
+    if(this.lives > 0 && this.victory <= 0) { var rsp = this.getZone().level; this.doSpawn(); this.levelWarp(rsp); this.lives--; }
+    else if(++this.gameOverTimer > 15) { this.gameOver = true; this.gameOverTimer = 0; }
+  }
   /* Triggers page refresh after 5 seconds of a game over. */
   else if(this.gameOver) { if(++this.gameOverTimer > 150) { app.close(); } }
   else { this.gameOverTimer = 0; }
@@ -416,6 +433,12 @@ Game.prototype.levelWarp = function(lid) {
 /* When this client player collects a coin */
 Game.prototype.coinage = function() {
   this.coins = Math.min(99, this.coins+1);
+  if(this.coins >= Game.COINS_TO_LIFE) { this.lifeage(); this.coins = 0; }
+};
+
+/* When the client player collects a life */
+Game.prototype.lifeage = function() {
+  this.lives = Math.min(99, this.lives+1);
 };
 
 Game.prototype.loop = function() {

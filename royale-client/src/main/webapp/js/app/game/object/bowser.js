@@ -94,7 +94,7 @@ BowserObject.prototype.update = function(event) { /* ASYNC */ };
 BowserObject.prototype.step = function() {
   /* Bonked */
   if(this.state === BowserObject.STATE.BONK) {
-    if(this.bonkTimer++ > BowserObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > BowserObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= BowserObject.BONK_DECEL;
@@ -220,10 +220,8 @@ BowserObject.prototype.bonk = function() {
 };
 
 BowserObject.prototype.kill = function() { /* No standard killstate */ };
-
-BowserObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+BowserObject.prototype.isTangible = GameObject.prototype.isTangible;
+BowserObject.prototype.destroy = GameObject.prototype.destroy;
 
 BowserObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

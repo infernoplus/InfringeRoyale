@@ -1,5 +1,6 @@
 "use strict";
 /* global app */
+/* global shor2 */
 
 function ToolZone(editor) {
   this.editor = editor;
@@ -19,6 +20,15 @@ function ToolZone(editor) {
   
   this.btnSize = document.getElementById("editor-tool-zone-resize");
   this.btnSize.onclick = function() { tmp.resize(); };
+  
+  this.btnShiftX = document.getElementById("editor-tool-zone-shiftx");
+  this.btnShiftX.onclick = function() { tmp.shiftX(); };
+  this.btnUnshiftX = document.getElementById("editor-tool-zone-unshiftx");
+  this.btnUnshiftX.onclick = function() { tmp.unshiftX(); };
+  this.btnShiftY = document.getElementById("editor-tool-zone-shifty");
+  this.btnShiftY.onclick = function() { tmp.shiftY(); };
+  this.btnUnshiftY = document.getElementById("editor-tool-zone-unshifty");
+  this.btnUnshiftY.onclick = function() { tmp.unshiftY(); };
 }
 
 ToolZone.prototype.resize = function() {
@@ -40,6 +50,66 @@ ToolZone.prototype.resize = function() {
   }
   
   this.zone.data = rs;
+};
+
+ToolZone.prototype.shiftX = function() {
+  var dat = this.zone.data;
+  var obj = this.zone.obj;
+  var wrp = this.zone.warp;
+  
+  for(var i=0;i<dat.length;i++) {
+    dat[i].shift();
+  }
+  
+  for(var i=0;i<obj.length;i++) {
+    var pos = shor2.decode(obj[i].pos);
+    pos.x--;
+    obj[i].pos = shor2.encode(pos.x, pos.y);
+  }
+  
+  for(var i=0;i<wrp.length;i++) {
+    var pos = shor2.decode(wrp[i].pos);
+    pos.x--;
+    wrp[i].pos = shor2.encode(pos.x, pos.y);
+  }
+};
+
+ToolZone.prototype.unshiftX = function() {
+  var dat = this.zone.data;
+  var obj = this.zone.obj;
+  var wrp = this.zone.warp;
+  
+  for(var i=0;i<dat.length;i++) {
+    dat[i].unshift(30);
+  }
+  
+  for(var i=0;i<obj.length;i++) {
+    var pos = shor2.decode(obj[i].pos);
+    pos.x++;
+    obj[i].pos = shor2.encode(pos.x, pos.y);
+  }
+  
+  for(var i=0;i<wrp.length;i++) {
+    var pos = shor2.decode(wrp[i].pos);
+    pos.x++;
+    wrp[i].pos = shor2.encode(pos.x, pos.y);
+  }
+};
+
+ToolZone.prototype.shiftY = function() {
+  var dat = this.zone.data;
+  dat.shift();
+};
+
+ToolZone.prototype.unshiftY = function() {
+  var dat = this.zone.data;
+  
+  var nu = [];
+  for(var i=0;i<dat[0].length;i++) {
+    nu.push(30);
+  }
+  
+  dat.unshift(nu);
 };
 
 ToolZone.prototype.reload = function() {

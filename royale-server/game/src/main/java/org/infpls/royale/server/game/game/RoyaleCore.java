@@ -35,7 +35,7 @@ public abstract class RoyaleCore {
       final Controller controller = controllers.get(i);
       if(controller.garbage) {
         controllers.remove(i--);
-        global.add(new ByteMe.NET011(controller.pid));
+        if(!(controller.result > 0 && controller.result < 4)) { global.add(new ByteMe.NET011(controller.pid)); }
         regenList = true;
         continue;
       } 

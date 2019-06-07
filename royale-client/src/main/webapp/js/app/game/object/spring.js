@@ -71,7 +71,7 @@ SpringObject.prototype.step = function() {
 
 SpringObject.prototype.interaction = function() {
   var ply = this.game.getPlayer();
-  if(ply && ply.level === this.level && ply.zone === this.zone && !ply.dead) {
+  if(ply && ply.level === this.level && ply.zone === this.zone && ply.isTangible()) {
     if(squar.intersection(this.pos, this.dim, ply.pos, ply.dim)) {
       var cmp = Math.pow(1.-(Math.min(Math.max(0, ply.pos.y - this.pos.y), 2.)*.5),2.);
       if(ply.fallSpeed >= PlayerObject.FALL_SPEED_MAX*.75 && ply.btnA) { ply.jumping = 0; ply.isSpring = true; } /* hacky but works */
@@ -83,7 +83,7 @@ SpringObject.prototype.interaction = function() {
   var min = 2.;
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj instanceof PlayerObject && obj.level === this.level && obj.zone === this.zone && !obj.dead) {
+    if(obj instanceof PlayerObject && obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
       if(squar.intersection(this.pos, this.dim, obj.pos, obj.dim)) {
         var h = Math.min(Math.max(0, obj.pos.y - this.pos.y), 2.);
         if(h < min) { min = h; }
@@ -96,10 +96,8 @@ SpringObject.prototype.interaction = function() {
 };
 
 SpringObject.prototype.kill = function() { };
-
-SpringObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+SpringObject.prototype.destroy = GameObject.prototype.destroy;
+SpringObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 SpringObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

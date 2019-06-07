@@ -69,8 +69,8 @@ CoinObject.prototype.step = function() {
 
 CoinObject.prototype.playerCollide = function(p) {
   if(this.dead || this.garbage) { return; }
+  p.powerup(this);
   this.kill();
-  if(p.pid === this.game.pid) { this.game.coinage(); }
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x00));
 };
 
@@ -83,9 +83,8 @@ CoinObject.prototype.kill = function() {
   this.destroy();
 };
 
-CoinObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+CoinObject.prototype.isTangible = GameObject.prototype.isTangible;
+CoinObject.prototype.destroy = GameObject.prototype.destroy;
 
 CoinObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

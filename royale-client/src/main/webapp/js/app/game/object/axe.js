@@ -69,7 +69,8 @@ AxeObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
 AxeObject.prototype.playerBump = ItemObject.prototype.playerBump;
 
 AxeObject.prototype.kill = ItemObject.prototype.kill;
-AxeObject.prototype.destroy = ItemObject.prototype.destroy;
+AxeObject.prototype.isTangible = GameObject.prototype.isTangible;
+AxeObject.prototype.destroy = GameObject.prototype.destroy;
 
 AxeObject.prototype.setState = ItemObject.prototype.setState;
 AxeObject.prototype.draw = ItemObject.prototype.draw;

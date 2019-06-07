@@ -56,7 +56,8 @@ MushroomObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
 MushroomObject.prototype.playerBump = ItemObject.prototype.playerBump;
 
 MushroomObject.prototype.kill = ItemObject.prototype.kill;
-MushroomObject.prototype.destroy = ItemObject.prototype.destroy;
+MushroomObject.prototype.destroy = GameObject.prototype.destroy;
+MushroomObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 MushroomObject.prototype.setState = ItemObject.prototype.setState;
 MushroomObject.prototype.draw = ItemObject.prototype.draw;

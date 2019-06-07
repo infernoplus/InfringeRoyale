@@ -106,10 +106,8 @@ BlastObject.prototype.playerBump = function(p) {
 };
 
 BlastObject.prototype.kill = function() { };
-
-BlastObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+BlastObject.prototype.isTangible = GameObject.prototype.isTangible;
+BlastObject.prototype.destroy = GameObject.prototype.destroy;
 
 BlastObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

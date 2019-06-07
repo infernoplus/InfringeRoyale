@@ -54,7 +54,8 @@ FlowerObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
 FlowerObject.prototype.playerBump = ItemObject.prototype.playerBump;
 
 FlowerObject.prototype.kill = ItemObject.prototype.kill;
-FlowerObject.prototype.destroy = ItemObject.prototype.destroy;
+FlowerObject.prototype.destroy = GameObject.prototype.destroy;
+FlowerObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 FlowerObject.prototype.setState = ItemObject.prototype.setState;
 FlowerObject.prototype.draw = ItemObject.prototype.draw;

@@ -1,9 +1,9 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, HammerProj */
+/* global GameObject, HammerProj, PlayerObject */
 /* global NET011, NET020 */
 
-function HammerObject(game, level, zone, pos, oid) {
+function HammerObject(game, level, zone, pos, oid, reverse) {
   GameObject.call(this, game, level, zone, pos);
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
@@ -23,16 +23,19 @@ function HammerObject(game, level, zone, pos, oid) {
   this.grounded = false;
   
   /* Var */
-  this.hide = false;
-  this.hideTimer = 0;
+  this.disabled = false;
+  this.disabledTimer = 0;
   this.proxHit = false;    // So we don't send an enable event every single frame while waiting for server response.
   
   this.hammer = undefined;  // last hammer obj we threw
   
   /* Control */
-  this.loc = [this.pos.x, this.pos.x - HammerObject.MOVE_AREA];
+  this.loc = parseInt(reverse)===1?
+    [this.pos.x + HammerObject.MOVE_AREA, this.pos.x]:
+    [this.pos.x, this.pos.x - HammerObject.MOVE_AREA];
   this.attackTimer = 0;
   this.attackAnimTimer = 0;
+  this.double = 0;
   this.groundTimer = 0;
   this.jumpTimer = -1;
   this.reverse = false; /* direction bro is moving */
@@ -57,11 +60,12 @@ HammerObject.BONK_DECEL = 0.925;
 HammerObject.BONK_FALL_SPEED = 0.5;
 
 HammerObject.MOVE_SPEED_MAX = 0.095;
-HammerObject.JUMP_DELAY = 45;        // Time between jumps
+HammerObject.JUMP_DELAY = 55;        // Time between jumps
 HammerObject.MOVE_AREA = 4;          // 4 Blocks horizontal area
 HammerObject.JUMP_LENGTH = 8;        // Length of jump
 HammerObject.JUMP_DECEL = 0.009;     // Jump deceleration
 HammerObject.ATTACK_DELAY = 75;      // Time between attacks
+HammerObject.DOUBLE_RATE = 5;        // How many attacks till a double attack
 HammerObject.ATTACK_ANIM_LENGTH = 13;
 HammerObject.PROJ_OFFSET = vec2.make(.5, 1.25);
     
@@ -107,12 +111,12 @@ HammerObject.prototype.update = function(event) {
 
 HammerObject.prototype.step = function() {
   /* Disabled */
-  if(this.hide) { this.proximity(); return; }
-  else if(this.hideTimer > 0) { this.hideTimer--; }
+  if(this.disabled) { this.proximity(); return; }
+  else if(this.disabledTimer > 0) { this.disabledTimer--; }
   
   /* Bonked */
   if(this.state === HammerObject.STATE.BONK) {
-    if(this.bonkTimer++ > HammerObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > HammerObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= HammerObject.BONK_DECEL;
@@ -125,11 +129,12 @@ HammerObject.prototype.step = function() {
   this.sprite = this.state.SPRITE[parseInt(this.anim/HammerObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Normal Gameplay */
+  this.face();
   this.control();
   this.physics();
   
-  if(this.attackTimer++ > HammerObject.ATTACK_DELAY) { this.attack(); }
   if(this.attackAnimTimer > 0) { this.setState(HammerObject.STATE.ATTACK); this.attach(); this.attackAnimTimer--; }
+  else if(this.attackTimer++ > HammerObject.ATTACK_DELAY) { this.attack(); }
   else { this.hammer = undefined; }
   
   if(this.pos.y < 0.) { this.destroy(); }
@@ -223,24 +228,38 @@ HammerObject.prototype.proximity = function() {
   }
 };
 
+/* Face nearest player */
+HammerObject.prototype.face = function() {
+  var nearest;
+  for(var i=0;i<this.game.objects.length;i++) {
+     var obj = this.game.objects[i];
+     if(obj instanceof PlayerObject && obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
+       if(!nearest || Math.abs(nearest) > vec2.distance(obj.pos, this.pos)) { nearest = obj.pos.x - this.pos.x; }
+     }
+  }
+  if(!nearest) { this.dir = true; }
+  else { this.dir = nearest<0; }
+};
+
 HammerObject.prototype.enable = function() {
-  this.hide = false;
-  this.hideTimer = HammerObject.ENABLE_FADE_TIME;
+  this.disabled = false;
+  this.disabledTimer = HammerObject.ENABLE_FADE_TIME;
 };
 
 HammerObject.prototype.disable = function() {
-  this.hide = true;
+  this.disabled = true;
 };
 
 HammerObject.prototype.attack = function() {
   this.attackAnimTimer = HammerObject.ATTACK_ANIM_LENGTH;
   this.attackTimer = 0;
   this.hammer = this.game.createObject(HammerProj.ID, this.level, this.zone, vec2.add(this.pos, HammerObject.PROJ_OFFSET), [this]);
+  if(++this.double > HammerObject.DOUBLE_RATE) { this.double = 0; this.attackTimer = HammerObject.ATTACK_DELAY; }
 };
 
 /* Keeps the hammer we are throwing attached to us until it's time to actually throw it */
 HammerObject.prototype.attach = function() {
-  if(this.hammer) { this.hammer.pos = vec2.add(this.pos, HammerObject.PROJ_OFFSET); }
+  if(this.hammer) { this.hammer.pos = vec2.add(this.pos, HammerObject.PROJ_OFFSET); this.hammer.dir = !this.dir; }
 };
 
 HammerObject.prototype.playerCollide = function(p) {
@@ -265,10 +284,8 @@ HammerObject.prototype.bonk = function() {
 };
 
 HammerObject.prototype.kill = function() { /* No standard killstate */ };
-
-HammerObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+HammerObject.prototype.isTangible = GameObject.prototype.isTangible;
+HammerObject.prototype.destroy = GameObject.prototype.destroy;
 
 HammerObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -279,11 +296,11 @@ HammerObject.prototype.setState = function(STATE) {
 
 HammerObject.prototype.draw = function(sprites) {
   /* Disabled */
-  if(this.hide) { return; }
+  if(this.disabled) { return; }
   
   var mod;
   if(this.state === HammerObject.STATE.BONK) { mod = 0x03; }
-  else if(this.hideTimer > 0) { mod = 0xA0 + parseInt((1.-(this.hideTimer/HammerObject.ENABLE_FADE_TIME))*32.); }
+  else if(this.disabledTimer > 0) { mod = 0xA0 + parseInt((1.-(this.disabledTimer/HammerObject.ENABLE_FADE_TIME))*32.); }
   else { mod = 0x00; }
   
   if(this.sprite.INDEX instanceof Array) {

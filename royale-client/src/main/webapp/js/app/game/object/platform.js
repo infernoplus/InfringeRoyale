@@ -104,10 +104,8 @@ PlatformObject.prototype.riding = function(obj) {
 };
 
 PlatformObject.prototype.kill = function() { };
-
-PlatformObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+PlatformObject.prototype.destroy = GameObject.prototype.destroy;
+PlatformObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 PlatformObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

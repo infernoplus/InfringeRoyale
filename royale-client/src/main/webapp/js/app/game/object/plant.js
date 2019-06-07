@@ -83,7 +83,7 @@ PlantObject.prototype.update = function(event) {
 PlantObject.prototype.step = function() {
   /* Bonked */
   if(this.state === PlantObject.STATE.BONK) {
-    if(this.bonkTimer++ > PlantObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > PlantObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= PlantObject.BONK_DECEL;
@@ -148,10 +148,8 @@ PlantObject.prototype.playerBump = function(p) {
 };
 
 PlantObject.prototype.kill = function() { };
-
-PlantObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+PlantObject.prototype.destroy = GameObject.prototype.destroy;
+PlantObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 PlantObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

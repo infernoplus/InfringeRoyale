@@ -18,7 +18,7 @@ function FishObject(game, level, zone, pos, oid, delay, impulse) {
   this.anim = 0;
   
   /* Var */
-  this.hidden = false;
+  this.disabled = false;
   this.delayTimer = this.delay;
   this.bonkTimer = 0;
   
@@ -88,7 +88,7 @@ FishObject.prototype.update = function(event) {
 FishObject.prototype.step = function() {
   /* Bonked */
   if(this.state === FishObject.STATE.BONK) {
-    if(this.bonkTimer++ > FishObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > FishObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= FishObject.BONK_DECEL;
@@ -112,19 +112,19 @@ FishObject.prototype.physics = function() {
     this.pos.x += this.moveSpeed*FishObject.DRAG;
     this.pos.y += this.fallSpeed;
   }
-  else { this.hide(); }
+  else { this.disable(); }
 };
 
 FishObject.prototype.jump = function() {
-  this.show();
+  this.enable();
   this.pos = vec2.copy(this.loc);
   this.fallSpeed = FishObject.IMPULSE.y*this.impulse;
   this.moveSpeed = FishObject.IMPULSE.x*this.impulse;
   this.delayTimer = this.delay;
 };
 
-FishObject.prototype.hide = function() { this.hidden = true; };
-FishObject.prototype.show = function() { this.hidden = false; };
+FishObject.prototype.disable = function() { this.disabled = true; };
+FishObject.prototype.enable = function() { this.disabled = false; };
 
 FishObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); } };
 
@@ -140,12 +140,12 @@ FishObject.prototype.bonk = function() {
 
 
 FishObject.prototype.playerCollide = function(p) {
-  if(this.dead || this.garbage || this.hidden) { return; }
+  if(this.dead || this.garbage) { return; }
   p.damage(this);
 };
 
 FishObject.prototype.playerStomp = function(p) {
-  if(this.dead || this.garbage || this.hidden) { return; }
+  if(this.dead || this.garbage) { return; }
   this.bonk();
   p.bounce();
   this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01));
@@ -156,10 +156,8 @@ FishObject.prototype.playerBump = function(p) {
 };
 
 FishObject.prototype.kill = function() { };
-
-FishObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+FishObject.prototype.isTangible = GameObject.prototype.isTangible;
+FishObject.prototype.destroy = GameObject.prototype.destroy;
 
 FishObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -169,7 +167,7 @@ FishObject.prototype.setState = function(STATE) {
 };
 
 FishObject.prototype.draw = function(sprites) {
-  if(this.hidden) { return; }
+  if(this.disabled) { return; }
   
   var mod;
   if(this.state === FishObject.STATE.BONK) { mod = 0x03; }

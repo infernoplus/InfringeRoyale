@@ -386,7 +386,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Warp Pipe */
   0x52: {
-    NAME: "WARP PIPE",
+    NAME: "WARP PIPE SLOW",
     COLLIDE: true,
     HIDDEN: false,
     ASYNC: true,
@@ -404,7 +404,7 @@ td32.TILE_PROPERTIES = {
             else if(r.definition === this) { cx = x+1; }
             else { return; }
             
-            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) { ply.pipe(2, td.data); }
+            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) { ply.pipe(2, td.data, 85); }
           }
         }
       }
@@ -412,7 +412,7 @@ td32.TILE_PROPERTIES = {
   },
   /* Warp Pipe Horiz */
   0x53: {
-    NAME: "WARP PIPE RIGHT",
+    NAME: "WARP PIPE RIGHT SLOW",
     COLLIDE: true,
     HIDDEN: false,
     ASYNC: true,
@@ -421,7 +421,50 @@ td32.TILE_PROPERTIES = {
         /* Push */
         case 0x02 : {
           if(game.pid === pid) {
-            game.getPlayer().pipe(4, td.data);
+            game.getPlayer().pipe(4, td.data, 85);
+          }
+        }
+      }
+    }
+  },
+  /* Warp Pipe */
+  0x54: {
+    NAME: "WARP PIPE FAST",
+    COLLIDE: true,
+    HIDDEN: false,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Down */
+        case 0x01 : {
+          if(game.pid === pid) {
+            var ply = game.getPlayer();
+            var l = game.world.getZone(level, zone).getTile(vec2.make(x-1,y));
+            var r = game.world.getZone(level, zone).getTile(vec2.make(x+1,y));
+            
+            var cx;
+            if(l.definition === this) { cx = x; }
+            else if(r.definition === this) { cx = x+1; }
+            else { return; }
+            
+            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) { ply.pipe(2, td.data, 0); }
+          }
+        }
+      }
+    }
+  },
+  /* Warp Pipe Horiz */
+  0x55: {
+    NAME: "WARP PIPE RIGHT FAST",
+    COLLIDE: true,
+    HIDDEN: false,
+    ASYNC: true,
+    TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+      switch(type) {
+        /* Push */
+        case 0x02 : {
+          if(game.pid === pid) {
+            game.getPlayer().pipe(4, td.data, 0);
           }
         }
       }

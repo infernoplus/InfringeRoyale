@@ -35,7 +35,12 @@ GameObject.prototype.kill = function() {
 
 /* Flags object for deletion. */
 GameObject.prototype.destroy = function() {
+  this.dead = true;
   this.garbage = true;
+};
+
+GameObject.prototype.isTangible = function() {
+  return !this.dead && !this.disabled && this.dim;
 };
 
 /* Returns data needed to draw this object. */

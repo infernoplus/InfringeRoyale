@@ -163,31 +163,27 @@ FireballProj.prototype.physics = function() {
 FireballProj.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj === this || obj.dead || obj.pid === this.owner || obj instanceof PlayerObject || !obj.damage) { continue; }  // Fireballs skip objects that lack a damage function to call, and their owners
-    if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
-      var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
-      if(hit) {
-        if(this.owner === this.game.pid) { obj.damage(this); }     // Fireballs created by other players don't do damage. They are just ghosts.
-        this.kill();
-        return;
+    if(obj === this || obj.pid === this.owner || !obj.isTangible() || obj instanceof PlayerObject || !obj.damage) { continue; }  // Fireballs skip objects that lack a damage function to call, and their owners
+    if(obj.level === this.level && obj.zone === this.zone) {
+      if(squar.intersection(obj.pos, obj.dim, this.pos, this.dim)) {
+        if(this.owner === this.game.pid) { obj.damage(this); }             // Fireballs created by other players don't do damage. They are just ghosts.
+        this.kill(); return;
       }
     }
   }
 };
 
 FireballProj.prototype.playerCollide = function(p) { };
-
 FireballProj.prototype.playerStomp = function(p) { };
-
 FireballProj.prototype.playerBump = function(p) { };
 
 FireballProj.prototype.kill = function() {
   this.setState(FireballProj.STATE.DEAD);
+  this.dead = true;
 };
 
-FireballProj.prototype.destroy = function() {
-  this.garbage = true;
-};
+FireballProj.prototype.isTangible = GameObject.prototype.isTangible;
+FireballProj.prototype.destroy = GameObject.prototype.destroy;
 
 FireballProj.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar, td32 */
-/* global GameObject, MushroomObject, FlowerObject, StarObject, LifeObject, CoinObject, AxeObject, FireballProj */
+/* global GameObject, MushroomObject, FlowerObject, StarObject, LifeObject, CoinObject, AxeObject, FireballProj, PlantObject */
 /* global NET011, NET013, NET018, NET020 */
 
 function PlayerObject(game, level, zone, pos, pid) {
@@ -11,6 +11,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   /* Animation */
   this.anim = 0;
   this.reverse = false;
+  this.arrowFade = 0.;
   
   /* Dead */
   this.deadFreezeTimer = 0;
@@ -39,6 +40,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.pipeDir = -1;  // Direction of current anim.  null up down left right = -1 0 1 2 3
   this.pipeExt = -1;  // Direction of the exit pipe. null up down left right = -1 0 1 2 3
   this.pipeDelay = 0;
+  this.pipeDelayLength = 0;  // Set by the last pipe we went in.
   
   this.poleTimer = 0; // Timer used for flag pole
   this.poleWait = false;  // True when waiting for flag to come all the way down
@@ -108,7 +110,7 @@ PlayerObject.ATTACK_ANIM_LENGTH = 3;
 PlayerObject.PIPE_TIME = 30;
 PlayerObject.PIPE_SPEED = 0.06;
 PlayerObject.PIPE_EXT_OFFSET = vec2.make(.5,0.); // Horizontal offset from warp point when exiting warp pipe.
-PlayerObject.PIPE_DELAY = 85;
+PlayerObject.WEED_EAT_RADIUS = 3;
 
 PlayerObject.POLE_DELAY = 15;
 PlayerObject.POLE_SLIDE_SPEED = 0.15;
@@ -117,6 +119,17 @@ PlayerObject.LEVEL_END_MOVE_OFF = vec2.make(10, 0); // Position offset for where
 PlayerObject.CLIMB_SPEED = 0.125;
 
 PlayerObject.PLATFORM_SNAP_DIST = 0.15;
+
+PlayerObject.ARROW_SPRITE = 0x0FD;
+PlayerObject.ARROW_TEXT = "YOU";
+PlayerObject.ARROW_OFFSET = vec2.make(0., 0.1);
+PlayerObject.TEXT_OFFSET = vec2.make(0., 0.55);
+PlayerObject.TEXT_SIZE = .65;
+PlayerObject.TEXT_COLOR = "#FFFFFF";
+PlayerObject.ARROW_RAD_IN = 3;
+PlayerObject.ARROW_RAD_OUT = 7;
+PlayerObject.ARROW_THRESHOLD_MIN = 4;
+PlayerObject.ARROW_THRESHOLD_MAX = 6;
 
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [
@@ -199,7 +212,7 @@ PlayerObject.STATE = [
   {NAME: PlayerObject.SNAME.SLIDE, ID: 0x23, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_SLIDE]},
   {NAME: PlayerObject.SNAME.FALL, ID: 0x24, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_FALL]},
   {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x25, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.B_TRANSFORM]},
-  {NAME: PlayerObject.SNAME.POLE, ID: 0x26, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_CLIMB1]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x26, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_CLIMB0]},
   {NAME: PlayerObject.SNAME.CLIMB, ID: 0x27, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_CLIMB0,PlayerObject.SPRITE.B_CLIMB1]},
   /* Fire Mario -> 0x40 */
   {NAME: PlayerObject.SNAME.STAND, ID: 0x40, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_STAND]},
@@ -209,7 +222,7 @@ PlayerObject.STATE = [
   {NAME: PlayerObject.SNAME.FALL, ID: 0x44, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_FALL]},
   {NAME: PlayerObject.SNAME.ATTACK, ID: 0x45, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_ATTACK]},
   {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x46, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.F_TRANSFORM]},
-  {NAME: PlayerObject.SNAME.POLE, ID: 0x47, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_CLIMB1]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x47, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_CLIMB0]},
   {NAME: PlayerObject.SNAME.CLIMB, ID: 0x48, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_CLIMB0,PlayerObject.SPRITE.F_CLIMB1]},
   /* Generic -> 0x60 */
   {NAME: PlayerObject.SNAME.DEAD, DIM: DIM0, ID: 0x60, SPRITE: [PlayerObject.SPRITE.G_DEAD]},
@@ -339,9 +352,10 @@ PlayerObject.prototype.step = function() {
       case 3 : { this.pos.x -= PlayerObject.PIPE_SPEED; break; }
       case 4 : { this.pos.x += PlayerObject.PIPE_SPEED; break; }
     }
-    if(--this.pipeTimer === 1 && this.pipeWarp) { this.pipeDelay = PlayerObject.PIPE_DELAY; }
+    if(--this.pipeTimer === 1 && this.pipeWarp) { this.pipeDelay = this.pipeDelayLength; }
     if(this.pipeTimer <= 0 && this.pipeWarp) {
       this.warp(this.pipeWarp);
+      this.weedeat();
       this.pipeWarp = undefined;
       switch(this.pipeExt) {
         case 1 : { this.pos.y -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
@@ -352,7 +366,7 @@ PlayerObject.prototype.step = function() {
       }
       this.pipeTimer = PlayerObject.PIPE_TIME;
       this.pipeDir = this.pipeExt;
-      this.pipeDelay = PlayerObject.PIPE_DELAY;
+      this.pipeDelay = this.pipeDelayLength;
     }
     return;
   }
@@ -368,6 +382,7 @@ PlayerObject.prototype.step = function() {
   this.control();
   this.physics();
   this.interaction();
+  this.arrow();
   
   if(this.pos.y < 0.) { this.kill(); }
 };
@@ -633,7 +648,7 @@ PlayerObject.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
     if(obj === this) { continue; }
-    if(obj.level === this.level && obj.zone === this.zone && !obj.dead && obj.dim) {
+    if(obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) {
         if(this.starTimer > 0 && obj.bonk) {
@@ -662,6 +677,18 @@ PlayerObject.prototype.interaction = function() {
   }
 };
 
+/* Shows or hides the YOU arrow over the player based on crowdedness */
+PlayerObject.prototype.arrow = function() {
+  var pts = 0;
+  for(var i=0;i<this.game.objects.length;i++) {
+    var obj = this.game.objects[i];
+    if(obj !== this && obj instanceof PlayerObject && obj.level === this.level && obj.zone === this.zone) {
+      pts += 1.-(Math.min(PlayerObject.ARROW_RAD_OUT, Math.max(0., vec2.distance(this.pos, obj.pos)-PlayerObject.ARROW_RAD_IN))/PlayerObject.ARROW_RAD_OUT);
+    } 
+  }
+  this.arrowFade = Math.min(PlayerObject.ARROW_THRESHOLD_MAX, Math.max(0., pts-PlayerObject.ARROW_THRESHOLD_MIN))/PlayerObject.ARROW_THRESHOLD_MAX;
+};
+
 PlayerObject.prototype.attack = function() {
   this.attackTimer = PlayerObject.ATTACK_DELAY;
   this.attackCharge -= PlayerObject.ATTACK_CHARGE;
@@ -684,17 +711,16 @@ PlayerObject.prototype.powerup = function(obj) {
   if(obj instanceof MushroomObject && this.power < 1) { this.transform(1); return; }
   if(obj instanceof FlowerObject && this.power < 2) { this.transform(2); return; }
   if(obj instanceof StarObject) { this.star(); this.game.out.push(NET013.encode(0x02)); return; }
-  if(obj instanceof LifeObject) { return; }
-  if(obj instanceof CoinObject) { return; }
+  if(obj instanceof LifeObject) { this.game.lifeage(); return; }
+  if(obj instanceof CoinObject) { this.game.coinage(); return; }
   if(obj instanceof AxeObject) { this.game.out.push(NET018.encode()); return; }  // Asks server what result to get from picking up the axe and 'winning'
 };
 
 /* This essentially is the win state. */
 /* Result is the numerical place we came in. 1 being the best (first place) */
 PlayerObject.prototype.axe = function(result) {
-  var txt;
-  if(result <= 3) { txt = this.game.getText(this.level, this.zone, result); }
-  else { txt = this.game.getText(this.level, this.zone, "too bad"); }
+  var txt = this.game.getText(this.level, this.zone, result.toString());
+  if(!txt) { txt = this.game.getText(this.level, this.zone, "too bad"); }
   
   if(txt) { this.autoTarget = vec2.add(txt.pos, vec2.make(0., -1.6)); }
 };
@@ -722,13 +748,26 @@ PlayerObject.prototype.warp = function(wid) {
 };
 
 /* ent/ext = null, up, down, left, right [0,1,2,3,4] */
-PlayerObject.prototype.pipe = function(ent, wid) {
+PlayerObject.prototype.pipe = function(ent, wid, delay) {
   if(ent === 1 || ent === 2) { this.setState(PlayerObject.SNAME.STAND); }
   var wrp = this.game.world.getLevel(this.level).getWarp(wid);
   this.pipeWarp = wid;
   this.pipeTimer = PlayerObject.PIPE_TIME;
   this.pipeDir = ent;
   this.pipeExt = wrp.data;
+  this.pipeDelayLength = delay;
+};
+
+/* Kills any plants that would be in the pipe we are coming out of */
+PlayerObject.prototype.weedeat = function() {
+  for(var i=0;i<this.game.objects.length;i++) {
+    var obj = this.game.objects[i];
+    if(obj instanceof PlantObject && !obj.dead) {
+      if(vec2.distance(this.pos, obj.pos) < PlayerObject.WEED_EAT_RADIUS) {
+        obj.destroy();
+      }
+    }
+  }
 };
 
 PlayerObject.prototype.pole = function(p) {
@@ -769,8 +808,9 @@ PlayerObject.prototype.kill = function() {
   if(this.game.getPlayer() === this) { this.game.out.push(NET011.encode()); }
 };
 
-PlayerObject.prototype.destroy = function() {
-  this.garbage = true;
+PlayerObject.prototype.destroy = GameObject.prototype.destroy;
+PlayerObject.prototype.isTangible = function() {
+  return GameObject.prototype.isTangible.call(this) && !this.isState(PlayerObject.SNAME.HIDE) && this.pipeDelay <= 0;
 };
 
 PlayerObject.prototype.setState = function(SNAME) {
@@ -818,6 +858,16 @@ PlayerObject.prototype.draw = function(sprites) {
     if(mod === 0x02) { sprites.push({pos: vec2.add(this.pos, PlayerObject.DIM_OFFSET), reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00}); }
     sprites.push({pos: vec2.add(this.pos, PlayerObject.DIM_OFFSET), reverse: this.reverse, index: this.sprite.INDEX, mode: mod});
   }
+  
+  var mod;
+  if(this.arrowFade <= 0.) { return; }
+  else { mod = 0xA0 + parseInt(this.arrowFade*32.); }
+  sprites.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.ARROW_OFFSET), reverse: false, index: PlayerObject.ARROW_SPRITE, mode: mod});
+};
+
+PlayerObject.prototype.write = function(texts) {
+  if(this.arrowFade <= 0.) { return; }
+  texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.TEXT_OFFSET), size: PlayerObject.TEXT_SIZE, color: "rgba(255,255,255,"+this.arrowFade+")", text: PlayerObject.ARROW_TEXT});
 };
 
 /* Register object class */

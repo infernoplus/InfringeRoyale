@@ -39,7 +39,7 @@ ToolObject.prototype.input = function(imp, mous, keys) {
   
   var g = vec2.chop(this.editor.display.camera.unproject(mous.pos));
   g.y = data.length-g.y-1;
-  if(g.x < 0 || g.x > data[0].length-1 || g.y < 0) { return; }
+  //if(g.x < 0 || g.x > data[0].length-1 || g.y < 0) { return; }  // Don't need this for objects
   
   if(mous.lmb) {
     for(var i=0;i<this.zone.obj.length;i++) {

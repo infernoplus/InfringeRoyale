@@ -181,9 +181,8 @@ ItemObject.prototype.kill = function() {
   this.destroy();
 };
 
-ItemObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+ItemObject.prototype.destroy = GameObject.prototype.destroy;
+ItemObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 ItemObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

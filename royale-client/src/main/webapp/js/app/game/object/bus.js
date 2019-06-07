@@ -100,10 +100,8 @@ BusObject.prototype.riding = function(obj) {
 };
 
 BusObject.prototype.kill = function() { };
-
-BusObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+BusObject.prototype.isTangible = GameObject.prototype.isTangible;
+BusObject.prototype.destroy = GameObject.prototype.destroy;
 
 BusObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

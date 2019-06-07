@@ -25,8 +25,8 @@ function GoombaObject(game, level, zone, pos, oid, variant) {
   this.grounded = false;
   
   /* Var */
-  this.hide = false;
-  this.hideTimer = 0;
+  this.disabled = false;
+  this.disabledTimer = 0;
   this.proxHit = false;    // So we don't send an enable event every single frame while waiting for server response.
   
   /* Control */
@@ -98,12 +98,12 @@ GoombaObject.prototype.update = function(event) {
 
 GoombaObject.prototype.step = function() {
   /* Disabled */
-  if(this.hide) { this.proximity(); return; }
-  else if(this.hideTimer > 0) { this.hideTimer--; }
+  if(this.disabled) { this.proximity(); return; }
+  else if(this.disabledTimer > 0) { this.disabledTimer--; }
   
   /* Bonked */
   if(this.state === GoombaObject.STATE.BONK) {
-    if(this.bonkTimer++ > GoombaObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > GoombaObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= GoombaObject.BONK_DECEL;
@@ -204,12 +204,12 @@ GoombaObject.prototype.proximity = function() {
 };
 
 GoombaObject.prototype.enable = function() {
-  this.hide = false;
-  this.hideTimer = GoombaObject.ENABLE_FADE_TIME;
+  this.disabled = false;
+  this.disabledTimer = GoombaObject.ENABLE_FADE_TIME;
 };
 
 GoombaObject.prototype.disable = function() {
-  this.hide = true;
+  this.disabled = true;
 };
 
 GoombaObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); } };
@@ -246,9 +246,8 @@ GoombaObject.prototype.kill = function() {
   this.setState(GoombaObject.STATE.DEAD);
 };
 
-GoombaObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+GoombaObject.prototype.destroy = GameObject.prototype.destroy;
+GoombaObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 GoombaObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -259,11 +258,11 @@ GoombaObject.prototype.setState = function(STATE) {
 
 GoombaObject.prototype.draw = function(sprites) {
   /* Disabled */
-  if(this.hide) { return; }
+  if(this.disabled) { return; }
 
   var mod;
   if(this.state === GoombaObject.STATE.BONK) { mod = 0x03; }
-  else if(this.hideTimer > 0) { mod = 0xA0 + parseInt((1.-(this.hideTimer/GoombaObject.ENABLE_FADE_TIME))*32.); }
+  else if(this.disabledTimer > 0) { mod = 0xA0 + parseInt((1.-(this.disabledTimer/GoombaObject.ENABLE_FADE_TIME))*32.); }
   else { mod = 0x00; }
   
   if(this.sprite.INDEX instanceof Array) {

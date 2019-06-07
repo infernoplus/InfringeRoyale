@@ -16,6 +16,7 @@ function HammerProj(game, level, zone, pos, oid) {
   
   /* Var */
   this.throwTimer = HammerProj.THROW_DELAY;
+  this.dir = false;
   
   /* Physics */
   this.dim = vec2.make(.5, .5);
@@ -32,7 +33,7 @@ HammerProj.SOFFSET = vec2.make(-.25, -.25); // Difference between position of sp
 
 HammerProj.THROW_DELAY = 13;
 
-HammerProj.IMPULSE = vec2.make(.42, 0.875);
+HammerProj.IMPULSE = vec2.make(.48, 0.915);
 HammerProj.DRAG = .965;
 HammerProj.FALL_SPEED_MAX = 0.65;
 HammerProj.FALL_SPEED_ACCEL = 0.095;
@@ -91,23 +92,17 @@ HammerProj.prototype.physics = function() {
 
 HammerProj.prototype.interaction = function() {
   if(this.state !== HammerProj.STATE.THROW) { return; }
-  for(var i=0;i<this.game.objects.length;i++) {
-    var obj = this.game.objects[i];
-    if(!(obj instanceof PlayerObject) || obj.dead) { continue; }  // Skip everything thats not a living player
-    if(obj.level === this.level && obj.zone === this.zone) {
-      var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
-      if(hit) {
-        obj.damage(this);
-        return;
-      }
+  var ply = this.game.getPlayer();
+  if(ply && ply.isTangible() && ply.level === this.level && ply.zone === this.zone) {
+    if(squar.intersection(ply.pos, ply.dim, this.pos, this.dim)) {
+      ply.damage(this);
+      return;
     }
   }
 };
 
-HammerProj.prototype.throw = function() {
-  var obj = this.game.getObject(this.owner);
-  
-  this.moveSpeed = obj&&obj.dir?HammerProj.IMPULSE.x:-HammerProj.IMPULSE.x;
+HammerProj.prototype.throw = function() {  
+  this.moveSpeed = this.dir?HammerProj.IMPULSE.x:-HammerProj.IMPULSE.x;
   this.fallSpeed = HammerProj.IMPULSE.y;
   
   this.setState(HammerProj.STATE.THROW);
@@ -120,10 +115,8 @@ HammerProj.prototype.playerStomp = function(p) { };
 HammerProj.prototype.playerBump = function(p) { };
 
 HammerProj.prototype.kill = function() { };
-
-HammerProj.prototype.destroy = function() {
-  this.garbage = true;
-};
+HammerProj.prototype.destroy = GameObject.prototype.destroy;
+HammerProj.prototype.isTangible = GameObject.prototype.isTangible;
 
 HammerProj.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -141,7 +134,7 @@ HammerProj.prototype.draw = function(sprites) {
       }
     }
   }
-  else { sprites.push({pos: vec2.add(this.pos, HammerProj.SOFFSET), reverse: false, index: this.sprite.INDEX, mode: 0x00}); }
+  else { sprites.push({pos: vec2.add(this.pos, HammerProj.SOFFSET), reverse: this.dir, index: this.sprite.INDEX, mode: 0x00}); }
 };
 
 /* Register object class */

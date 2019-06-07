@@ -68,42 +68,35 @@ FireObject.prototype.step = function() {
   
   /* Normal Gameplay */
   this.control();
-  this.physics();
+  this.interaction();
 };
 
 FireObject.prototype.control = function() {
   this.rot += FireObject.SPIN_RATE;
 };
 
-FireObject.prototype.physics = function() {
+FireObject.prototype.interaction = function() {
   var vec = vec2.normalize(vec2.make(Math.sin(-this.anim/FireObject.SPIN_RATE), Math.cos(-this.anim/FireObject.SPIN_RATE)));
   
-  /* Hacky but... whatever */
   var plyr = this.game.getPlayer();
-  if(plyr && !plyr.dead && plyr.level === this.level && plyr.zone === this.zone)
-  for(var i=0;i<FireObject.PARTS;i++) {
-    var pos = vec2.add(vec2.add(this.pos, FireObject.OFFSET), vec2.scale(vec, FireObject.SPACING*i));
-    var hit = squar.intersection(plyr.pos, plyr.dim, pos, this.dim);
-    if(hit) { this.playerCollide(plyr); }
+  if(plyr && plyr.isTangible() && plyr.level === this.level && plyr.zone === this.zone) {
+    for(var i=0;i<FireObject.PARTS;i++) {
+      var pos = vec2.add(vec2.add(this.pos, FireObject.OFFSET), vec2.scale(vec, FireObject.SPACING*i));
+      var hit = squar.intersection(plyr.pos, plyr.dim, pos, this.dim);
+      if(hit) { plyr.damage(this); }
+    }
   }
 };
 
-FireObject.prototype.playerCollide = function(p) {
-  if(this.garbage) { return; }
-  p.damage(this);
-};
+FireObject.prototype.playerCollide = function(p) { };
 
 FireObject.prototype.playerStomp = function(p) { };
 
 FireObject.prototype.playerBump = function(p) { };
 
-FireObject.prototype.kill = function() {
-  
-};
-
-FireObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+FireObject.prototype.kill = function() { };
+FireObject.prototype.isTangible = GameObject.prototype.isTangible;
+FireObject.prototype.destroy = GameObject.prototype.destroy;
 
 FireObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

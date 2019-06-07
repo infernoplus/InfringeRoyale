@@ -49,7 +49,9 @@ Lobby.prototype.getPlayerInfo = Game.prototype.getPlayerInfo;
 Lobby.prototype.getRemain = Game.prototype.getRemain;
 
 Lobby.prototype.levelWarp = Game.prototype.levelWarp;
+
 Lobby.prototype.coinage = Game.prototype.coinage;
+Lobby.prototype.lifeage = Game.prototype.lifeage;
 
 Lobby.prototype.loop = function() {
   if(this.lobbyTimer > 0) { this.lobbyTimer--; }
