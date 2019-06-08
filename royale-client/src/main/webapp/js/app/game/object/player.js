@@ -61,6 +61,9 @@ function PlayerObject(game, level, zone, pos, pid) {
   
   /* State */
   this.setState(PlayerObject.SNAME.STAND);
+  
+  /* Sound */
+  this.sounds = [];
 }
 
 
@@ -346,6 +349,7 @@ PlayerObject.prototype.step = function() {
   /* Warp Pipe */
   if(this.pipeDelay > 0) { this.pipeDelay--; return; }
   if(this.pipeTimer > 0 && this.pipeDelay <= 0) {
+    if(this.pipeTimer >= PlayerObject.PIPE_TIME) { this.play("sfx/pipe.wav", 1., .04); }
     switch(this.pipeDir) {
       case 1 : { this.pos.y += PlayerObject.PIPE_SPEED; break; }
       case 2 : { this.pos.y -= PlayerObject.PIPE_SPEED; break; }
@@ -383,6 +387,7 @@ PlayerObject.prototype.step = function() {
   this.physics();
   this.interaction();
   this.arrow();
+  this.sound();
   
   if(this.pos.y < 0.) { this.kill(); }
 };
@@ -451,6 +456,7 @@ PlayerObject.prototype.control = function() {
   if(this.btnA) {
     if(this.grounded) {
       this.jumping = 0;
+      this.play(this.power>0?"sfx/jump1.wav":"sfx/jump0.wav", 1., .04);
     }
     if(this.jumping > jumpMax) {
       this.jumping = -1;
@@ -694,6 +700,7 @@ PlayerObject.prototype.attack = function() {
   this.attackCharge -= PlayerObject.ATTACK_CHARGE;
   var p = this.reverse?vec2.add(this.pos, PlayerObject.PROJ_OFFSET):vec2.add(this.pos, vec2.multiply(PlayerObject.PROJ_OFFSET, vec2.make(-1., 1.)));
   this.game.createObject(FireballProj.ID, this.level, this.zone, p, [this.reverse, this.pid]);
+  this.play("sfx/fireball.wav", 1., .04);
 };
 
 PlayerObject.prototype.bounce = function() {
@@ -730,6 +737,7 @@ PlayerObject.prototype.star = function() {
 };
 
 PlayerObject.prototype.transform = function(to) {
+  this.play("sfx/powerup.wav", 1., .04);
   this.transformTarget = to;
   this.transformTimer = PlayerObject.TRANSFORM_TIME;
   this.setState(PlayerObject.SNAME.TRANSFORM);
@@ -777,6 +785,7 @@ PlayerObject.prototype.pole = function(p) {
   this.fallSpeed = 0;
   this.pos.x = p.x;
   this.poleTimer = PlayerObject.POLE_DELAY;
+  this.play("sfx/flagpole.wav", 1., 0.);
 };
 
 PlayerObject.prototype.vine = function(p, wid) {
@@ -868,6 +877,20 @@ PlayerObject.prototype.draw = function(sprites) {
 PlayerObject.prototype.write = function(texts) {
   if(this.arrowFade <= 0.) { return; }
   texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.TEXT_OFFSET), size: PlayerObject.TEXT_SIZE, color: "rgba(255,255,255,"+this.arrowFade+")", text: PlayerObject.ARROW_TEXT});
+};
+
+PlayerObject.prototype.sound = function() {
+  for(var i=0;i<this.sounds.length;i++) {
+    var snd = this.sounds[i];
+    if(snd.done()) { this.sounds.splice(i--, 1); }
+    else { snd.position(this.pos); }
+  }
+};
+
+PlayerObject.prototype.play = function(path, gain, shift) {
+  var sfx = this.game.audio.getSpatialAudio(path, gain, shift, "effect");
+  sfx.play(this.pos);
+  this.sounds.push(sfx);
 };
 
 /* Register object class */

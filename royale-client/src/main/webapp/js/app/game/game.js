@@ -14,10 +14,12 @@ function Game(data) {
   
   this.input = new Input(this, this.canvas);
   this.display = new Display(this, this.container, this.canvas, data.resource);
+  this.audio = new Audio(this);
   
   this.objects = [];
   this.pid = undefined; /* Unique player id for this client. Assigned during init packet. */
   this.players = []; /* List of player names and associated pids */
+  this.sounds = []; /* Array of currently playing global sounds */
   
   this.load(data);
   
@@ -66,7 +68,7 @@ Game.prototype.load = function(data) {
   app.menu.load.show();
   
   /* Load world data */
-  this.world = new World(data);
+  this.world = new World(this, data);
   
   /* Spawn objects from world obj params */
   for(var i=0;i<this.world.levels.length;i++) {
@@ -107,6 +109,7 @@ Game.prototype.updatePlayerList = function(packet) {
 
 /* G13*/
 Game.prototype.gameStartTimer = function(packet) {
+  if(this.startTimer < 0) { this.play("sfx/alert.wav",1.,0.); }
   if(packet.time > 0) { this.startTimer = packet.time; this.remain = this.players.length; }
   else { this.doStart(); }
 };
@@ -278,6 +281,13 @@ Game.prototype.doStep = function() {
   /* Step world to update bumps & effects & etc */
   this.world.step();
   
+  /* Step audio class and objects */
+  for(var i=0;i<this.sounds.length;i++) {
+    var snd = this.sounds[i];
+    if(snd.done()) { this.sounds.splice(i--, 1); }
+  }
+  this.audio.update();
+  
   /* Triggers game over if player is dead for 15 frames and has zero lives. If we have a life we respawn instead. */
   if(this.startDelta !== undefined && !this.gameOver && !ply) {
     if(this.lives > 0 && this.victory <= 0) { var rsp = this.getZone().level; this.doSpawn(); this.levelWarp(rsp); this.lives--; }
@@ -422,6 +432,13 @@ Game.prototype.getRemain = function() {
   return rm;
 };
 
+/* Plays sound effect as non spatial */
+Game.prototype.play = function(path,gain,shift) {
+  var sfx = this.audio.getAudio(path, gain, shift, "effect");
+  sfx.play();
+  this.sounds.push(sfx);
+};
+
 /* Shows lives/level name screen then warps player to start of specified level. */
 /* Called when player reaches end of the level they are currently on. */
 Game.prototype.levelWarp = function(lid) {
@@ -434,11 +451,13 @@ Game.prototype.levelWarp = function(lid) {
 Game.prototype.coinage = function() {
   this.coins = Math.min(99, this.coins+1);
   if(this.coins >= Game.COINS_TO_LIFE) { this.lifeage(); this.coins = 0; }
+  this.play("sfx/coin.wav",1.,.04);
 };
 
 /* When the client player collects a life */
 Game.prototype.lifeage = function() {
   this.lives = Math.min(99, this.lives+1);
+  this.play("sfx/coin.wav",1.,.04);
 };
 
 Game.prototype.loop = function() {
@@ -478,4 +497,5 @@ Game.prototype.destroy = function() {
   clearTimeout(this.loopReq);
   this.input.destroy();
   this.display.destroy();
+  this.audio.destroy();
 };

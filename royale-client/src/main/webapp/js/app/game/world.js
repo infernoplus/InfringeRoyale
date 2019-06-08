@@ -1,12 +1,13 @@
 "use strict";
 /* global util, vec2, shor2, td32 */
 
-function World(data) {
+function World(game, data) {
+  this.game = game;
   this.initial = data.initial; // ID for the first level of this world.
   
   this.levels = [];
   for(var i=0;i<data.world.length;i++) {
-    this.levels.push(new Level(data.world[i]));
+    this.levels.push(new Level(game, data.world[i]));
   }
 }
 
@@ -52,14 +53,16 @@ World.prototype.getZone = function(level, zone) {
 
 /* ========================================================================== */
 
-function Level(data) {
+function Level(game, data) {
+  this.game = game;
+  
   this.id = data.id;
   this.name = data.name;
   this.initial = data.initial; // ID for the stating zone of this level.
   
   this.zones = [];
   for(var i=0;i<data.zone.length;i++) {
-    this.zones.push(new Zone(this.id, data.zone[i]));
+    this.zones.push(new Zone(game, this.id, data.zone[i]));
   }
 }
 
@@ -89,9 +92,11 @@ Level.prototype.getWarp = function(wid) {
 
 /* ========================================================================== */
 
-function Zone(level, data) {
+function Zone(game, level, data) {
+  this.game = game;
+  
   this.id = data.id;
-  this.level = level;    // Level that this zone is a part of
+  this.level = level;    // ID of the Level that this zone is a part of
   
   this.initial = data.initial; // shor2 starting point for this zone.
   this.color = data.color; // HTML color of the sky for this zone.
@@ -103,6 +108,7 @@ function Zone(level, data) {
   this.bumped = [];
   this.effects = [];
   this.vines = [];
+  this.sounds = [];
 }
 
 Zone.prototype.update = function(game, pid, level, zone, x, y, type) {
@@ -137,6 +143,12 @@ Zone.prototype.step = function() {
     if(vn.y < 0) { this.vines.splice(i--, 1); continue; }
     this.data[vn.y--][vn.x] = vn.td;
   }
+  
+  /* Update Sounds */
+  for(var i=0;i<this.sounds.length;i++) {
+    var snd = this.sounds[i];
+    if(snd.done()) { this.sounds.splice(i--, 1); }
+  }
 };
 
 /* returns raw data of tile (as an int) */
@@ -149,6 +161,7 @@ Zone.prototype.bump = function(x,y) {
   var yo = this.dimensions().y-1-y;
   this.data[yo][x] = td32.bump(this.data[yo][x], 15);
   this.bumped.push({x: x, y: yo});
+  this.play(x,y,"sfx/bump.wav", 1., .04);
 };
 
 Zone.prototype.replace = function(x,y,td) {
@@ -166,11 +179,19 @@ Zone.prototype.break = function(x,y,td) {
   var orig = td32.decode16(this.data[yo][x]);
   this.data[yo][x] = td;
   this.effects.push(new BreakEffect(vec2.make(x,y), orig.index));
+  this.play(x,y,"sfx/break.wav", 1., .04);
 };
 
 Zone.prototype.coin = function(x,y) {
   var yo = this.dimensions().y-1-y;
   this.effects.push(new CoinEffect(vec2.make(x,y)));
+};
+
+Zone.prototype.play = function(x,y,path,gain,shift) {
+  if(this.game.getZone() !== this) { return; }              // Don't play sounds in areas the player/camera aren't in
+  var sfx = this.game.audio.getSpatialAudio(path, gain, shift, "effect");
+  sfx.play(vec2.make(x,y));
+  this.sounds.push(sfx);
 };
 
 /* Returns width and height of the zone in tiles. */

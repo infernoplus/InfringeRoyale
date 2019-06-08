@@ -188,6 +188,7 @@ td32.TILE_PROPERTIES = {
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          game.world.getZone(level, zone).play(x,y,"sfx/item.wav",1.,0.04);
           break;
         }
         /* Big bump */
@@ -197,6 +198,7 @@ td32.TILE_PROPERTIES = {
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          game.world.getZone(level, zone).play(x,y,"sfx/item.wav",1.,0.04);
           break;
         }
       }
@@ -294,6 +296,7 @@ td32.TILE_PROPERTIES = {
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).grow(x,y+1,vin);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          game.world.getZone(level, zone).play(x,y,"sfx/vine.wav",1.,0.04);
           break;
         }
         /* Big bump */
@@ -304,6 +307,7 @@ td32.TILE_PROPERTIES = {
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).grow(x,y+1,vin);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          game.world.getZone(level, zone).play(x,y,"sfx/vine.wav",1.,0.04);
           break;
         }
       }
@@ -324,6 +328,7 @@ td32.TILE_PROPERTIES = {
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          game.world.getZone(level, zone).play(x,y,"sfx/item.wav",1.,0.04);
           break;
         }
         /* Big bump */
@@ -333,6 +338,7 @@ td32.TILE_PROPERTIES = {
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+          game.world.getZone(level, zone).play(x,y,"sfx/item.wav",1.,0.04);
           break;
         }
       }
