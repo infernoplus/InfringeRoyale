@@ -1,6 +1,6 @@
 "use strict";
 /* global app */
-/* global cook */
+/* global Cookies */
 
 function MenuName() {
   this.element = document.getElementById("name");
@@ -14,7 +14,7 @@ function MenuName() {
 
 /* When the launch button is clicked. */
 MenuName.prototype.launch = function() {
-  cook.set("name", this.nameInput.value, 30);
+  Cookies.set("name", this.nameInput.value, {expires: 30});
   app.join(this.nameInput.value);
 };
 
@@ -22,7 +22,7 @@ MenuName.prototype.show = function() {
   app.menu.hideAll();
   app.menu.navigation("name", "name");
   app.menu.background("a");
-  var nam = cook.get("name");
+  var nam = Cookies.get("name");
   this.nameInput.value = nam?nam:"";
   this.linkElement.style.display = "block";
   this.element.style.display = "block";

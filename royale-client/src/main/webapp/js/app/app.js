@@ -8,25 +8,28 @@ function App() {
 }
 
 App.prototype.init = function() {
-  this.menu.load.show();
-  
-  var serverResponse = function(data) {
-    if(data.result) { app.menu.error.show(data.result); return; }
-    /* OK */
-    app.menu.main.show(data.active);
-  };
+  var that = this;
+  this.menu.disclaim.show();
+  setTimeout(function() {
+    that.menu.load.show();
+    var serverResponse = function(data) {
+      if(data.result) { that.menu.error.show(data.result); return; }
+      /* OK */
+      that.menu.main.show(data.active);
+    };
 
-  var serverError = function() {
-    app.menu.error.show("An unknown error occured while connecting to the game server...");
-  };
+    var serverError = function() {
+      that.menu.error.show("An unknown error occured while connecting to the game server...");
+    };
 
-  $.ajax({
-    url: "/royale/status",
-    type: 'GET',
-    timeout: 3000,
-    success: function(data) { serverResponse(data); },
-    error: function() { serverError(); }
-  });
+    $.ajax({
+      url: "/royale/status",
+      type: 'GET',
+      timeout: 3000,
+      success: function(data) { serverResponse(data); },
+      error: function() { serverError(); }
+    });
+  }, 2000);
 };
 
 /* Load a game from .game file */

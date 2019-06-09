@@ -1,6 +1,6 @@
 "use strict";
 /* global app */
-/* global util, vec2, cook */
+/* global util, vec2, Cookies */
 /* global PlayerObject */
 
 
@@ -14,10 +14,8 @@ function Audio(game) {
   
   if(!this.initWebAudio()) { this.initFallback(); }
   
-  this.muteMusic = false;
-  this.muteSound = false;
-//  this.muteMusic = parseInt(cook.get("music"))===0;
-//  this.muteSound = parseInt(cook.get("sound"))===0; // Add cookie
+  this.muteMusic = parseInt(Cookies.get("music"))===1;
+  this.muteSound = parseInt(Cookies.get("sound"))===1;
 }
 
 Audio.FALLOFF_MIN = 1;
@@ -133,8 +131,8 @@ Audio.prototype.updateVolume = function() {
 };
 
 Audio.prototype.saveSettings = function() {
-  cook.set("music", this.muteMusic?1:0, 30);
-  cook.set("sound", this.muteSound?1:0, 30);
+  Cookies.set("music", this.muteMusic?1:0, {expires: 30});
+  Cookies.set("sound", this.muteSound?1:0, {expires: 30});
 };
 
 Audio.prototype.setMusic = function(path, loop) {

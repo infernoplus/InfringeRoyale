@@ -23,6 +23,13 @@
         <div id ='error-message' class='error'></div>
       </div>
       
+      <!-- Disclaimer -->
+      <div id='disclaim' class='container-center'>
+        <div class='dis-lg'>Mario and all related assets are property of Nintendo.</div>
+        <div class='dis-sm'>Mario Royale is a completely free fan created parody game. The noxio game engine and codebase is property of InfernoPlus. Reverse engineering or reuse of this game engine is prohibited without explicit permission.</div>
+        <div class='dis-sm'>Please don't sue me. <i>Please.</i></div>
+        <div></div>
+      </div>
       
       <!-- Loading Screen -->
       <div id='load' class='container-center'>
@@ -31,7 +38,7 @@
       
       <!-- Main Menu -->
       <div id='main' class='container-center'>
-        <div class='title'>Infringe Royale</div>
+        <div class='title'>Mario Royale</div>
         <div class='container-launch'>
           <span id ='main-launch' class='launch'>Play Now!</span>
           <span class='players'><span id='main-number' class='player-number'>##</span> Online</span>
@@ -55,19 +62,20 @@
       
       <!-- Libs -->
       <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
+      <script src='js/lib/cookie/js.cookie.min.js'></script>
       
       <!-- Util -->
       <script src='js/app/util/util.js'></script>
       <script src='js/app/util/frame.js'></script>
       <script src='js/app/util/byteme.js'></script>
       <script src='js/app/util/squar.js'></script>
-      <script src='js/app/util/cook.js'></script>
       
       <!-- Menus -->
       <script src='js/app/menu.js'></script>
       <script src='js/app/menu/menu-warn.js'></script>
       <script src='js/app/menu/menu-error.js'></script>
       <script src='js/app/menu/menu-load.js'></script>
+      <script src='js/app/menu/menu-disclaim.js'></script>
       <script src='js/app/menu/menu-main.js'></script>
       <script src='js/app/menu/menu-name.js'></script>
       <script src='js/app/menu/menu-game.js'></script>

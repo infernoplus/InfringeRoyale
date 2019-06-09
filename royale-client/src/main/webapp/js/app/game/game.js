@@ -283,6 +283,7 @@ Game.prototype.doStep = function() {
       ply.autoTarget = undefined;
       ply.grounded = false;
       ply.show();
+      ply.invuln();
       this.levelWarpId = undefined;
     }
   }
