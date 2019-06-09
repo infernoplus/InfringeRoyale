@@ -103,18 +103,9 @@ Audio.prototype.update = function() {
   this.updateVolume();
   
   /* Set Camera Position */
-  var ply = this.game.getPlayer();
-  this.context.listener.positionX.value = ply?ply.pos.x:this.game.display.camera.pos.x;
-  this.context.listener.positionY.value = ply?ply.pos.y:this.game.display.camera.pos.y;
-  this.context.listener.positionZ.value = 0.;
-
-  /* Set Orientation */
-  this.context.listener.forwardX.value = 1.;
-  this.context.listener.forwardY.value = 0.;
-  this.context.listener.forwardZ.value = 0.;
-  this.context.listener.upX.value = 0.;
-  this.context.listener.upY.value = 1.;
-  this.context.listener.upZ.value = 0.;
+  var ppos = this.game.getPlayer()?this.game.getPlayer().pos:this.game.display.camera.pos;
+  this.context.listener.setPosition(ppos.x, ppos.y, 0.);
+  this.context.listener.setOrientation(1., 0., 0., 0., 1., 0.);
 };
 
 /* Set Master Volume */
