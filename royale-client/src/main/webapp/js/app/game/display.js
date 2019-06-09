@@ -203,6 +203,9 @@ Display.prototype.drawUI = function() {
   var H = this.canvas.height;
   var COIN = [0x00F0, 0x00F1, 0x00F2, 0x00F1];
   var PLAY = 0x000D;
+  var SFX = [0x00FC, 0x00FA];
+  var MUSIC = [0x00FB, 0x00F9];
+  var PAD = 0x00F8;
   var c = COIN[parseInt(this.game.frame/3) % COIN.length];
   var tex = this.resource.getTexture("obj");
   var ply = this.game.getPlayerInfo(this.game.pid);
@@ -255,13 +258,24 @@ Display.prototype.drawUI = function() {
     var l = context.measureText(ctxt).width + 30;
     context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, 4+l+16, 40, 24, 24);
     context.fillText("x"+(this.game.lives<=9?"0"+this.game.lives:this.game.lives), 4+l+16+26, 64);
+    var w;
     if(this.game instanceof Game) {
       var txt = this.game.remain + " PLAYERS REMAIN";
-      context.fillText(txt, W-context.measureText(txt).width-8, 32);
+      w = context.measureText(txt).width;
+      context.fillText(txt, W-w-8, 32);
     }
     else if(this.game instanceof Lobby) {
       var txt = this.game.players.length + " / 99 PLAYERS";
-      context.fillText(txt, W-context.measureText(txt).width-8, 32);
+      w = context.measureText(txt).width;
+      context.fillText(txt, W-w-8, 32);
+    }
+    var st = util.sprite.getSprite(tex, MUSIC[this.game.audio.muteMusic?1:0]);
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8, 40, 24, 24);
+    var st = util.sprite.getSprite(tex, SFX[this.game.audio.muteSound?1:0]);
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8, 40, 24, 24);
+    if(this.game.input.pad.connected()) {
+      var st = util.sprite.getSprite(tex, PAD);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8-24-8, 40, 24, 24);
     }
   }
 };

@@ -35,6 +35,7 @@ Lobby.prototype.doStep = function() {
   Game.prototype.doStep.call(this);
 };
 Lobby.prototype.doSpawn = Game.prototype.doSpawn;
+Lobby.prototype.doMusic = Game.prototype.doMusic;
 Lobby.prototype.doPush = Game.prototype.doPush;
 
 Lobby.prototype.createObject = Game.prototype.createObject;

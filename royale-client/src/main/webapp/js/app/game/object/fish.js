@@ -103,7 +103,9 @@ FishObject.prototype.step = function() {
   if(this.delayTimer > 0) { this.delayTimer--; }
   else { this.jump(); }
   
+  /* Normal Gameplay */
   this.physics();
+  this.sound();
 };
 
 FishObject.prototype.physics = function() {
@@ -114,6 +116,8 @@ FishObject.prototype.physics = function() {
   }
   else { this.disable(); }
 };
+
+FishObject.prototype.sound = GameObject.prototype.sound;
 
 FishObject.prototype.jump = function() {
   this.enable();
@@ -136,6 +140,7 @@ FishObject.prototype.bonk = function() {
   this.moveSpeed = FishObject.BONK_IMP.x;
   this.fallSpeed = FishObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 
@@ -174,6 +179,8 @@ FishObject.prototype.draw = function(sprites) {
   else { mod = 0x00; }
   sprites.push({pos: vec2.subtract(this.pos, FishObject.SOFFSET), reverse: this.dir, index: this.sprite.INDEX, mode: mod});
 };
+
+FishObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(FishObject);

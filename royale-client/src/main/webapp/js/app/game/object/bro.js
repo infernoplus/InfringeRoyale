@@ -132,6 +132,7 @@ HammerObject.prototype.step = function() {
   this.face();
   this.control();
   this.physics();
+  this.sound();
   
   if(this.attackAnimTimer > 0) { this.setState(HammerObject.STATE.ATTACK); this.attach(); this.attackAnimTimer--; }
   else if(this.attackTimer++ > HammerObject.ATTACK_DELAY) { this.attack(); }
@@ -241,6 +242,8 @@ HammerObject.prototype.face = function() {
   else { this.dir = nearest<0; }
 };
 
+HammerObject.prototype.sound = GameObject.prototype.sound;
+
 HammerObject.prototype.enable = function() {
   this.disabled = false;
   this.disabledTimer = HammerObject.ENABLE_FADE_TIME;
@@ -281,6 +284,7 @@ HammerObject.prototype.bonk = function() {
   this.moveSpeed = HammerObject.BONK_IMP.x;
   this.fallSpeed = HammerObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 HammerObject.prototype.kill = function() { /* No standard killstate */ };
@@ -313,6 +317,8 @@ HammerObject.prototype.draw = function(sprites) {
   }
   else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
 };
+
+HammerObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(HammerObject);

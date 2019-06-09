@@ -1,6 +1,7 @@
 "use strict";
 /* global app */
-/* global util, vec2 */
+/* global util, vec2, cook */
+/* global PlayerObject */
 
 
 /* Yo! This class was basically copy pasted in here from 20xx. */
@@ -12,10 +13,15 @@ function Audio(game) {
   this.game = game;
   
   if(!this.initWebAudio()) { this.initFallback(); }
+  
+  this.muteMusic = false;
+  this.muteSound = false;
+//  this.muteMusic = parseInt(cook.get("music"))===0;
+//  this.muteSound = parseInt(cook.get("sound"))===0; // Add cookie
 }
 
-Audio.FALLOFF_MIN = 3;
-Audio.FALLOFF_MAX = 25;
+Audio.FALLOFF_MIN = 1;
+Audio.FALLOFF_MAX = 24;
 
 /* Returns true if webaudio is set up correctly, false if fuck no. */
 Audio.prototype.initWebAudio = function() {
@@ -40,6 +46,7 @@ Audio.prototype.initWebAudio = function() {
     "sfx/flagpole.wav",
     "sfx/item.wav",
     "sfx/jump0.wav",
+    "sfx/jump1.wav",
     "sfx/kick.wav",
     "sfx/life.wav",
     "sfx/pipe.wav",
@@ -76,7 +83,9 @@ Audio.prototype.initWebAudio = function() {
   this.musicVolume.gain.value = 1.0;
   this.musicVolume.connect(this.masterVolume); // Music Volume -> Master Volume
   
-  this.updateVolume();
+  this.masterVolume.gain.value = .5;
+  this.effectVolume.gain.value = this.muteSound?0.:.75;
+  this.musicVolume.gain.value = this.muteMusic?0.:.5;
   
   this.context.listener.setPosition(0., 0., 0.);
   this.context.listener.setOrientation(1., 0., 0., 0., 1., 0.);
@@ -111,16 +120,38 @@ Audio.prototype.update = function() {
 /* Set Master Volume */
 Audio.prototype.updateVolume = function() {
   this.masterVolume.gain.value = .5;
-  this.effectVolume.gain.value = .75;
-  this.musicVolume.gain.value = .75;
+  this.effectVolume.gain.value = this.muteSound?0.:.75;
+  this.musicVolume.gain.value = this.muteMusic?0.:.5;
+  
+  if(this.muteSound || this.muteMusic) { return; }
+  
+  /* If a player with a star is near we lower music volume */
+  var zon = this.game.getZone();
+  var ppos = this.game.getPlayer()?this.game.getPlayer().pos:this.game.display.camera.pos;
+  var dist = 999;
+  for(var i=0;i<this.game.objects.length;i++) {
+    var obj = this.game.objects[i];
+    if(obj instanceof PlayerObject && obj.level === zon.level && obj.zone === zon.id && obj.starTimer > 0) {
+      var d = vec2.distance(ppos, obj.pos);
+      if(d < dist) { dist = d; }
+    }
+  }
+  if(dist < Audio.FALLOFF_MAX) {
+    this.musicVolume.gain.value = Math.max(0., Math.min(1., Math.pow(d/Audio.FALLOFF_MAX,2.)))*.5;
+  }
 };
 
-Audio.prototype.setMusic = function(sound, loop) {
+Audio.prototype.saveSettings = function() {
+  cook.set("music", this.muteMusic?1:0, 30);
+  cook.set("sound", this.muteSound?1:0, 30);
+};
+
+Audio.prototype.setMusic = function(path, loop) {
   if(this.music) { 
-    if(this.music.path === sound.path) { return; }
+    if(this.music.path === path) { return; }
     this.music.stop();
   }
-  this.music = sound;
+  this.music = this.getAudio(path, 1., 0., "music");
   this.music.loop(loop);
   this.music.play();
 };

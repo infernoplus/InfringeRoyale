@@ -143,6 +143,7 @@ KoopaObject.prototype.step = function() {
   this.control();
   this.physics();
   this.interaction();
+  this.sound();
   
   if(this.pos.y < 0.) { this.destroy(); }
 };
@@ -251,6 +252,8 @@ KoopaObject.prototype.proximity = function() {
   }
 };
 
+KoopaObject.prototype.sound = GameObject.prototype.sound;
+
 KoopaObject.prototype.enable = function() {
   this.disabled = false;
   this.disabledTimer = KoopaObject.ENABLE_FADE_TIME;
@@ -270,6 +273,7 @@ KoopaObject.prototype.bonk = function() {
   this.moveSpeed = KoopaObject.BONK_IMP.x;
   this.fallSpeed = KoopaObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 /* dir (true = left, false = right) */
@@ -281,6 +285,7 @@ KoopaObject.prototype.stomped = function(dir) {
     this.setState(KoopaObject.STATE.SPIN);
     this.dir = dir;
   }
+  this.play("sfx/stomp.wav", 1., .04);
 };
 
 KoopaObject.prototype.playerCollide = function(p) {
@@ -347,6 +352,8 @@ KoopaObject.prototype.draw = function(sprites) {
     sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
   }
 };
+
+KoopaObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(KoopaObject);

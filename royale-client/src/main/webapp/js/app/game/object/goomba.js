@@ -125,6 +125,7 @@ GoombaObject.prototype.step = function() {
   /* Normal Gameplay */
   this.control();
   this.physics();
+  this.sound();
   
   if(this.pos.y < 0.) { this.destroy(); }
 };
@@ -193,6 +194,8 @@ GoombaObject.prototype.physics = function() {
   if(changeDir) { this.dir = !this.dir; }
 };
 
+GoombaObject.prototype.sound = GameObject.prototype.sound;
+
 /* Tests against client player to see if they are near enough that we should enable this enemy. */
 /* On a successful test we send a object event 0xA0 to the server to trigger this enemy being enabled for all players */
 GoombaObject.prototype.proximity = function() {
@@ -222,6 +225,7 @@ GoombaObject.prototype.bonk = function() {
   this.moveSpeed = GoombaObject.BONK_IMP.x;
   this.fallSpeed = GoombaObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 GoombaObject.prototype.playerCollide = function(p) {
@@ -244,6 +248,7 @@ GoombaObject.prototype.playerBump = function(p) {
 GoombaObject.prototype.kill = function() {
   this.dead = true;
   this.setState(GoombaObject.STATE.DEAD);
+  this.play("sfx/stomp.wav", 1., .04);
 };
 
 GoombaObject.prototype.destroy = GameObject.prototype.destroy;
@@ -287,6 +292,8 @@ GoombaObject.prototype.draw = function(sprites) {
     sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
   }
 };
+
+GoombaObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(GoombaObject);

@@ -30,6 +30,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   /* Var */
   this.power = 0;            // Powerup Index
   this.starTimer = 0;        // Star powerup active timer
+  this.starMusic = undefined;
   this.damageTimer = 0;      // Post damage invincibility timer
   
   this.transformTimer = 0;
@@ -44,6 +45,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   
   this.poleTimer = 0; // Timer used for flag pole
   this.poleWait = false;  // True when waiting for flag to come all the way down
+  this.poleSound = false; // True after it plays. Resets after pole slide done;
   
   this.vineWarp = undefined; // The warp id that we are going to warp to when we climb up this vine
   
@@ -61,9 +63,6 @@ function PlayerObject(game, level, zone, pos, pid) {
   
   /* State */
   this.setState(PlayerObject.SNAME.STAND);
-  
-  /* Sound */
-  this.sounds = [];
 }
 
 
@@ -76,7 +75,7 @@ PlayerObject.ANIMATION_RATE = 3;
 PlayerObject.DIM_OFFSET = vec2.make(-.05, 0.);
 
 PlayerObject.DEAD_FREEZE_TIME = 7;
-PlayerObject.DEAD_TIME = 30;
+PlayerObject.DEAD_TIME = 70;
 PlayerObject.DEAD_UP_FORCE = 0.65;
 
 PlayerObject.RUN_SPEED_MAX = 0.315;
@@ -257,6 +256,7 @@ PlayerObject.prototype.trigger = function(type) {
 
 PlayerObject.prototype.step = function() {
   if(this.starTimer > 0) { this.starTimer--; }
+  else if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; }
   
   /* Ghost playback */
   if(this.isState(PlayerObject.SNAME.GHOST)) { return; }
@@ -265,8 +265,9 @@ PlayerObject.prototype.step = function() {
   if(this.isState(PlayerObject.SNAME.HIDE)) { return; }
     
   /* Flagpole Slide */
-  if(this.isState(PlayerObject.SNAME.POLE)) {    
+  if(this.isState(PlayerObject.SNAME.POLE)) {
     if(this.poleTimer > 0 && !this.poleWait) { this.poleTimer--; return; }
+    else if(!this.poleSound) { this.poleSound = true; this.play("sfx/flagpole.wav", 1., 0.); }
         
     if(this.poleWait) { }
     else if(this.poleTimer <= 0 && this.autoTarget) { this.setState(PlayerObject.SNAME.STAND); }
@@ -456,7 +457,7 @@ PlayerObject.prototype.control = function() {
   if(this.btnA) {
     if(this.grounded) {
       this.jumping = 0;
-      this.play(this.power>0?"sfx/jump1.wav":"sfx/jump0.wav", 1., .04);
+      this.play(this.power>0?"sfx/jump1.wav":"sfx/jump0.wav", .7, .04);
     }
     if(this.jumping > jumpMax) {
       this.jumping = -1;
@@ -695,6 +696,8 @@ PlayerObject.prototype.arrow = function() {
   this.arrowFade = Math.min(PlayerObject.ARROW_THRESHOLD_MAX, Math.max(0., pts-PlayerObject.ARROW_THRESHOLD_MIN))/PlayerObject.ARROW_THRESHOLD_MAX;
 };
 
+PlayerObject.prototype.sound = GameObject.prototype.sound;
+
 PlayerObject.prototype.attack = function() {
   this.attackTimer = PlayerObject.ATTACK_DELAY;
   this.attackCharge -= PlayerObject.ATTACK_CHARGE;
@@ -734,10 +737,13 @@ PlayerObject.prototype.axe = function(result) {
 
 PlayerObject.prototype.star = function() {
   this.starTimer = PlayerObject.STAR_LENGTH;
+  this.starMusic = this.play("music/star.mp3", 1., .04);
+  if(this.starMusic) { this.starMusic.loop(true); }
 };
 
 PlayerObject.prototype.transform = function(to) {
-  this.play("sfx/powerup.wav", 1., .04);
+  if(this.power<to) { this.play("sfx/powerup.wav", 1., .04); }
+  else { this.play("sfx/pipe.wav", 1., .04); }
   this.transformTarget = to;
   this.transformTimer = PlayerObject.TRANSFORM_TIME;
   this.setState(PlayerObject.SNAME.TRANSFORM);
@@ -785,7 +791,7 @@ PlayerObject.prototype.pole = function(p) {
   this.fallSpeed = 0;
   this.pos.x = p.x;
   this.poleTimer = PlayerObject.POLE_DELAY;
-  this.play("sfx/flagpole.wav", 1., 0.);
+  this.poleSound = false;
 };
 
 PlayerObject.prototype.vine = function(p, wid) {
@@ -879,19 +885,7 @@ PlayerObject.prototype.write = function(texts) {
   texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.TEXT_OFFSET), size: PlayerObject.TEXT_SIZE, color: "rgba(255,255,255,"+this.arrowFade+")", text: PlayerObject.ARROW_TEXT});
 };
 
-PlayerObject.prototype.sound = function() {
-  for(var i=0;i<this.sounds.length;i++) {
-    var snd = this.sounds[i];
-    if(snd.done()) { this.sounds.splice(i--, 1); }
-    else { snd.position(this.pos); }
-  }
-};
-
-PlayerObject.prototype.play = function(path, gain, shift) {
-  var sfx = this.game.audio.getSpatialAudio(path, gain, shift, "effect");
-  sfx.play(this.pos);
-  this.sounds.push(sfx);
-};
+PlayerObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(PlayerObject);

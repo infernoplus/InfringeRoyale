@@ -118,6 +118,7 @@ TroopaObject.prototype.step = function() {
   this.control();
   this.physics();
   this.interaction();
+  this.sound();
   
   if(this.pos.y < 0.) { this.destroy(); }
 };
@@ -218,6 +219,8 @@ TroopaObject.prototype.interaction = function() {
   }
 };
 
+TroopaObject.prototype.sound = GameObject.prototype.sound;
+
 /* Looks at the ground in front of this koopa troopa and checks if it's solid. */
 TroopaObject.prototype.checkGround = function() {
   var inf = this.dir?vec2.add(this.pos, vec2.make(-TroopaObject.CHECK_DIST, 0)):vec2.add(this.pos, vec2.make(TroopaObject.CHECK_DIST+this.dim.x, 0));
@@ -244,6 +247,7 @@ TroopaObject.prototype.bonk = function() {
   this.moveSpeed = KoopaObject.BONK_IMP.x;
   this.fallSpeed = KoopaObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 /* dir (true = left, false = right) */
@@ -255,6 +259,7 @@ TroopaObject.prototype.stomped = function(dir) {
     this.setState(TroopaObject.STATE.SPIN);
     this.dir = dir;
   }
+  this.play("sfx/stomp.wav", 1., .04);
 };
 
 TroopaObject.prototype.playerCollide = function(p) {
@@ -305,6 +310,8 @@ TroopaObject.prototype.draw = function(sprites) {
     sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
   }
 };
+
+TroopaObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(TroopaObject);
