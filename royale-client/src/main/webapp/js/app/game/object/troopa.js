@@ -25,8 +25,8 @@ function TroopaObject(game, level, zone, pos, oid, fly, variant) {
   this.grounded = false;
   
   /* Var */
-  this.hide = false;
-  this.hideTimer = 0;
+  this.disabled = false;
+  this.disabledTimer = 0;
   this.proxHit = false;    // So we don't send an enable event every single frame while waiting for server response.
   
   this.immuneTimer = 0;
@@ -89,9 +89,13 @@ for(var i=0;i<TroopaObject.STATE_LIST.length;i++) {
 TroopaObject.prototype.update = KoopaObject.prototype.update;
 
 TroopaObject.prototype.step = function() {
+  /* Disabled */
+  if(this.disabled) { this.proximity(); return; }
+  else if(this.disabledTimer > 0) { this.disabledTimer--; }
+  
     /* Bonked */
   if(this.state === TroopaObject.STATE.BONK) {
-    if(this.bonkTimer++ > KoopaObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > KoopaObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= KoopaObject.BONK_DECEL;
@@ -114,6 +118,7 @@ TroopaObject.prototype.step = function() {
   this.control();
   this.physics();
   this.interaction();
+  this.sound();
   
   if(this.pos.y < 0.) { this.destroy(); }
 };
@@ -206,13 +211,15 @@ TroopaObject.prototype.interaction = function() {
   if(this.state !== TroopaObject.STATE.SPIN) { return; }
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj === this || obj instanceof PlayerObject || obj.dead || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
-    if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
+    if(obj === this || obj instanceof PlayerObject || !obj.isTangible() || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
+    if(obj.level === this.level && obj.zone === this.zone) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) { obj.damage(); }  // We don't sync this event since it's not a direct player interaction. It *should* synchronize naturally though.
     }
   }
 };
+
+TroopaObject.prototype.sound = GameObject.prototype.sound;
 
 /* Looks at the ground in front of this koopa troopa and checks if it's solid. */
 TroopaObject.prototype.checkGround = function() {
@@ -240,6 +247,7 @@ TroopaObject.prototype.bonk = function() {
   this.moveSpeed = KoopaObject.BONK_IMP.x;
   this.fallSpeed = KoopaObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 /* dir (true = left, false = right) */
@@ -251,6 +259,7 @@ TroopaObject.prototype.stomped = function(dir) {
     this.setState(TroopaObject.STATE.SPIN);
     this.dir = dir;
   }
+  this.play("sfx/stomp.wav", 1., .04);
 };
 
 TroopaObject.prototype.playerCollide = function(p) {
@@ -268,22 +277,22 @@ TroopaObject.prototype.playerStomp = KoopaObject.prototype.playerStomp;
 TroopaObject.prototype.playerBump = KoopaObject.prototype.playerBump;
 
 TroopaObject.prototype.kill = KoopaObject.prototype.kill;
-
 TroopaObject.prototype.destroy = KoopaObject.prototype.destroy;
+TroopaObject.prototype.isTangible = KoopaObject.prototype.isTangible;
 
 TroopaObject.prototype.setState = KoopaObject.prototype.setState;
 
 TroopaObject.prototype.draw = function(sprites) {
   var mod;
   if(this.state === TroopaObject.STATE.BONK) { mod = 0x03; }
-  else if(this.hideTimer > 0) { mod = 0xA0 + parseInt((1.-(this.hideTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }
+  else if(this.disabledTimer > 0) { mod = 0xA0 + parseInt((1.-(this.disabledTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }
   else { mod = 0x00; }
   
   if(this.sprite.INDEX instanceof Array) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        var sp = s[!mod?i:(s.length-1-i)][j];
+        var sp = s[mod!==0x03?i:(s.length-1-i)][j];
         switch(this.variant) {
           case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
           default : { break; }
@@ -301,6 +310,8 @@ TroopaObject.prototype.draw = function(sprites) {
     sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
   }
 };
+
+TroopaObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(TroopaObject);

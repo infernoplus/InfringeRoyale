@@ -35,6 +35,7 @@ Lobby.prototype.doStep = function() {
   Game.prototype.doStep.call(this);
 };
 Lobby.prototype.doSpawn = Game.prototype.doSpawn;
+Lobby.prototype.doMusic = Game.prototype.doMusic;
 Lobby.prototype.doPush = Game.prototype.doPush;
 
 Lobby.prototype.createObject = Game.prototype.createObject;
@@ -49,7 +50,9 @@ Lobby.prototype.getPlayerInfo = Game.prototype.getPlayerInfo;
 Lobby.prototype.getRemain = Game.prototype.getRemain;
 
 Lobby.prototype.levelWarp = Game.prototype.levelWarp;
+
 Lobby.prototype.coinage = Game.prototype.coinage;
+Lobby.prototype.lifeage = Game.prototype.lifeage;
 
 Lobby.prototype.loop = function() {
   if(this.lobbyTimer > 0) { this.lobbyTimer--; }

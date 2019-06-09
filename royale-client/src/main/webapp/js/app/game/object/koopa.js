@@ -22,10 +22,11 @@ function KoopaObject(game, level, zone, pos, oid, fly, variant) {
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.grounded = false;
+  this.jump = -1;
   
   /* Var */
-  this.hide = false;
-  this.hideTimer = 0;
+  this.disabled = false;
+  this.disabledTimer = 0;
   this.proxHit = false;    // So we don't send an enable event every single frame while waiting for server response.
   
   this.immuneTimer = 0;
@@ -56,10 +57,13 @@ KoopaObject.BONK_FALL_SPEED = 0.5;
 KoopaObject.PLAYER_IMMUNE_TIME = 6;  // Player is immune to damage for this many frames after bouncing off or kicking this enemy
 
 KoopaObject.MOVE_SPEED_MAX = 0.075;
-KoopaObject.SHELL_MOVE_SPEED_MAX = 0.275;
+KoopaObject.SHELL_MOVE_SPEED_MAX = 0.35;
 
 KoopaObject.FALL_SPEED_MAX = 0.35;
 KoopaObject.FALL_SPEED_ACCEL = 0.085;
+
+KoopaObject.JUMP_LENGTH_MAX = 20;
+KoopaObject.JUMP_DECEL = 0.025;
 
 KoopaObject.TRANSFORM_TIME = 175;
 KoopaObject.TRANSFORM_THRESHOLD = 75;
@@ -111,12 +115,12 @@ KoopaObject.prototype.update = function(event) {
 
 KoopaObject.prototype.step = function() {
   /* Disabled */
-  if(this.hide) { this.proximity(); return; }
-  else if(this.hideTimer > 0) { this.hideTimer--; }
+  if(this.disabled) { this.proximity(); return; }
+  else if(this.disabledTimer > 0) { this.disabledTimer--; }
   
   /* Bonked */
   if(this.state === KoopaObject.STATE.BONK) {
-    if(this.bonkTimer++ > KoopaObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > KoopaObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= KoopaObject.BONK_DECEL;
@@ -139,18 +143,34 @@ KoopaObject.prototype.step = function() {
   this.control();
   this.physics();
   this.interaction();
+  this.sound();
   
   if(this.pos.y < 0.) { this.destroy(); }
 };
 
 KoopaObject.prototype.control = function() {
-  if(this.state === KoopaObject.STATE.FLY) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
-  if(this.state === KoopaObject.STATE.RUN) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
-  if(this.state === KoopaObject.STATE.SPIN) { this.moveSpeed = this.dir ? -KoopaObject.SHELL_MOVE_SPEED_MAX : KoopaObject.SHELL_MOVE_SPEED_MAX; }
-  if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) { this.moveSpeed = 0; }
+  if(this.state === KoopaObject.STATE.FLY) {
+    this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX;
+    if(this.grounded) { this.jump = 0; }
+  }
+  else if(this.state === KoopaObject.STATE.RUN) { this.moveSpeed = this.dir ? -KoopaObject.MOVE_SPEED_MAX : KoopaObject.MOVE_SPEED_MAX; }
+  else if(this.state === KoopaObject.STATE.SPIN) { this.moveSpeed = this.dir ? -KoopaObject.SHELL_MOVE_SPEED_MAX : KoopaObject.SHELL_MOVE_SPEED_MAX; }
+  else if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) { this.moveSpeed = 0; }
+  
+  if(this.jump > KoopaObject.JUMP_LENGTH_MAX) { this.jump = -1; }
 };
 
 KoopaObject.prototype.physics = function() {
+  if(this.jump !== -1) {
+    this.fallSpeed = KoopaObject.FALL_SPEED_MAX - (this.jump*KoopaObject.JUMP_DECEL);
+    this.jump++;
+    this.grounded = false;
+  }
+  else {
+    if(this.grounded) { this.fallSpeed = 0; }
+    this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
+  }
+  
   if(this.grounded) {
     this.fallSpeed = 0;
   }
@@ -201,7 +221,7 @@ KoopaObject.prototype.physics = function() {
       }
       else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
         movy.y = tile.pos.y - this.dim.y;
-        this.jumping = -1;
+        this.jump = -1;
         this.fallSpeed = 0;
       }
     }
@@ -214,8 +234,8 @@ KoopaObject.prototype.interaction = function() {
   if(this.state !== KoopaObject.STATE.SPIN) { return; }
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj === this || obj instanceof PlayerObject || obj.dead || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
-    if(obj.level === this.level && obj.zone === this.zone && obj.dim) {
+    if(obj === this || obj instanceof PlayerObject || !obj.isTangible() || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
+    if(obj.level === this.level && obj.zone === this.zone) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) { obj.damage(this); }  // We don't sync this event since it's not a direct player interaction. It *should* synchronize naturally though.
     }
@@ -232,13 +252,15 @@ KoopaObject.prototype.proximity = function() {
   }
 };
 
+KoopaObject.prototype.sound = GameObject.prototype.sound;
+
 KoopaObject.prototype.enable = function() {
-  this.hide = false;
-  this.hideTimer = KoopaObject.ENABLE_FADE_TIME;
+  this.disabled = false;
+  this.disabledTimer = KoopaObject.ENABLE_FADE_TIME;
 };
 
 KoopaObject.prototype.disable = function() {
-  this.hide = true;
+  this.disabled = true;
 };
 
 KoopaObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); } };
@@ -251,17 +273,19 @@ KoopaObject.prototype.bonk = function() {
   this.moveSpeed = KoopaObject.BONK_IMP.x;
   this.fallSpeed = KoopaObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 /* dir (true = left, false = right) */
 KoopaObject.prototype.stomped = function(dir) {
-  if(this.state === KoopaObject.STATE.FLY) { this.setState(KoopaObject.STATE.RUN); }
+  if(this.state === KoopaObject.STATE.FLY) { this.setState(KoopaObject.STATE.RUN); this.jump = -1; }
   else if(this.state === KoopaObject.STATE.RUN) { this.setState(KoopaObject.STATE.SHELL); this.transformTimer = KoopaObject.TRANSFORM_TIME; }
   else if(this.state === KoopaObject.STATE.SPIN) { this.setState(KoopaObject.STATE.SHELL); this.transformTimer = KoopaObject.TRANSFORM_TIME; }
   else if(this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) {
     this.setState(KoopaObject.STATE.SPIN);
     this.dir = dir;
   }
+  this.play("sfx/stomp.wav", 1., .04);
 };
 
 KoopaObject.prototype.playerCollide = function(p) {
@@ -290,10 +314,8 @@ KoopaObject.prototype.playerBump = function(p) {
 };
 
 KoopaObject.prototype.kill = function() { };
-
-KoopaObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+KoopaObject.prototype.destroy = GameObject.prototype.destroy;
+KoopaObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 KoopaObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -305,14 +327,14 @@ KoopaObject.prototype.setState = function(STATE) {
 KoopaObject.prototype.draw = function(sprites) {
   var mod;
   if(this.state === KoopaObject.STATE.BONK) { mod = 0x03; }
-  else if(this.hideTimer > 0) { mod = 0xA0 + parseInt((1.-(this.hideTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }
+  else if(this.disabledTimer > 0) { mod = 0xA0 + parseInt((1.-(this.disabledTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }
   else { mod = 0x00; }
   
   if(this.sprite.INDEX instanceof Array) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        var sp = s[!mod?i:(s.length-1-i)][j];
+        var sp = s[mod!==0x03?i:(s.length-1-i)][j];
         switch(this.variant) {
           case 1 : { sp += KoopaObject.VARIANT_OFFSET; break; }
           default : { break; }
@@ -330,6 +352,8 @@ KoopaObject.prototype.draw = function(sprites) {
     sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
   }
 };
+
+KoopaObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(KoopaObject);

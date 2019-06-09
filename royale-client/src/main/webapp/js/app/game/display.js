@@ -56,6 +56,7 @@ Display.prototype.draw = function() {
   var dim = zone.dimensions();
   
   context.save();
+  context.translate(.5, .5);
   context.translate(this.canvas.width*.5, this.canvas.height*.5);
   context.scale(this.camera.scale, this.camera.scale);
   context.translate(-this.camera.pos.x*Display.TEXRES, -this.camera.pos.y*Display.TEXRES);
@@ -112,13 +113,13 @@ Display.prototype.drawObject = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
     if(obj.level === zone.level && obj.zone === zone.id && obj.pid !== this.game.pid) {
-      if(obj instanceof TextObject) { obj.write(texts); }
-      else { obj.draw(sprites); }
+      if(obj.write) { obj.write(texts); }
+      if(obj.draw) { obj.draw(sprites); }
     }
   }
   
   var ply = this.game.getPlayer();
-  if(ply && ply.level === zone.level && ply.zone === zone.id) { ply.draw(sprites); } // Draw our character last.
+  if(ply && ply.level === zone.level && ply.zone === zone.id) { ply.draw(sprites); ply.write(texts); } // Draw our character last.
   
   var tex = this.resource.getTexture("obj");
   
@@ -201,6 +202,10 @@ Display.prototype.drawUI = function() {
   var W = this.canvas.width;
   var H = this.canvas.height;
   var COIN = [0x00F0, 0x00F1, 0x00F2, 0x00F1];
+  var PLAY = 0x000D;
+  var SFX = [0x00FC, 0x00FA];
+  var MUSIC = [0x00FB, 0x00F9];
+  var PAD = 0x00F8;
   var c = COIN[parseInt(this.game.frame/3) % COIN.length];
   var tex = this.resource.getTexture("obj");
   var ply = this.game.getPlayerInfo(this.game.pid);
@@ -246,15 +251,31 @@ Display.prototype.drawUI = function() {
     context.textAlign = "left";
     context.fillText((ply?ply.name:"INFRINGIO"), 8, 32);
     var st = util.sprite.getSprite(tex, c);
+    var ctxt = "x"+(this.game.coins<=9?"0"+this.game.coins:this.game.coins);
     context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, 4, 40, 24, 24);
-    context.fillText("x"+this.game.coins, 30, 64);
+    context.fillText(ctxt, 30, 64);
+    var st = util.sprite.getSprite(tex, PLAY);
+    var l = context.measureText(ctxt).width + 30;
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, 4+l+16, 40, 24, 24);
+    context.fillText("x"+(this.game.lives<=9?"0"+this.game.lives:this.game.lives), 4+l+16+26, 64);
+    var w;
     if(this.game instanceof Game) {
       var txt = this.game.remain + " PLAYERS REMAIN";
-      context.fillText(txt, W-context.measureText(txt).width-8, 32);
+      w = context.measureText(txt).width;
+      context.fillText(txt, W-w-8, 32);
     }
     else if(this.game instanceof Lobby) {
       var txt = this.game.players.length + " / 99 PLAYERS";
-      context.fillText(txt, W-context.measureText(txt).width-8, 32);
+      w = context.measureText(txt).width;
+      context.fillText(txt, W-w-8, 32);
+    }
+    var st = util.sprite.getSprite(tex, MUSIC[this.game.audio.muteMusic?1:0]);
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8, 40, 24, 24);
+    var st = util.sprite.getSprite(tex, SFX[this.game.audio.muteSound?1:0]);
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8, 40, 24, 24);
+    if(this.game.input.pad.connected()) {
+      var st = util.sprite.getSprite(tex, PAD);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8-24-8, 40, 24, 24);
     }
   }
 };

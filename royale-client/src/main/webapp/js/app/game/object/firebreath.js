@@ -96,11 +96,10 @@ FireBreathProj.prototype.physics = function() {
 FireBreathProj.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(!(obj instanceof PlayerObject) || obj.dead) { continue; }  // Skip everything thats not a living player
+    if(!(obj instanceof PlayerObject) || !obj.isTangible()) { continue; }  // Skip everything thats not a living player
     if(obj.level === this.level && obj.zone === this.zone) {
-      var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
-      if(hit) {
-        obj.damage(this);
+      if(squar.intersection(obj.pos, obj.dim, this.pos, this.dim)) {
+        if(obj.pid === this.game.pid) { obj.damage(this); }
         this.kill();
         return;
       }
@@ -115,12 +114,12 @@ FireBreathProj.prototype.playerStomp = function(p) { };
 FireBreathProj.prototype.playerBump = function(p) { };
 
 FireBreathProj.prototype.kill = function() {
+  this.dead = true;
   this.setState(FireBreathProj.STATE.DEAD);
 };
 
-FireBreathProj.prototype.destroy = function() {
-  this.garbage = true;
-};
+FireBreathProj.prototype.isTangible = GameObject.prototype.isTangible;
+FireBreathProj.prototype.destroy = GameObject.prototype.destroy;
 
 FireBreathProj.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

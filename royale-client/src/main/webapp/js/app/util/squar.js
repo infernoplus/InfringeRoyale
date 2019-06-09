@@ -9,3 +9,10 @@ squar.intersection = function(pos1, dim1, pos2, dim2) {
          pos2.y < pos1.y + dim1.y &&
          pos2.y + dim2.y > pos1.y;
 };
+
+squar.inside = function(pos1, pos2, dim2) {
+  return pos2.x < pos1.x &&
+         pos2.x + dim2.x > pos1.x &&
+         pos2.y < pos1.y &&
+         pos2.y + dim2.y > pos1.y;
+};

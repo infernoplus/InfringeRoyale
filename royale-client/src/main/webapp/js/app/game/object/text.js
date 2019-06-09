@@ -56,10 +56,8 @@ TextObject.prototype.update = function(event) { /* ASYNC */ };
 TextObject.prototype.step = function() { };
 
 TextObject.prototype.kill = function() { };
-
-TextObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+TextObject.prototype.destroy = GameObject.prototype.destroy;
+TextObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 TextObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -67,8 +65,6 @@ TextObject.prototype.setState = function(STATE) {
   this.sprite = STATE.SPRITE[0];
   this.anim = 0;
 };
-
-TextObject.prototype.draw = function(sprites) { };
 
 TextObject.prototype.write = function(texts) {
   texts.push({pos: vec2.add(this.pos, this.offset), size: this.size, color: this.color, text: this.text});

@@ -58,10 +58,8 @@ CheckObject.prototype.step = function() {
 };
 
 CheckObject.prototype.kill = function() { };
-
-CheckObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+CheckObject.prototype.isTangible = GameObject.prototype.isTangible;
+CheckObject.prototype.destroy = GameObject.prototype.destroy;
 
 CheckObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

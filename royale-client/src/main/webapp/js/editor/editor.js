@@ -33,7 +33,7 @@ Editor.TICK_RATE = 33;
 
 Editor.prototype.load = function(data) {  
   /* Load world data */
-  this.world = new World(data);
+  this.world = new World(this, data);
   
   this.ready = true;
 };
@@ -60,6 +60,7 @@ Editor.prototype.compile = function() {
         id: zone.id,
         initial: zone.initial,
         color: zone.color,
+        music: zone.music,
         data: zone.data,
         obj: zone.obj,
         warp: zone.warp

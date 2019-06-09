@@ -5,9 +5,16 @@
         <link rel='icon' href='img/home/icon.png'>
         <link rel='stylesheet' type='text/css' href='css/home.css'>
         <link rel='stylesheet' type='text/css' href='css/spinner.css'>
+        <link rel='stylesheet' type='text/css' href='css/link.css'>
     </head>
     
     <body id='body' style='display: none;'>
+      <!-- Links -->
+      <div id='link' class="link" style="display: none">
+        <div class="link-twit" onclick="window.open('https://twitter.com/Inferbro')"></div>
+        <div class="link-patr" onclick="window.open('https://www.patreon.com/infernoplus')"></div>
+      </div>
+      
       <!-- Warning -->
       <div id='warn' class='warn'></div>
       
@@ -48,8 +55,9 @@
       
       <!-- Libs -->
       <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
-
+      
       <!-- Core -->
       <script src='js/game.min.js'></script>
+      
     </body>        
 </html>

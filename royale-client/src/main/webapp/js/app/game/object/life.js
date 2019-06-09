@@ -56,7 +56,8 @@ LifeObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
 LifeObject.prototype.playerBump = ItemObject.prototype.playerBump;
 
 LifeObject.prototype.kill = ItemObject.prototype.kill;
-LifeObject.prototype.destroy = ItemObject.prototype.destroy;
+LifeObject.prototype.destroy = GameObject.prototype.destroy;
+LifeObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 LifeObject.prototype.setState = ItemObject.prototype.setState;
 LifeObject.prototype.draw = ItemObject.prototype.draw;

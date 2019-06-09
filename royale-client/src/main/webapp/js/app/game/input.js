@@ -14,9 +14,56 @@ function Input(game, container) {
   this.container.addEventListener("DOMMouseScroll", function(event) { that.mouse.wheel(event); }, false); // Firefox
   document.onkeyup = function(event) { that.keyboard.event(event, false); };
   document.onkeydown = function(event) { that.keyboard.event(event, true); };
-  
+
   this.mouse.input = this;
   this.keyboard.input = this;
+};
+
+Input.prototype.pad = {
+  pads: [],
+  ax: vec2.make(0., 0.),
+  a: false,
+  b: false
+};
+
+Input.prototype.pad.update = function() {
+  this.pads = navigator.getGamepads();
+  this.analog();
+  this.button();
+};
+
+Input.prototype.pad.analog = function() {
+  var pad = this.pads[0];
+  if(pad) {
+    for(var i=0;i<pad.axes.length-1;i++) {
+      var x = pad.axes[i];
+      var y = pad.axes[i+1];
+      if(Math.abs(x) < 0.1 && Math.abs(y) < 0.1) { continue; }
+      else { this.ax = vec2.make(x,y); return; }
+    }
+  }
+  this.ax = vec2.make(0., 0.);
+};
+
+Input.prototype.pad.button = function() {
+  var pad = this.pads[0];
+  var a = false;
+  var b = false;
+  if(pad) {
+    for(var i=0;i<pad.buttons.length;i++) {
+      var btn = pad.buttons[i];
+      if(btn.value === 1) {
+        if(i%2 === 0) { a = true; }
+        else { b = true; }
+      }
+    }
+  }
+  this.a = a;
+  this.b = b;
+};
+
+Input.prototype.pad.connected = function() {
+  return !!this.pads[0];
 };
 
 Input.prototype.mouse = {

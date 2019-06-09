@@ -94,7 +94,7 @@ BowserObject.prototype.update = function(event) { /* ASYNC */ };
 BowserObject.prototype.step = function() {
   /* Bonked */
   if(this.state === BowserObject.STATE.BONK) {
-    if(this.bonkTimer++ > BowserObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > BowserObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= BowserObject.BONK_DECEL;
@@ -109,6 +109,7 @@ BowserObject.prototype.step = function() {
   /* Normal Gameplay */
   this.control();
   this.physics();
+  this.sound();
   
   if(this.attackTimer++ > BowserObject.ATTACK_DELAY) { this.attack(); }
   if(this.attackAnimTimer > 0) { this.setState(BowserObject.STATE.ATTACK); this.attackAnimTimer--; }
@@ -192,10 +193,13 @@ BowserObject.prototype.physics = function() {
   this.pos = vec2.make(movx.x, movy.y);
 };
 
+BowserObject.prototype.sound = GameObject.prototype.sound;
+
 BowserObject.prototype.attack = function() {
   this.attackAnimTimer = BowserObject.ATTACK_ANIM_LENGTH;
   this.attackTimer = 0;
   this.game.createObject(FireBreathProj.ID, this.level, this.zone, vec2.add(this.pos, BowserObject.PROJ_OFFSET), []);
+  this.play("sfx/breath.wav", 1.5, .04);
 };
 
 BowserObject.prototype.playerCollide = function(p) {
@@ -217,13 +221,12 @@ BowserObject.prototype.bonk = function() {
   this.moveSpeed = BowserObject.BONK_IMP.x;
   this.fallSpeed = BowserObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 BowserObject.prototype.kill = function() { /* No standard killstate */ };
-
-BowserObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+BowserObject.prototype.isTangible = GameObject.prototype.isTangible;
+BowserObject.prototype.destroy = GameObject.prototype.destroy;
 
 BowserObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -247,6 +250,8 @@ BowserObject.prototype.draw = function(sprites) {
   }
   else { sprites.push({pos: this.pos, reverse: !this.dir, index: this.sprite.INDEX, mode: mod}); }
 };
+
+BowserObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(BowserObject);

@@ -1,9 +1,9 @@
 "use strict";
 /* global app */
-/* global util, shor2, vec2, td32, MERGE_BYTE */
+/* global util, shor2, vec2, td32, squar, MERGE_BYTE */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, FlagObject, TextObject */
+/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, BusObject, FlagObject, TextObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
@@ -14,10 +14,12 @@ function Game(data) {
   
   this.input = new Input(this, this.canvas);
   this.display = new Display(this, this.container, this.canvas, data.resource);
+  this.audio = new Audio(this);
   
   this.objects = [];
   this.pid = undefined; /* Unique player id for this client. Assigned during init packet. */
   this.players = []; /* List of player names and associated pids */
+  this.sounds = []; /* Array of currently playing global sounds */
   
   this.load(data);
   
@@ -34,9 +36,11 @@ function Game(data) {
   
   this.remain = 0;               // Number of players still alive
   
+  this.lives = 0;
   this.coins = 0;
   
   this.victory = 0;
+  this.victoryMusic = false;
   this.gameOverTimer = 0;
   this.gameOver = false;
   
@@ -57,13 +61,16 @@ Game.TICK_RATE = 33;
 Game.FDLC_TARGET = 3;
 Game.FDLC_MAX = Game.FDLC_TARGET+2;
 
-Game.LEVEL_WARP_TIME = 60;
+Game.LEVEL_WARP_TIME = 100;
+Game.GAME_OVER_TIME = 200;
+
+Game.COINS_TO_LIFE = 50;
 
 Game.prototype.load = function(data) {
   app.menu.load.show();
   
   /* Load world data */
-  this.world = new World(data);
+  this.world = new World(this, data);
   
   /* Spawn objects from world obj params */
   for(var i=0;i<this.world.levels.length;i++) {
@@ -104,6 +111,7 @@ Game.prototype.updatePlayerList = function(packet) {
 
 /* G13*/
 Game.prototype.gameStartTimer = function(packet) {
+  if(this.startTimer < 0) { this.play("sfx/alert.wav",1.,0.); }
   if(packet.time > 0) { this.startTimer = packet.time; this.remain = this.players.length; }
   else { this.doStart(); }
 };
@@ -179,7 +187,18 @@ Game.prototype.doNET013 = function(n) {
 
 /* PLAYER_RESULT_REQUEST [0x18] */
 Game.prototype.doNET018 = function(n) {
-  if(n.pid !== this.pid || n.result <= 0x00) { return; }
+  if(n.result <= 0x00) { return; }
+
+  var obj = this.getGhost(n.pid);
+  if(obj) { 
+    var txt = this.getText(obj.level, obj.zone, n.result.toString());
+    if(txt) {
+      var nam = this.getPlayerInfo(n.pid).name;
+      this.createObject(TextObject.ID, txt.level, txt.zone, vec2.add(txt.pos, vec2.make(0, -3)), [undefined, -0.1, 0.25, "#FFFFFF", nam]);
+    }
+  }
+
+  if(n.pid !== this.pid) { return; }
   var ply = this.getPlayer();
   if(ply) { ply.axe(n.result); }
   this.victory = n.result;
@@ -210,9 +229,11 @@ Game.prototype.doStart = function() {
 /* Handle player input */
 Game.prototype.doInput = function() {
   var imp = this.input.pop();
+  this.input.pad.update();
   
   var mous = this.input.mouse;
   var keys = this.input.keyboard.keys;
+  var pad = this.input.pad;
   
   if(!this.inx27 && keys[27]) { /* MENU */ } this.inx27 = keys[27]; // ESC
   
@@ -220,16 +241,32 @@ Game.prototype.doInput = function() {
   if(!obj) { return; }
 
   var dir = [0,0];
-  if(keys[87] || keys[38]) { dir[1]++; } // W or UP
-  if(keys[83] || keys[40]) { dir[1]--; } // S or DOWN
-  if(keys[65] || keys[37]) { dir[0]--; } // A or LEFT
-  if(keys[68] || keys[39]) { dir[0]++; } // D or RIGHT
-  var a = keys[32]; // SPACE
-  var b = keys[16] || keys[45]; // Shift or num0
+  if(keys[87] || keys[38] || pad.ax.y < -.1) { dir[1]++; } // W or UP
+  if(keys[83] || keys[40] || pad.ax.y > .1) { dir[1]--; } // S or DOWN
+  if(keys[65] || keys[37] || pad.ax.x < -.1) { dir[0]--; } // A or LEFT
+  if(keys[68] || keys[39] || pad.ax.x > .1) { dir[0]++; } // D or RIGHT
+  var a = keys[32] || pad.a; // SPACE
+  var b = keys[16] || keys[45] || pad.b; // Shift or num0
   
   if(mous.spin) { this.display.camera.zoom(mous.spin); } // Mouse wheel -> Camera zoom
   
   obj.input(dir, a, b);
+  
+  /* @TODO: Hacky last second additions */
+  /* Check if client has clicked on the button to mute sound */
+  var tmp = this;
+  var W = this.display.canvas.width;
+  var btns = [
+    {pos: vec2.make(W-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteMusic = !tmp.audio.muteMusic; tmp.audio.saveSettings(); }},
+    {pos: vec2.make(W-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteSound = !tmp.audio.muteSound; tmp.audio.saveSettings(); }}
+  ];
+  for(var i=0;i<imp.mouse.length;i++) {
+    var m = imp.mouse[i];
+    for(var j=0;j<btns.length;j++) {
+      var b = btns[j];
+      if(m.btn === 0 && squar.inside(m.pos, b.pos, b.dim)) { b.click(); }
+    }
+  }
 };
 
 /* Step game world */
@@ -264,10 +301,21 @@ Game.prototype.doStep = function() {
   /* Step world to update bumps & effects & etc */
   this.world.step();
   
-  /* Triggers game over if player is dead for 15 frames. */
-  if(this.startDelta !== undefined && !this.gameOver && !ply) { if(++this.gameOverTimer > 15) { this.gameOver = true; this.gameOverTimer = 0; } }
+  /* Step audio class and objects */
+  for(var i=0;i<this.sounds.length;i++) {
+    var snd = this.sounds[i];
+    if(snd.done()) { this.sounds.splice(i--, 1); }
+  }
+  this.doMusic();
+  this.audio.update();
+  
+  /* Triggers game over if player is dead for 15 frames and has zero lives. If we have a life we respawn instead. */
+  if(this.startDelta !== undefined && !this.gameOver && !ply) {
+    if(this.lives > 0 && this.victory <= 0) { var rsp = this.getZone().level; this.doSpawn(); this.levelWarp(rsp); this.lives--; }
+    else if(++this.gameOverTimer > 30) { this.gameOver = true; this.gameOverTimer = 0; }
+  }
   /* Triggers page refresh after 5 seconds of a game over. */
-  else if(this.gameOver) { if(++this.gameOverTimer > 150) { app.close(); } }
+  else if(this.gameOver) { if(++this.gameOverTimer > Game.GAME_OVER_TIME) { app.close(); } }
   else { this.gameOverTimer = 0; }
   
   this.lastDraw = this.frame;
@@ -284,6 +332,23 @@ Game.prototype.doSpawn = function() {
     var pos = zone.initial; // shor2
     this.createObject(PlayerObject.ID, level.id, zone.id, shor2.decode(pos), [this.pid]);
     this.out.push(NET010.encode(level, zone, pos));
+  }
+};
+
+/* Looks at game state and decides what music we should be playing */
+/* @TODO: might be better to handle this with events instaed? */
+Game.prototype.doMusic = function() {
+  var ply = this.getPlayer();
+  var zon = this.getZone();
+  if(this.gameOver) { this.audio.setMusic("music/gameover.mp3", false); return; }
+  if(ply && ply.dead) { this.audio.setMusic("music/dead.mp3", false); return; }
+  if(ply && ply.autoTarget && this.victory <= 0) { this.audio.setMusic("music/level.mp3", false); return; }
+  if(this.victory > 0 && !this.victoryMusic) { this.audio.setMusic("music/castle.mp3", false); this.victoryMusic = true; return; }
+  if(this.victory > 0 && this.victory < 4 && this.victoryMusic && !this.audio.music.playing) { this.audio.setMusic("music/victory.mp3", false); return; }
+  if(ply && this.levelWarpTimer <= 0 && this.startDelta !== undefined && !this.victoryMusic) {
+    if(zon.music !== "") { this.audio.setMusic(zon.music, true); }
+    else { this.audio.stopMusic(); }
+    return;
   }
 };
 
@@ -346,7 +411,7 @@ Game.prototype.getPlatforms = function() {
   var plts = [];
   for(var i=0;i<this.objects.length;i++) {
     var obj = this.objects[i];
-    if(obj instanceof PlatformObject && obj.level === zon.level && obj.zone === zon.id) {
+    if((obj instanceof PlatformObject || obj instanceof BusObject) && obj.level === zon.level && obj.zone === zon.id) {
       plts.push(obj);
     }
   }
@@ -405,6 +470,13 @@ Game.prototype.getRemain = function() {
   return rm;
 };
 
+/* Plays sound effect as non spatial */
+Game.prototype.play = function(path,gain,shift) {
+  var sfx = this.audio.getAudio(path, gain, shift, "effect");
+  sfx.play();
+  this.sounds.push(sfx);
+};
+
 /* Shows lives/level name screen then warps player to start of specified level. */
 /* Called when player reaches end of the level they are currently on. */
 Game.prototype.levelWarp = function(lid) {
@@ -416,6 +488,14 @@ Game.prototype.levelWarp = function(lid) {
 /* When this client player collects a coin */
 Game.prototype.coinage = function() {
   this.coins = Math.min(99, this.coins+1);
+  if(this.coins >= Game.COINS_TO_LIFE) { this.lifeage(); this.coins = 0; }
+  this.play("sfx/coin.wav",.4,0.);
+};
+
+/* When the client player collects a life */
+Game.prototype.lifeage = function() {
+  this.lives = Math.min(99, this.lives+1);
+  this.play("sfx/life.wav",1.,0.);
 };
 
 Game.prototype.loop = function() {
@@ -455,4 +535,5 @@ Game.prototype.destroy = function() {
   clearTimeout(this.loopReq);
   this.input.destroy();
   this.display.destroy();
+  this.audio.destroy();
 };

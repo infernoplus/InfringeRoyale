@@ -78,6 +78,8 @@
                     <jsSourceFile>app/util/frame.js</jsSourceFile>
                     <jsSourceFile>app/util/byteme.js</jsSourceFile>
                     <jsSourceFile>app/util/squar.js</jsSourceFile>
+                    <jsSourceFile>app/util/cook.js</jsSourceFile>
+
                     <!-- Menus -->
                     <jsSourceFile>app/menu.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-warn.js</jsSourceFile>
@@ -86,6 +88,7 @@
                     <jsSourceFile>app/menu/menu-main.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-name.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-game.js</jsSourceFile>
+
                     <!-- Game Core -->
                     <jsSourceFile>app/net/network.js</jsSourceFile>
                     <jsSourceFile>app/net/state-login.js</jsSourceFile>
@@ -96,12 +99,18 @@
                     <jsSourceFile>app/game/object/koopa.js</jsSourceFile>
                     <jsSourceFile>app/game/object/troopa.js</jsSourceFile>
                     <jsSourceFile>app/game/object/plant.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/fish.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/bro.js</jsSourceFile>
                     <jsSourceFile>app/game/object/bowser.js</jsSourceFile>
                     <jsSourceFile>app/game/object/platform.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/bus.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/spring.js</jsSourceFile>
                     <jsSourceFile>app/game/object/flag.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fire.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/blast.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fireball.js</jsSourceFile>
                     <jsSourceFile>app/game/object/firebreath.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/hammer.js</jsSourceFile>
                     <jsSourceFile>app/game/object/item.js</jsSourceFile>
                     <jsSourceFile>app/game/object/mushroom.js</jsSourceFile>
                     <jsSourceFile>app/game/object/flower.js</jsSourceFile>
@@ -117,10 +126,14 @@
                     <jsSourceFile>app/game/input.js</jsSourceFile>
                     <jsSourceFile>app/game/display/resource.js</jsSourceFile>
                     <jsSourceFile>app/game/display/camera.js</jsSourceFile>
+                    <jsSourceFile>app/game/audio/data.js</jsSourceFile>
+                    <jsSourceFile>app/game/audio/instance.js</jsSourceFile>
+                    <jsSourceFile>app/game/audio.js</jsSourceFile>
                     <jsSourceFile>app/game/display.js</jsSourceFile>
                     <jsSourceFile>app/game/world.js</jsSourceFile>
                     <jsSourceFile>app/game/game.js</jsSourceFile>
                     <jsSourceFile>app/game/lobby.js</jsSourceFile>
+
                     <!-- Main Exec -->
                     <jsSourceFile>app/app.js</jsSourceFile>
                   </jsSourceFiles>
@@ -142,6 +155,7 @@
                     <jsSourceFile>app/util/byteme.js</jsSourceFile>
                     <jsSourceFile>app/util/squar.js</jsSourceFile>
                     <jsSourceFile>editor/util/file.js</jsSourceFile>
+
                     <!-- Menus -->
                     <jsSourceFile>editor/menu/menu.js</jsSourceFile>
                     <jsSourceFile>editor/menu/menu-warn.js</jsSourceFile>
@@ -150,6 +164,7 @@
                     <jsSourceFile>editor/menu/menu-bar.js</jsSourceFile>
                     <jsSourceFile>editor/menu/menu-list.js</jsSourceFile>
                     <jsSourceFile>editor/menu/menu-tool.js</jsSourceFile>
+
                     <!-- Tools -->
                     <jsSourceFile>editor/tool/tool-world.js</jsSourceFile>
                     <jsSourceFile>editor/tool/tool-level.js</jsSourceFile>
@@ -160,6 +175,7 @@
                     <jsSourceFile>editor/tool/tool-copy.js</jsSourceFile>
                     <jsSourceFile>editor/tool/tool-rep.js</jsSourceFile>
                     <jsSourceFile>editor/tool/tool-ref.js</jsSourceFile>
+
                     <!-- Game Core -->
                     <jsSourceFile>app/game/object/object.js</jsSourceFile>
                     <jsSourceFile>app/game/object/player.js</jsSourceFile>
@@ -167,12 +183,18 @@
                     <jsSourceFile>app/game/object/koopa.js</jsSourceFile>
                     <jsSourceFile>app/game/object/troopa.js</jsSourceFile>
                     <jsSourceFile>app/game/object/plant.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/fish.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/bro.js</jsSourceFile>
                     <jsSourceFile>app/game/object/bowser.js</jsSourceFile>
                     <jsSourceFile>app/game/object/platform.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/bus.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/spring.js</jsSourceFile>
                     <jsSourceFile>app/game/object/flag.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fire.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/blast.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fireball.js</jsSourceFile>
                     <jsSourceFile>app/game/object/firebreath.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/hammer.js</jsSourceFile>
                     <jsSourceFile>app/game/object/item.js</jsSourceFile>
                     <jsSourceFile>app/game/object/mushroom.js</jsSourceFile>
                     <jsSourceFile>app/game/object/flower.js</jsSourceFile>
@@ -192,6 +214,7 @@
                     <jsSourceFile>editor/display.js</jsSourceFile>
                     <jsSourceFile>app/game/world.js</jsSourceFile>
                     <jsSourceFile>editor/editor.js</jsSourceFile>
+
                     <!-- Main Exec -->
                     <jsSourceFile>editor/app.js</jsSourceFile>
                   </jsSourceFiles>

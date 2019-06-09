@@ -60,10 +60,8 @@ FlagObject.prototype.step = function() {
 };
 
 FlagObject.prototype.kill = function() { };
-
-FlagObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+FlagObject.prototype.isTangible = GameObject.prototype.isTangible;
+FlagObject.prototype.destroy = GameObject.prototype.destroy;
 
 FlagObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

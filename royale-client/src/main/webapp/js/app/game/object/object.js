@@ -15,6 +15,9 @@ function GameObject(game, level, zone, pos) {
   this.reverse = false;    // If true we flip the sprite on the horizontal axis.
   this.dead = false;       // Object is dead.
   this.garbage = false;    // Destroyed state, this object is ready to be deleted.
+  
+  /* Sound */
+  this.sounds = [];
 };
 
 /* ASYNC objects do not send or recieve updates to/from the server. */
@@ -27,6 +30,15 @@ GameObject.prototype.update = function(data) { };
 /* Game step update */
 GameObject.prototype.step = function() { };
 
+/* Sound update */
+GameObject.prototype.sound = function() {
+  for(var i=0;i<this.sounds.length;i++) {
+    var snd = this.sounds[i];
+    if(snd.done()) { this.sounds.splice(i--, 1); }
+    else { snd.position(this.pos); }
+  }
+};
+
 /* Sets object kill state, this will genearlly lead to destroy(); */
 GameObject.prototype.kill = function() {
   this.dead = true;
@@ -35,11 +47,26 @@ GameObject.prototype.kill = function() {
 
 /* Flags object for deletion. */
 GameObject.prototype.destroy = function() {
+  this.dead = true;
   this.garbage = true;
+};
+
+GameObject.prototype.isTangible = function() {
+  return !this.dead && !this.disabled && this.dim;
 };
 
 /* Returns data needed to draw this object. */
 GameObject.prototype.draw = function() { };
+
+/* Play a sound with gain and shift */
+GameObject.prototype.play = function(path, gain, shift) {
+  var zon = this.game.getZone();
+  if(this.zone !== zon.id || this.level !== zon.level) { return; }
+  var sfx = this.game.audio.getSpatialAudio(path, gain, shift, "effect");
+  sfx.play(this.pos);
+  this.sounds.push(sfx);
+  return sfx;
+};
 
 /* Static. All object classes are registered here so we can spawn thems using their IDs. */
 GameObject.OBJECT_LIST = [];

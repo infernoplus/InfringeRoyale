@@ -11,11 +11,11 @@ import org.infpls.royale.server.util.*;
 
 public abstract class GameLobby {
   private final static String LOBBY_FILE = "lobby";
-  private final static String GAME_FILE = "world-1";
+  private final static String[] GAME_FILES = new String[]{ "world-1", "world-2", "world-3" };
   
-  private final static int MIN_PLAYERS = 2;          // Min players needed to vote start
+  private final static int MIN_PLAYERS = 10;          // Min players needed to vote start
   private final static int MAX_PLAYERS = 99;         // Max players, game starts automatically
-  private final static float MIN_VOTE_FRAC = .90f;   // Needs 75% ready vote to start early
+  private final static float MIN_VOTE_FRAC = .85f;   // Needs 85% ready vote to start early
   private final static int MAX_AGE = 1440000;        // Max number of frames before we just close the lobby. This is 12 hours.
   
   private final static int START_DELAY = 150;
@@ -26,6 +26,8 @@ public abstract class GameLobby {
   
   private final GameLoop loop; /* Seperate timer thread to trigger game steps */
   protected RoyaleCore game; /* The actual game object */
+  
+  protected final String gameFile;
   
   private final InputSync inputs; /* Packets that the game must handle are stored until a gamestep happens. This is for synchronization. */
   private final EventSync events; /* Second verse same as the first. */
@@ -50,6 +52,7 @@ public abstract class GameLobby {
     closed = false;
     
     game = new RoyaleLobby();
+    gameFile = GAME_FILES[(int)Math.min(GAME_FILES.length-1, Math.random()*GAME_FILES.length)];
 
     loop = new GameLoop(this);
   }
@@ -158,7 +161,7 @@ public abstract class GameLobby {
       try { if(isClosed()) { session.close("Error during game setup."); return; } }
       catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during game setup.", ioex); return; }
       loading.add(session);
-      sendPacket(new PacketG01(GAME_FILE), session);
+      sendPacket(new PacketG01(gameFile), session);
     }
     
     game = new RoyaleGame();

@@ -8,8 +8,7 @@ function PlatformObject(game, level, zone, pos, oid, width, movx, movy, speed, l
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
-  this.state = PlatformObject.STATE.IDLE;
-  this.sprite = this.state.SPRITE[0];
+  this.setState(PlatformObject.STATE.IDLE);
   
   this.loc = parseInt(reverse)===0?                                 // Locations   
     [pos, vec2.add(pos, vec2.make(parseInt(movx), parseInt(movy)))]:
@@ -21,7 +20,6 @@ function PlatformObject(game, level, zone, pos, oid, width, movx, movy, speed, l
   /* Physics */
   this.dim = vec2.make(parseInt(width), .5);
   this.speed = parseFloat(speed);
-  this.grounded = false;
   this.riders = [];
   
   /* Control */
@@ -63,7 +61,7 @@ for(var i=0;i<PlatformObject.STATE_LIST.length;i++) {
 
 /* === INSTANCE ============================================================= */
 
-PlatformObject.prototype.update = function(event) { };
+PlatformObject.prototype.update = function(event) { /* ASYNC */ };
 
 PlatformObject.prototype.step = function() {
   /* Delay */
@@ -106,10 +104,8 @@ PlatformObject.prototype.riding = function(obj) {
 };
 
 PlatformObject.prototype.kill = function() { };
-
-PlatformObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+PlatformObject.prototype.destroy = GameObject.prototype.destroy;
+PlatformObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 PlatformObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }

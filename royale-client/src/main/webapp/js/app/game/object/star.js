@@ -66,7 +66,8 @@ StarObject.prototype.playerStomp = ItemObject.prototype.playerStomp;
 StarObject.prototype.playerBump = ItemObject.prototype.playerBump;
 
 StarObject.prototype.kill = ItemObject.prototype.kill;
-StarObject.prototype.destroy = ItemObject.prototype.destroy;
+StarObject.prototype.destroy = GameObject.prototype.destroy;
+StarObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 StarObject.prototype.setState = ItemObject.prototype.setState;
 StarObject.prototype.draw = ItemObject.prototype.draw;

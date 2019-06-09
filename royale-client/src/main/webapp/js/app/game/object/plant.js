@@ -83,7 +83,7 @@ PlantObject.prototype.update = function(event) {
 PlantObject.prototype.step = function() {
   /* Bonked */
   if(this.state === PlantObject.STATE.BONK) {
-    if(this.bonkTimer++ > PlantObject.BONK_TIME) { this.destroy(); return; }
+    if(this.bonkTimer++ > PlantObject.BONK_TIME || this.pos.y+this.dim.y < 0) { this.destroy(); return; }
     
     this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     this.moveSpeed *= PlantObject.BONK_DECEL;
@@ -100,6 +100,7 @@ PlantObject.prototype.step = function() {
   /* Normal Gameplay */
   this.control();
   this.physics();
+  this.sound();
 };
 
 PlantObject.prototype.control = function() {
@@ -120,6 +121,8 @@ PlantObject.prototype.physics = function() {
   }
 };
 
+PlantObject.prototype.sound = GameObject.prototype.sound;
+
 PlantObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01)); } };
 
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
@@ -130,6 +133,7 @@ PlantObject.prototype.bonk = function() {
   this.moveSpeed = PlantObject.BONK_IMP.x;
   this.fallSpeed = PlantObject.BONK_IMP.y;
   this.dead = true;
+  this.play("sfx/kick.wav", 1., .04);
 };
 
 PlantObject.prototype.playerCollide = function(p) {
@@ -148,10 +152,8 @@ PlantObject.prototype.playerBump = function(p) {
 };
 
 PlantObject.prototype.kill = function() { };
-
-PlantObject.prototype.destroy = function() {
-  this.garbage = true;
-};
+PlantObject.prototype.destroy = GameObject.prototype.destroy;
+PlantObject.prototype.isTangible = GameObject.prototype.isTangible;
 
 PlantObject.prototype.setState = function(STATE) {
   if(STATE === this.state) { return; }
@@ -187,6 +189,8 @@ PlantObject.prototype.draw = function(sprites) {
     sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
   }
 };
+
+PlantObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(PlantObject);

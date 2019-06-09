@@ -100,8 +100,9 @@ img {
   animation: glow 1s infinite alternate;
 }
 
-.launch::hover {
-  
+.launch:hover {
+  animation: none;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 .players {
