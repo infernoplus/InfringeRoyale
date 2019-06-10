@@ -25,7 +25,6 @@ Network.prototype.connect = function(name){
 
   this.webSocket = new WebSocket("ws://" + address + "/royale/ws");
   this.webSocket.binaryType = 'arraybuffer';
-  app.menu.warn.show("Connecting @" + address, 0);
 
   this.webSocket.onopen = function(event) {
     if(event.type !== "open") {
