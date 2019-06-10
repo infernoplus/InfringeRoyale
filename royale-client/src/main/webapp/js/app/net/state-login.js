@@ -18,14 +18,13 @@ StateLogin.prototype.handleBinary = function(packet) {
 
 StateLogin.prototype.ready = function() {
   this.send({type: "l00", name: app.net.prefName});
-  app.menu.warn.show("LoginState Ready");
 };
 
 // L01
 StateLogin.prototype.loggedIn = function(p) {
   app.net.name = p.name;
   app.net.sid = p.sid;
-  app.menu.warn.show("Logged in: " + p.name + " // " + p.sid);
+  console.log("Logged in: " + p.name + " // " + p.sid);
 };
 
 StateLogin.prototype.send = function(data) {

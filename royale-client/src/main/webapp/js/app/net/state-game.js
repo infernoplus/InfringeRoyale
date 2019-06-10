@@ -22,7 +22,6 @@ StateGame.prototype.handleBinary = function(data) {
 };
 
 StateGame.prototype.ready = function() {
-  app.menu.warn.show("GameState Ready");
   this.send({type: "g00"});
 };
 
@@ -31,15 +30,12 @@ StateGame.prototype.load = function(p) {
   var address = window.location.host;
   var that = this;
   
-  app.menu.warn.show("Downloading map file...");
   $.ajax({
     url: "http://" + address + "/royale/game/" + p.game,
     type: 'GET',
     timeout: 5000,
     success: function(data) {
-      app.menu.warn.show("Loading game...");
       app.load(data);
-      app.menu.warn.show("Load done...");
       that.send({type: "g03"});
     },
     error: function() {
