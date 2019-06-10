@@ -78,13 +78,13 @@
                     <jsSourceFile>app/util/frame.js</jsSourceFile>
                     <jsSourceFile>app/util/byteme.js</jsSourceFile>
                     <jsSourceFile>app/util/squar.js</jsSourceFile>
-                    <jsSourceFile>app/util/cook.js</jsSourceFile>
 
                     <!-- Menus -->
                     <jsSourceFile>app/menu.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-warn.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-error.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-load.js</jsSourceFile>
+                    <jsSourceFile>app/menu/menu-disclaim.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-main.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-name.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-game.js</jsSourceFile>

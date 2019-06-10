@@ -11,6 +11,7 @@ function Menu() {
     {id: "warn", obj: new MenuWarn()}, // Special, displays on top. Non-exclusive.
     {id: "error", obj: new MenuError()},
     {id: "load", obj: new MenuLoad()},
+    {id: "disclaim", obj: new MenuDisclaim()},
     {id: "main", obj: new MenuMain()},
     {id: "name", obj: new MenuName()},
     {id: "game", obj: new MenuGame()}
@@ -36,7 +37,7 @@ function Menu() {
   };
   
   this.hideAll();
-  this.background('a');
+  this.background('c');
   this.body.style.display = "block";
 };
 

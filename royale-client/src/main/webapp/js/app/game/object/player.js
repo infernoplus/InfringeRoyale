@@ -259,7 +259,7 @@ PlayerObject.prototype.step = function() {
   else if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; }
   
   /* Ghost playback */
-  if(this.isState(PlayerObject.SNAME.GHOST)) { return; }
+  if(this.isState(PlayerObject.SNAME.GHOST)) { this.sound(); return; }
   
   /* Player Hidden */
   if(this.isState(PlayerObject.SNAME.HIDE)) { return; }
@@ -715,6 +715,11 @@ PlayerObject.prototype.damage = function(obj) {
   if(this.damageTimer > 0 || this.starTimer > 0) { return; }
   if(this.power > 0) { this.transform(0); this.damageTimer = PlayerObject.DAMAGE_TIME; return; }
   this.kill();
+};
+
+/* Temp invuln. Called when player loads into a level to prevent instant spawn kill */
+PlayerObject.prototype.invuln = function() {
+  this.damageTimer = PlayerObject.DAMAGE_TIME;
 };
 
 PlayerObject.prototype.powerup = function(obj) {
