@@ -13,7 +13,7 @@ public class SessionThread extends Thread {
   private List<Packet> pout;              // Outgoing packet queue
   private List<ByteBuffer> bout;              // Outgoing packet queue
   
-  private static final int SEND_TIMEOUT = 3000, CLOSE_WAIT_TIMEOUT = 150;
+  private static final int SEND_TIMEOUT = 15000, CLOSE_WAIT_TIMEOUT = 150;
   
   private long sendTime;                 // Time of last send start
   private boolean sending;               // Currently in the process of sending data to a client
