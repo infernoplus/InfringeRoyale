@@ -102,8 +102,22 @@ Audio.prototype.update = function() {
   
   /* Set Camera Position */
   var ppos = this.game.getPlayer()?this.game.getPlayer().pos:this.game.display.camera.pos;
-  this.context.listener.setPosition(ppos.x, ppos.y, 0.);
-  this.context.listener.setOrientation(1., 0., 0., 0., 1., 0.);
+  if(this.context.listener.setPosition) {
+    this.context.listener.setPosition(ppos.x, ppos.y, 0.);
+    this.context.listener.setOrientation(1., 0., 0., 0., 1., 0.);
+  }
+  // Safari
+  else {
+    this.context.listener.positionX.value = ppos.x;
+    this.context.listener.positionY.value = ppos.y;
+    this.context.listener.positionZ.value = 0.;
+    this.context.listener.forwardX.value = 1.;
+    this.context.listener.forwardY.value = 0.;
+    this.context.listener.forwardZ.value = 0.;
+    this.context.listener.upX.value = 0.;
+    this.context.listener.upY.value = 1.;
+    this.context.listener.upZ.value = 0.;
+  }
 };
 
 /* Set Master Volume */
