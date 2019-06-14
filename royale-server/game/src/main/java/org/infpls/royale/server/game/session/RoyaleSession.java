@@ -110,8 +110,9 @@ public final class RoyaleSession {
   }
   
   /* Foricbly removes player from the game they are in. Used in event of critical connection error. */
-  public void eject() throws IOException {
-    close();
+  /* Does not write to socket or do anything that would cause blocking. */
+  public void eject() {
+    sessionState.eject();
   }
   
   public void destroy() throws IOException {

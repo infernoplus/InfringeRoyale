@@ -75,9 +75,14 @@ public class Oak {
   }
   
   public static void log(Level level, String msg, Exception ex) {
-    final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
-    final String[] spl = ste[ste.length > 2 ? 3 : 0].getClassName().split("\\.");
-    final String src = spl[spl.length > 0 ? spl.length-1 : 0] + "." + ste[ste.length > 2 ? 3 : 0].getMethodName();
+    String src = "<Unknown>";
+    try {
+      final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+      final String[] spl = ste[ste.length > 2 ? 3 : 0].getClassName().split("\\.");
+      src = spl[spl.length > 0 ? spl.length-1 : 0] + "." + ste[ste.length > 2 ? 3 : 0].getMethodName();
+    }
+    catch(Exception e) { }
+    
     log(level, src, msg, ex);
   }
   

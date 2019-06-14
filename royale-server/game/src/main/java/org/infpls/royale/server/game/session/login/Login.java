@@ -66,6 +66,8 @@ public class Login extends SessionState {
   public void handleBinary(final ByteBuffer data) throws IOException {
     throw new IOException("Recieved unknown binary data from client!");
   }
+  
+  public void eject() { }
 
   @Override
   public void destroy() throws IOException {

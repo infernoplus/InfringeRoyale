@@ -79,6 +79,11 @@ public class Game extends SessionState {
     lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.VOTE));
   };
   
+  /* See RoyaleSession for details. Don't call this without good reason. */
+  public void eject() {
+    lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.EJECT));
+  }
+  
   @Override
   public void destroy() throws IOException {
     lobby.pushEvent(new SessionEvent(session, SessionEvent.Type.DISCONNECT));

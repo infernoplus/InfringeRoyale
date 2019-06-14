@@ -56,7 +56,7 @@ public class Controller {
   /* Sends information to the client about the current gamestate */
   public void update(List<ByteMe.NETX> loc, List<ByteMe.NETX> glo) {
     if(updates.size() < 1) { return; }
-    if(updates.size() > 5) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); }   /* @TODO: DELETE THIS LINE */
+    if(updates.size() > 120) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); updates.clear(); }
     /* Process client input, if there is more than 3 updates in the queue we 'catch up' by processing 2 updates per tick instead of 1 */
     int lm = Math.max(1, Math.min(2, updates.size()-1));
     for(int j=0;j<updates.size()&&j<lm;j++) {

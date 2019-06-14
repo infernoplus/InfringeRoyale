@@ -13,7 +13,7 @@ public abstract class GameLobby {
   private final static String LOBBY_FILE = "lobby";
   private final static String[] GAME_FILES = new String[]{ "world-1", "world-2", "world-3" };
   
-  private final static int MIN_PLAYERS = 10;          // Min players needed to vote start
+  private final static int MIN_PLAYERS = 1;          // Min players needed to vote start
   private final static int MAX_PLAYERS = 99;         // Max players, game starts automatically
   private final static float MIN_VOTE_FRAC = .85f;   // Needs 85% ready vote to start early
   private final static int MAX_AGE = 1440000;        // Max number of frames before we just close the lobby. This is 12 hours.
@@ -66,7 +66,7 @@ public abstract class GameLobby {
       
       if(startTimer >= 0 && ++startTimer >= START_DELAY) { whereWeDroppin(); return; }
       if(locked && (loading.size() + players.size() < 1 || ++age > MAX_AGE)) { close(); }
-      
+
       game.input(inputs.pop());
       game.update();
     }
@@ -93,6 +93,7 @@ public abstract class GameLobby {
         case JOIN : { joinEvent(evt.session); break; }
         case READY : { readyEvent(evt.session); break; }
         case DISCONNECT : { disconnectEvent(evt.session); break; }
+        case EJECT : { ejectEvent(evt.session); break; }
         case VOTE : { voteEvent(evt.session); break; }
       }
     }
@@ -116,6 +117,13 @@ public abstract class GameLobby {
   }
   
   private void disconnectEvent(RoyaleSession session) {
+    loading.remove(session);
+    players.remove(session);
+    game.leave(session);
+  }
+  
+  private void ejectEvent(RoyaleSession session) {
+    Oak.log(Oak.Level.WARN, "Player ejection event recieved: '" + session.getUser() + "'");
     loading.remove(session);
     players.remove(session);
     game.leave(session);
