@@ -90,9 +90,16 @@ SpatialAudioInstance.prototype.create = function(gain, shift, volume) {
 
 SpatialAudioInstance.prototype.position = function(pos) {
   if(this.data.ready() && this.ready) {
-    this.panner.positionX.value = pos.x;
-    this.panner.positionY.value = pos.y;
-    this.panner.positionZ.value = 0.;
+    // Good browsers
+    if(this.panner.setPosition) {
+      this.panner.setPosition(pos.x, pos.y, 0.);
+    }
+    //Safari?
+    else {
+      this.panner.positionX.value = pos.x;
+      this.panner.positionY.value = pos.y;
+      this.panner.positionZ.value = 0.;
+    }
   }
 };
 
