@@ -32,37 +32,42 @@ public class SessionThread extends Thread {
   
   @Override
   public void run() {
-    while(session.isOpen() && !forceClose && !safeClose) {
-      final List<Packet> paks = popPacket();
-      final List<ByteBuffer> bins = popBinary();
-      try {
-        if(bins == null && paks == null) { doWait(); }
-        if(bins != null) {
-          sendTime = System.currentTimeMillis();
-          sending = true;
-          for(int i=0;i<bins.size();i++) {
-            final ByteBuffer bb = bins.get(i);
-            if(bb.capacity() > 0) { session.sendImmiediate(bb); }
+    try {
+      while(session.isOpen() && !forceClose && !safeClose) {
+        final List<Packet> paks = popPacket();
+        final List<ByteBuffer> bins = popBinary();
+        try {
+          if(bins == null && paks == null) { doWait(); }
+          if(bins != null) {
+            sendTime = System.currentTimeMillis();
+            sending = true;
+            for(int i=0;i<bins.size();i++) {
+              final ByteBuffer bb = bins.get(i);
+              if(bb.capacity() > 0) { session.sendImmiediate(bb); }
+            }
+            sending = false;
           }
-          sending = false;
+          if(paks != null) {
+            sendTime = System.currentTimeMillis();
+            sending = true;
+            session.sendImmiediate(new PacketS01(paks));
+            sending = false;
+          }
         }
-        if(paks != null) {
-          sendTime = System.currentTimeMillis();
-          sending = true;
-          session.sendImmiediate(new PacketS01(paks));
-          sending = false;
+        catch(Exception ex) {
+          Oak.log(Oak.Level.ERR, "Exception during SessionThread send for user: '" + session.getUser() + "'. Closing connection.", ex);
+          forceClose();
         }
       }
-      catch(Exception ex) {
-        Oak.log(Oak.Level.ERR, "Exception during SessionThread send for user: '" + session.getUser() + "'. Closing connection.", ex);
-        forceClose();
+      if(forceClose) {
+        Oak.log(Oak.Level.WARN, "Unsafe SessionThread close for user: '" + session.getUser() + "'");
+        try { if(session.isOpen()) { session.close(); } }
+        catch(IOException ex) { Oak.log(Oak.Level.ERR, "Failed to force close SessionThread for user: '" + session.getUser() + "'", ex); }
+        Oak.log(Oak.Level.INFO, "SessionThread resolved for user: '" + session.getUser() + "'");
       }
     }
-    if(forceClose) {
-      Oak.log(Oak.Level.WARN, "Unsafe SessionThread close for user: '" + session.getUser() + "'");
-      try { if(session.isOpen()) { session.close(); } }
-      catch(IOException ex) { Oak.log(Oak.Level.ERR, "Failed to force close SessionThread for user: '" + session.getUser() + "'", ex); }
-      Oak.log(Oak.Level.INFO, "SessionThread resolved for user: '" + session.getUser() + "'");
+    catch(Exception ex) {
+      Oak.log(Oak.Level.ERR, "SessionThread generic exception for user: '" + session.getUser() + "'", ex);
     }
     closed = true;
   }
@@ -76,7 +81,7 @@ public class SessionThread extends Thread {
     final long now = System.currentTimeMillis();
     if(sending && ((now - sendTime) > SEND_TIMEOUT)) {
       Oak.log(Oak.Level.WARN, "Send Timeout exceeded for user: " + session.getUser() + " :: lastSend=" + sendTime + " now=" + now + " diff=" + (now-sendTime));
-      forceClose();
+      forceClose(); /* @TODO: here, appears to cause blocking write (?) maybe fixed? */
     }
   }
   
@@ -116,16 +121,19 @@ public class SessionThread extends Thread {
     doNotify();
     final long start = System.currentTimeMillis();
     long now = start;
-    while(!closed && ((now - start) < CLOSE_WAIT_TIMEOUT)) { now = System.currentTimeMillis(); }
+    // while(!closed && ((now - start) < CLOSE_WAIT_TIMEOUT)) { now = System.currentTimeMillis(); } /* @TODO: here bad  stuff may happen. disabled temp */
     if(!closed) { Oak.log(Oak.Level.ERR, "TIMED OUT WAITING FOR CLOSE! user: '" + session.getUser() + "'"); }
     return closed;
   }
   
+  /* @TODO: appears to be the cause of a blocking write via session.close() */
+  /* Fixed in theory? should probably remove player from game manually but will fix later. */
   private void forceClose() {
     if(forceClose) { return; }
     forceClose = true;
     Oak.log(Oak.Level.WARN, "ForceClose call for user: '" + session.getUser() + "'");
-    try { Oak.log(Oak.Level.INFO, "Kicking user from game: '" + session.getUser() + "'"); session.eject(); } catch(IOException ex) { Oak.log(Oak.Level.ERR, "Failed to kick user from game.", ex); }
+    session.eject();
+    Oak.log(Oak.Level.WARN, "Ejected user from game: '" + session.getUser() + "'");
     doNotify();
   }
 }

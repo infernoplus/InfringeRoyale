@@ -18,6 +18,8 @@ public abstract class SessionState {
     session.sendPacket(p);
   }
   
+  public abstract void eject();
+  
   public abstract void destroy() throws IOException;
   
   /* Normal connection close */

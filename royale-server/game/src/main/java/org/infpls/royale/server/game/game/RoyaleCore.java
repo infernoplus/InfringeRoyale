@@ -7,6 +7,7 @@ import java.util.*;
 import org.infpls.royale.server.game.dao.lobby.GameLobby;
 import org.infpls.royale.server.game.session.*;
 import org.infpls.royale.server.game.session.game.*;
+import org.infpls.royale.server.util.Oak;
 
 public abstract class RoyaleCore {
   public final List<Controller> controllers;

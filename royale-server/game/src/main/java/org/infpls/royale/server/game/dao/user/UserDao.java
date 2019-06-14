@@ -6,6 +6,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import org.infpls.royale.server.game.dao.DaoContainer;
 import org.infpls.royale.server.game.session.RoyaleSession;
+import org.infpls.royale.server.util.Oak;
 
 /* UserDao handles both user info and logged in user RoyaleSessions.
    This is because theres is an overlap in data here
@@ -28,8 +29,10 @@ public class UserDao {
   public void destroySession(final WebSocketSession webSocket) throws IOException {
     for(int i=0;i<sessions.size();i++) {
       if(sessions.get(i).getWebSocketId().equals(webSocket.getId())) {
-        sessions.get(i).destroy();
-        sessions.remove(i);
+        final RoyaleSession session = sessions.get(i);
+        session.destroy();
+        try { sessions.remove(session); }
+        catch(Exception ex) { Oak.log(Oak.Level.ERR, "Error while destroying session.", ex); } /* @TODO: errors involve with this method */
         return;
       }
     }
