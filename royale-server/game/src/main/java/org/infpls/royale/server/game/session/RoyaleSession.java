@@ -59,14 +59,24 @@ public final class RoyaleSession {
   public void sendImmiediate(final Packet p) throws IOException, IllegalStateException {
     if(isOpen()) {
       final Gson gson = new GsonBuilder().create();
-      webSocket.sendMessage(new TextMessage(gson.toJson(p)));
+      try {
+        webSocket.sendMessage(new TextMessage(gson.toJson(p)));
+      }
+      catch(IllegalArgumentException iae) {
+        Oak.log(Oak.Level.ERR, "JSON IAException caught for : '" + getUser() + "'", iae);
+      }
     }
   }
   
   /* Sends data over websocket on immiediate thread. Should only be called by SessionThread.run() */
   public void sendImmiediate(final ByteBuffer bb) throws IOException, IllegalStateException {
     if(isOpen()) {
-      webSocket.sendMessage(new BinaryMessage(bb));
+      try {
+        webSocket.sendMessage(new BinaryMessage(bb));
+      }
+      catch(IllegalArgumentException iae) {
+        Oak.log(Oak.Level.ERR, "Binary IAException caught for : '" + getUser() + "'", iae);
+      }
     }
   }
   
