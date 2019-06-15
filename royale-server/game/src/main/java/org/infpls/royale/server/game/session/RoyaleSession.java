@@ -51,7 +51,7 @@ public final class RoyaleSession {
     sessionThread.push(p);
   }
   
-  public void sendBinary(final ByteBuffer bb) {
+  public void sendBinary(final byte[] bb) {
     sessionThread.push(bb);
   }
   
@@ -69,7 +69,7 @@ public final class RoyaleSession {
   }
   
   /* Sends data over websocket on immiediate thread. Should only be called by SessionThread.run() */
-  public void sendImmiediate(final ByteBuffer bb) throws IOException, IllegalStateException {
+  public void sendImmiediate(final byte[] bb) throws IOException, IllegalStateException {
     if(isOpen()) {
       try {
         webSocket.sendMessage(new BinaryMessage(bb));

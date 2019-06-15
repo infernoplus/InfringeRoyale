@@ -77,7 +77,7 @@ public abstract class RoyaleCore {
     ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
     baos.close();
     
-    controller.send(bb);
+    controller.send(bb.array());
     
     // Regenerate player list
     final List<PacketG12.NamePair> players = new ArrayList();
@@ -118,7 +118,15 @@ public abstract class RoyaleCore {
   public void send(ByteBuffer bb) {
     for(int i=0;i<controllers.size();i++) {
       final Controller controller = controllers.get(i);
-      controller.send(bb);
+      /* @TODO: In further attempts to fix the bytebuffer bug we are now making copies of arrays for each user before passing them to the sessionthread */
+      try {
+        final byte[] bytez = bb.array().clone();
+        
+        controller.send(bytez);
+      }
+      catch(Exception ex) {
+        Oak.log(Oak.Level.ERR, "Error during byte copy and send.", ex);
+      }
     }
   }
   
