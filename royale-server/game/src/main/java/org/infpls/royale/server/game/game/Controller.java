@@ -122,7 +122,7 @@ public class Controller {
     session.sendPacket(p);
   }
   
-  public void send(ByteBuffer bb) {
+  public void send(byte[] bb) {
     session.sendBinary(bb);
   }
   

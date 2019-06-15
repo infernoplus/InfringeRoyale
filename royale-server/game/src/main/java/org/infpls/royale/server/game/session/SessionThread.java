@@ -1,7 +1,6 @@
 package org.infpls.royale.server.game.session;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.*;
 import org.infpls.royale.server.util.Oak;
 
@@ -11,7 +10,7 @@ import org.infpls.royale.server.util.Oak;
 public class SessionThread extends Thread {
   private final RoyaleSession session;
   private List<Packet> pout;              // Outgoing packet queue
-  private List<ByteBuffer> bout;              // Outgoing packet queue
+  private List<byte[]> bout;              // Outgoing packet queue
   
   private static final int SEND_TIMEOUT = 15000, CLOSE_WAIT_TIMEOUT = 150;
   
@@ -35,15 +34,15 @@ public class SessionThread extends Thread {
     try {
       while(session.isOpen() && !forceClose && !safeClose) {
         final List<Packet> paks = popPacket();
-        final List<ByteBuffer> bins = popBinary();
+        final List<byte[]> bins = popBinary();
         try {
           if(bins == null && paks == null) { doWait(); }
           if(bins != null) {
             sendTime = System.currentTimeMillis();
             sending = true;
             for(int i=0;i<bins.size();i++) {
-              final ByteBuffer bb = bins.get(i);
-              if(bb.capacity() > 0) { session.sendImmiediate(bb); }
+              final byte[] bb = bins.get(i);
+              if(bb.length > 0) { session.sendImmiediate(bb); }
             }
             sending = false;
           }
@@ -75,8 +74,8 @@ public class SessionThread extends Thread {
   private synchronized void doWait() { try { wait(); } catch(InterruptedException ex) { Oak.log(Oak.Level.ERR, "Interrupt Exception.", ex); } }
   private synchronized void doNotify() { notify(); }
   
-  /* Note: For whatever reason, sending an empty ByteBuffer through sendImmiedate() causes the thread to hang. */
-  /* Always check to make sure your ByteBuffer has data in it before sending! */
+  /* Note: For whatever reason, sending an empty byte[] through sendImmiedate() causes the thread to hang. */
+  /* Always check to make sure your byte[] has data in it before sending! */
   public void checkTimeout() {
     final long now = System.currentTimeMillis();
     if(sending && ((now - sendTime) > SEND_TIMEOUT)) {
@@ -86,10 +85,10 @@ public class SessionThread extends Thread {
   }
   
   public void push(final Packet p) { if(forceClose || safeClose || closed) { return; } syncPacketAccess(false, p); checkTimeout(); doNotify(); }
-  public void push(final ByteBuffer bb) { if(forceClose || safeClose || closed) { return; } syncBinaryAccess(false, bb); checkTimeout(); doNotify(); }
+  public void push(final byte[] bb) { if(forceClose || safeClose || closed) { return; } syncBinaryAccess(false, bb); checkTimeout(); doNotify(); }
   
   private List<Packet> popPacket() { return syncPacketAccess(true, null); }
-  private List<ByteBuffer> popBinary() { return syncBinaryAccess(true, null); }
+  private List<byte[]> popBinary() { return syncBinaryAccess(true, null); }
   
   private synchronized List<Packet> syncPacketAccess(final boolean s, final Packet p) {
     if(s) {
@@ -100,9 +99,9 @@ public class SessionThread extends Thread {
     return null;
   }
   
-  private synchronized List<ByteBuffer> syncBinaryAccess(final boolean s, final ByteBuffer bb) {
+  private synchronized List<byte[]> syncBinaryAccess(final boolean s, final byte[] bb) {
     if(s) {
-      if(bout.size() > 0) { final List<ByteBuffer> popped = bout; bout = new ArrayList(); return popped; }
+      if(bout.size() > 0) { final List<byte[]> popped = bout; bout = new ArrayList(); return popped; }
       else { return null; }
     }
     bout.add(bb);
