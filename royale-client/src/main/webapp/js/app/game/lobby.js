@@ -49,6 +49,7 @@ Lobby.prototype.getZone = Game.prototype.getZone;
 Lobby.prototype.getPlayerInfo = Game.prototype.getPlayerInfo;
 Lobby.prototype.getRemain = Game.prototype.getRemain;
 
+Lobby.prototype.play = Game.prototype.play;
 Lobby.prototype.levelWarp = Game.prototype.levelWarp;
 
 Lobby.prototype.coinage = Game.prototype.coinage;

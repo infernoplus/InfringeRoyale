@@ -246,7 +246,7 @@ Game.prototype.doInput = function() {
   if(keys[65] || keys[37] || pad.ax.x < -.1) { dir[0]--; } // A or LEFT
   if(keys[68] || keys[39] || pad.ax.x > .1) { dir[0]++; } // D or RIGHT
   var a = keys[32] || pad.a; // SPACE
-  var b = keys[16] || keys[45] || pad.b; // Shift or num0
+  var b = keys[16] || keys[96] || keys[45] || pad.b; // Shift or num0
   
   if(mous.spin) { this.display.camera.zoom(mous.spin); } // Mouse wheel -> Camera zoom
   

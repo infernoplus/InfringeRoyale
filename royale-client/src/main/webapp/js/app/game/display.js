@@ -108,15 +108,24 @@ Display.prototype.drawObject = function() {
   var zone = this.game.getZone();
   var dim = zone.dimensions();
   
+  /* Culling Bounds */
+  var w = ((this.canvas.width/Display.TEXRES)*.6)/this.camera.scale;
+  var cx0 = Math.max(0, Math.min(dim.x, parseInt(this.camera.pos.x - w)));
+  var cx1 = Math.max(0, Math.min(dim.x, parseInt(this.camera.pos.x + w)));
+  
   var sprites = [];
   var texts = [];
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
     if(obj.level === zone.level && obj.zone === zone.id && obj.pid !== this.game.pid) {
-      if(obj.write) { obj.write(texts); }
-      if(obj.draw) { obj.draw(sprites); }
+      if(obj.pos.x >= cx0 && obj.pos.x <= cx1) {
+        if(obj.write) { obj.write(texts); }
+        if(obj.draw) { obj.draw(sprites); }
+      }
     }
   }
+  
+  console.log("drawing: " + sprites.length);
   
   var ply = this.game.getPlayer();
   if(ply && ply.level === zone.level && ply.zone === zone.id) { ply.draw(sprites); ply.write(texts); } // Draw our character last.
@@ -265,7 +274,7 @@ Display.prototype.drawUI = function() {
       context.fillText(txt, W-w-8, 32);
     }
     else if(this.game instanceof Lobby) {
-      var txt = this.game.players.length + " / 99 PLAYERS";
+      var txt = this.game.players.length + " / 75 PLAYERS";
       w = context.measureText(txt).width;
       context.fillText(txt, W-w-8, 32);
     }

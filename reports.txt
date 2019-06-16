@@ -9,6 +9,8 @@
 - spectate
 - keycode for num0 is wrong
 
+-movement changes, crouch jump and reverse jump
+
 
 tweet tommarow: addign fireflower to left hand side
 3-1 star wars aldaran scen
