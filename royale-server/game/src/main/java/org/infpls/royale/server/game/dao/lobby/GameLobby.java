@@ -13,8 +13,10 @@ public abstract class GameLobby {
   private final static String LOBBY_FILE = "lobby";
   private final static String[] GAME_FILES = new String[]{ "world-1", "world-2", "world-3" };
   
+  
   private final static int MIN_PLAYERS = 20;          // Min players needed to vote start
-  private final static int MAX_PLAYERS = 99;         // Max players, game starts automatically
+  private final static int MAX_PLAYERS = 75;         // Max players, game starts automatically
+
   private final static float MIN_VOTE_FRAC = .85f;   // Needs 85% ready vote to start early
   private final static int MAX_AGE = 1440000;        // Max number of frames before we just close the lobby. This is 12 hours.
   

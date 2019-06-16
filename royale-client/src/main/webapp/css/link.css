@@ -1,4 +1,4 @@
-.link {
+.link-r {
   position: absolute;
   top: 0px;
   right: 0px;
@@ -36,4 +36,27 @@
 
 .link-patr:hover {
   background-image: url(../img/home/patr-inv.png);
+}
+
+.link-l {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  margin-top: 6px;
+  margin-left: 6px;
+  padding: 0px;
+  background-color: rgba(0, 0, 0, 0.0);
+}
+
+.link-patch {
+  font-family: SmbWeb;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.link-patch:hover {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
 }

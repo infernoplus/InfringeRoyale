@@ -27,7 +27,8 @@ Input.prototype.pad = {
 };
 
 Input.prototype.pad.update = function() {
-  this.pads = navigator.getGamepads();
+  if(navigator) { this.pads = navigator.getGamepads(); }
+  else { this.pads = [undefined]; }
   this.analog();
   this.button();
 };
