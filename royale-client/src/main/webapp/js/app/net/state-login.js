@@ -17,7 +17,7 @@ StateLogin.prototype.handleBinary = function(packet) {
 };
 
 StateLogin.prototype.ready = function() {
-  this.send({type: "l00", name: app.net.prefName});
+  this.send({type: "l00", name: app.net.prefName, team: app.net.prefTeam});
   app.menu.warn.show("LoginState Ready");
 };
 
@@ -25,7 +25,7 @@ StateLogin.prototype.ready = function() {
 StateLogin.prototype.loggedIn = function(p) {
   app.net.name = p.name;
   app.net.sid = p.sid;
-  app.menu.warn.show("Logged in: " + p.name + " // " + p.sid);
+  app.menu.warn.show("Logged in: " + p.name + " :: " + p.team + " // " + p.sid);
 };
 
 StateLogin.prototype.send = function(data) {

@@ -28,6 +28,8 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.grounded = false;
   
   /* Var */
+  this.name = undefined;     // If this is set for whatever reason, it will display a name tag over this player.
+  
   this.power = 0;            // Powerup Index
   this.starTimer = 0;        // Star powerup active timer
   this.starMusic = undefined;
@@ -132,6 +134,10 @@ PlayerObject.ARROW_RAD_IN = 3;
 PlayerObject.ARROW_RAD_OUT = 7;
 PlayerObject.ARROW_THRESHOLD_MIN = 4;
 PlayerObject.ARROW_THRESHOLD_MAX = 6;
+
+PlayerObject.TEAM_OFFSET = vec2.make(0., 0.);
+PlayerObject.TEAM_SIZE = .3;
+PlayerObject.TEAM_COLOR = "rgba(255,255,255,0.75)";
 
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [
@@ -885,14 +891,22 @@ PlayerObject.prototype.draw = function(sprites) {
   }
   
   var mod;
-  if(this.arrowFade <= 0.) { return; }
-  else { mod = 0xA0 + parseInt(this.arrowFade*32.); }
-  sprites.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.ARROW_OFFSET), reverse: false, index: PlayerObject.ARROW_SPRITE, mode: mod});
+  if(this.arrowFade > 0.) {
+    mod = 0xA0 + parseInt(this.arrowFade*32.);
+    sprites.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.ARROW_OFFSET), reverse: false, index: PlayerObject.ARROW_SPRITE, mode: mod});
+  }
+  else if(this.name) {
+    
+  }
 };
 
 PlayerObject.prototype.write = function(texts) {
-  if(this.arrowFade <= 0.) { return; }
-  texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.TEXT_OFFSET), size: PlayerObject.TEXT_SIZE, color: "rgba(255,255,255,"+this.arrowFade+")", text: PlayerObject.ARROW_TEXT});
+  if(this.arrowFade > 0.) {
+    texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.TEXT_OFFSET), size: PlayerObject.TEXT_SIZE, color: "rgba(255,255,255,"+this.arrowFade+")", text: PlayerObject.ARROW_TEXT});
+  }
+  else if(this.name) { /* Hacky thing for ghost dim @TODO: */
+    texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.sprite.INDEX instanceof Array?1.:2.)), PlayerObject.TEAM_OFFSET), size: PlayerObject.TEAM_SIZE, color: PlayerObject.TEAM_COLOR, text: this.name});
+  }
 };
 
 PlayerObject.prototype.play = GameObject.prototype.play;

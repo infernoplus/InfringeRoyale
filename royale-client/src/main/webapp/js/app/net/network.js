@@ -3,9 +3,7 @@
 /* global WebSocket */
 /* global ArrayBuffer */
 
-function Network() {
-  
-};
+function Network() { };
 
 /* Returns true if connected to websocket */
 Network.prototype.connected = function () {
@@ -13,9 +11,10 @@ Network.prototype.connected = function () {
 };
 
 /* Connects to game server websocket */
-Network.prototype.connect = function(name){
+Network.prototype.connect = function(name, team){
   var address = window.location.host;
   this.prefName = name;
+  this.prefTeam = team;
   var that = this;
   
   if(this.connected()) {

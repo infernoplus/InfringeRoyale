@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class Oak {
   
-  private static final String FILE = "game-log.html";
+  private static final String FILE = "royale-log.html";
   
   public static enum Level {
     INFO("#000000", "#FFFFFF"), WARN("#000000", "#FFFF00"), ERR("#000000", "#FF0000"), CRIT("#FF0000", "#000000");
@@ -87,8 +87,8 @@ public class Oak {
   }
   
   public static void log(Level level, String src, String msg, Exception ex) {
-    System.out.println(new Date().toString() + " - " + src + " :: " + msg);
-    if(ex != null) { ex.printStackTrace(); }
+    /* System.out.println(new Date().toString() + " - " + src + " :: " + msg); */
+    /* if(ex != null) { ex.printStackTrace(); } */ // Don't log to catalina.out
     write(level, src, msg, ex);
   }
   

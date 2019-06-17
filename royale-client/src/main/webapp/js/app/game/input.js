@@ -15,8 +15,15 @@ function Input(game, container) {
   document.onkeyup = function(event) { that.keyboard.event(event, false); };
   document.onkeydown = function(event) { that.keyboard.event(event, true); };
 
+  this.touchEvt = function(event) { app.game.input.touch.event(event); };
+  
+  document.addEventListener('touchstart', this.touchEvt, true);
+  document.addEventListener('touchmove', this.touchEvt, true);
+  document.addEventListener('touchend', this.touchEvt, true);
+
   this.mouse.input = this;
   this.keyboard.input = this;
+  this.touch.input = this; // Reeeeeeee
 };
 
 Input.prototype.pad = {
@@ -109,15 +116,38 @@ Input.prototype.keyboard.event = function(evt, state) {
   if(state) { this.inputs.push({key: evt.keyCode, char: evt.key.length!==1?"":evt.key}); }
 };
 
+
+Input.prototype.touch = {
+  inputs: [],
+  pos: []
+};
+
+Input.prototype.touch.event = function(event) {
+  var last = this.pos;
+  this.pos = [];
+  for(var i=0;i<event.touches.length;i++) {
+    var tch = event.touches[i];
+    var contains = false;
+    for(var j=0;j<last.length;j++) {
+      if(last[j].id === tch.identifier) { contains = true; break; }
+    }
+    if(!contains) {
+      this.inputs.push({id: tch.identifier, x: tch.clientX, y: tch.clientY});
+    }
+    this.pos.push({id: tch.identifier, x: tch.clientX, y: tch.clientY});
+  }
+};
+
 Input.prototype.pop = function() {
   this.mouse.mov = this.mouse.nxtMov;
   this.mouse.spin = this.mouse.nxtSpin;
   this.mouse.nxtMov = {x: 0, y: 0};
   this.mouse.nxtSpin = 0.0;
   
-  var inputs = {mouse: this.mouse.inputs, keyboard: this.keyboard.inputs};
+  var inputs = {mouse: this.mouse.inputs, keyboard: this.keyboard.inputs, touch: this.touch.inputs};
   this.keyboard.inputs = [];
   this.mouse.inputs = [];
+  this.touch.inputs = [];
   
   return inputs;
 };

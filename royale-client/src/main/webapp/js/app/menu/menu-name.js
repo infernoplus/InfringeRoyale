@@ -6,6 +6,7 @@ function MenuName() {
   this.element = document.getElementById("name");
   this.linkElement = document.getElementById("link");
   this.nameInput = document.getElementById("name-input");
+  this.teamInput = document.getElementById("team-input");
   this.launchBtn = document.getElementById("name-launch");
   
   var that = this;
@@ -15,7 +16,8 @@ function MenuName() {
 /* When the launch button is clicked. */
 MenuName.prototype.launch = function() {
   Cookies.set("name", this.nameInput.value, {expires: 30});
-  app.join(this.nameInput.value);
+  Cookies.set("team", this.teamInput.value, {expires: 30});
+  app.join(this.nameInput.value, this.teamInput.value);
 };
 
 MenuName.prototype.show = function() {
@@ -23,7 +25,9 @@ MenuName.prototype.show = function() {
   app.menu.navigation("name", "name");
   app.menu.background("a");
   var nam = Cookies.get("name");
+  var tem = Cookies.get("team");
   this.nameInput.value = nam?nam:"";
+  this.teamInput.value = tem?tem:"";
   this.linkElement.style.display = "block";
   this.element.style.display = "block";
 };

@@ -69,6 +69,7 @@ Display.prototype.draw = function() {
   
   /* Draw UI */
   context.restore();
+  this.drawTouch();
   this.drawUI();
 };
 
@@ -204,6 +205,7 @@ Display.prototype.drawEffect = function() {
   
 };
 
+/* @TODO: this class is a fucking mess here. this needs heavy refactoring */
 Display.prototype.drawUI = function() {
   var context = this.context; // Sanity
   var W = this.canvas.width;
@@ -272,7 +274,7 @@ Display.prototype.drawUI = function() {
       context.fillText(txt, W-w-8, 32);
     }
     else if(this.game instanceof Lobby) {
-      var txt = this.game.players.length + " / 75 PLAYERS";
+      var txt = this.game.players.length + (this.game.touchMode?"":" / 75 PLAYERS");
       w = context.measureText(txt).width;
       context.fillText(txt, W-w-8, 32);
     }
@@ -285,6 +287,48 @@ Display.prototype.drawUI = function() {
       context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8-24-8, 40, 24, 24);
     }
   }
+};
+
+Display.prototype.drawTouch = function() {
+  if(!this.game.touchMode) { return; }
+  
+  var context = this.context; // Sanity
+  var W = this.canvas.width;
+  var H = this.canvas.height;
+  var S = 85;
+  var s = 65;
+  var hs = (S-s)*.5;
+  
+  if(this.game.thumbOrigin) {
+    context.fillStyle = "rgba(0,0,0,0.5)";
+    context.fillRect(this.game.thumbOrigin.x-(S*.5),this.game.thumbOrigin.y-(S*.5),S,S);
+    
+    context.fillStyle = "rgba(255,255,255,1.0)";
+    context.fillRect(this.game.thumbPos.x-(s*.5),this.game.thumbPos.y-(s*.5),s,s);
+  }
+  
+  context.fillStyle = "rgba(0,0,0,0.5)";
+  context.fillRect(W-S,H-S,S,S);
+  context.fillRect(W-S,H-(S*2),S,S);
+  context.fillStyle = this.game.touchRun?"rgba(255,255,255,0.75)":"rgba(0,0,0,0.5)";
+  context.fillRect(W-S,H-(S*3),S,S);
+  
+  context.fillStyle = "white";
+  context.font = s + "px SmbWeb";
+  context.textAlign = "left";
+  
+  var txt = "A";
+  var w = context.measureText(txt).width;
+  context.fillText(txt, W-w-hs, H-hs);
+  
+  var txt = "B";
+  var w = context.measureText(txt).width;
+  context.fillText(txt, W-w-(hs*.75), H-S-hs);
+  
+  context.fillStyle = this.game.touchRun?"black":"white";
+  var txt = "R";
+  var w = context.measureText(txt).width;
+  context.fillText(txt, W-w-(hs*.75), H-(S*2)-hs);
 };
 
 Display.prototype.drawLoad = function() {

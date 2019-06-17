@@ -60,3 +60,9 @@
 .link-patch:hover {
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
 }
+
+@media only screen and (max-width: 769px) {
+  .link-patch {
+    font-size: 12px;
+  }
+}

@@ -150,6 +150,9 @@ Zone.prototype.step = function() {
     var snd = this.sounds[i];
     if(snd.done()) { this.sounds.splice(i--, 1); }
   }
+  
+  /* !!! Snitch !!! */
+  td32.update(this.game);
 };
 
 /* returns raw data of tile (as an int) */

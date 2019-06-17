@@ -49,7 +49,7 @@ ToolWorld.prototype.addLevel = function() {
     ]
   };
   
-  this.editor.world.levels.push(new Level(data));
+  this.editor.world.levels.push(new Level(this.game, data));
   
   app.menu.list.generate();
 };

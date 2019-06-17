@@ -12,9 +12,9 @@ public class PacketG12 extends Packet {
   
   public static class NamePair {
     public final short id;
-    public final String name;
-    public NamePair(short id, String name) {
-      this.id = id; this.name = name;
+    public final String name, team;
+    public NamePair(short id, String name, String team) {
+      this.id = id; this.name = name; this.team = team;
     }
   }
 }
