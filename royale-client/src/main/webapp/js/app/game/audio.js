@@ -226,5 +226,5 @@ Audio.prototype.destroy = function() {
   }
   this.stopMusic();
   this.sounds = [];
-  this.context.close();
+  this.context.close().catch( function(ex) { console.log("Error closing audio context."); } );
 };

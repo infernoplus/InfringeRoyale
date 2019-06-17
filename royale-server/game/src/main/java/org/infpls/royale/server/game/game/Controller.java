@@ -24,6 +24,14 @@ public class Controller {
   
   public boolean garbage;  // If flagged, we will delete this controler on next update.
   
+  /* Anti Cheat Vars*/
+  private static final int AC_STAR_MIN_TIME = 700;   // Minimum time from start of game before you could feasibly get a star.
+  private static final int AC_STAR_MAX_COUNT = 3;    // If a player gets more than this number of stars they are cheating.
+  private static final int AC_MIN_WIN_TIME = 3600;   // Minimum time for a player to win a game. 2 minuteS atm.
+  
+  public boolean ban; // If flagged, this user will remain in the game but be essentially shadowbanned
+  private int starCount;
+  
   public Controller(RoyaleCore game, RoyaleSession session, short pid) {
     this.game = game;
     this.session = session; this.pid = pid;
@@ -37,6 +45,9 @@ public class Controller {
     result = 0;
     
     garbage = false;
+    
+    starCount = 0;
+    ban = false;
   }
   
   /* Handle data from client about their current playstate */
@@ -47,9 +58,13 @@ public class Controller {
     }
     catch(IOException ioex) {
       Oak.log(Oak.Level.ERR, "Error during byte decode.", ioex);
+      try { session.close("Stop! You violated the law!"); }
+      catch(IOException ex) { Oak.log(Oak.Level.ERR, "Error during session ejection.", ex); }
     }
     catch(Exception ex) {
       Oak.log(Oak.Level.ERR, "Error during byte decode.", ex);
+      try { session.close("Stop! You violated the law!"); }
+      catch(IOException ex2) { Oak.log(Oak.Level.ERR, "Error during session ejection.", ex2); }
     }
   }
   
@@ -67,10 +82,10 @@ public class Controller {
           case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
           case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
           case 0x12 : { process012((ByteMe.NET012)n); loc.add(n); break; }
-          case 0x13 : { process013((ByteMe.NET013)n); glo.add(n); break; }
+          case 0x13 : { process013((ByteMe.NET013)n); if(!ban) { glo.add(n); } break; }
           case 0x18 : { glo.add(process018((ByteMe.NET018)n)); break; }
-          case 0x20 : { process020((ByteMe.NET020)n); glo.add(n); break; }
-          case 0x30 : { process030((ByteMe.NET030)n); glo.add(n); break; }
+          case 0x20 : { process020((ByteMe.NET020)n); if(!ban) { glo.add(n); } break; }
+          case 0x30 : { process030((ByteMe.NET030)n); if(!ban) { glo.add(n); } break; }
         }
       }
     }
@@ -99,12 +114,20 @@ public class Controller {
   
   /* PLAYER_OBJECT_EVENT */
   public void process013(ByteMe.NET013 n) {
-    
+    /* Anti Cheat */
+    if(n.type == 0x02) {
+      if(game instanceof RoyaleLobby) { ban(); }
+      if(game.frame < AC_STAR_MIN_TIME) { ban(); }
+      if(starCount++ > AC_STAR_MAX_COUNT) { ban(); }
+    }
   }
   
-    /* PLAYER_RESULT_REQUEST */
+  /* PLAYER_RESULT_REQUEST */
   public ByteMe.NET018 process018(ByteMe.NET018 n) {
-    result = game.winRequest();
+    /* Anti Cheat */
+    if(game.frame < AC_MIN_WIN_TIME) { ban(); }
+    result = ban?69:game.winRequest();
+    
     return new ByteMe.NET018(n.pid, result);
   }
   
@@ -116,6 +139,12 @@ public class Controller {
   /* TILE_EVENT_TRIGGER */
   public void process030(ByteMe.NET030 n) {
     
+  }
+  
+  /* Essentially a shadow ban. The player is able to keep playing but their actions no longer affect the game. They are also barred from winning. */
+  public void ban() {
+    ban = true;
+    Oak.log(Oak.Level.INFO, "Player banned for potential cheating: '" + getName() +"', F: " + game.frame + ", IP: " + session.getIP());
   }
   
   public void send(Packet p) {

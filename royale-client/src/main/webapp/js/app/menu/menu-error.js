@@ -6,15 +6,16 @@ function MenuError() {
   this.error = document.getElementById("error-message");
 };
 
-MenuError.prototype.show = function(message) {
+MenuError.prototype.show = function(disp, msg, ex) {
+  app.net.close();
+  
   app.menu.hideAll();
   app.menu.navigation("error", "error");
   app.menu.background("b");
-  this.error.innerHTML = message;
-  console.warn("##ERROR## " + message);
+  this.error.innerHTML = disp;
+  if(msg) { console.warn("##ERROR## " + msg); }
+  if(ex) { console.warn("##TRACE## " + ex); }
   this.element.style.display = "block";
-  
-  app.net.close();
 };
 
 MenuError.prototype.hide = function() {

@@ -1,5 +1,16 @@
 -Support for browsers that do no thave a gamepad api.
 
++ CHANGE MAX TIME OF SERVER TO 1 HOUR
++ Star music is bugged
++ reverse midair
++ anti cheat basics
++ removed acciddental log stuff
++ backend bugs
++ more anti cheat
++ coin balance
+
+
+
 - Performance with 99 players on screen.
 - passwords
 - Control settings

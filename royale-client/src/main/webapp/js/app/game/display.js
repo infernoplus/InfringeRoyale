@@ -125,8 +125,6 @@ Display.prototype.drawObject = function() {
     }
   }
   
-  console.log("drawing: " + sprites.length);
-  
   var ply = this.game.getPlayer();
   if(ply && ply.level === zone.level && ply.zone === zone.id) { ply.draw(sprites); ply.write(texts); } // Draw our character last.
   
