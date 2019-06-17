@@ -77,6 +77,7 @@
                     <jsSourceFile>app/util/util.js</jsSourceFile>
                     <jsSourceFile>app/util/frame.js</jsSourceFile>
                     <jsSourceFile>app/util/byteme.js</jsSourceFile>
+                    <jsSourceFile>app/util/snitch.js</jsSourceFile>
                     <jsSourceFile>app/util/squar.js</jsSourceFile>
 
                     <!-- Menus -->
@@ -108,6 +109,8 @@
                     <jsSourceFile>app/game/object/flag.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fire.js</jsSourceFile>
                     <jsSourceFile>app/game/object/blast.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/launcher.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/bullet.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fireball.js</jsSourceFile>
                     <jsSourceFile>app/game/object/firebreath.js</jsSourceFile>
                     <jsSourceFile>app/game/object/hammer.js</jsSourceFile>
@@ -192,6 +195,8 @@
                     <jsSourceFile>app/game/object/flag.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fire.js</jsSourceFile>
                     <jsSourceFile>app/game/object/blast.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/launcher.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/bullet.js</jsSourceFile>
                     <jsSourceFile>app/game/object/fireball.js</jsSourceFile>
                     <jsSourceFile>app/game/object/firebreath.js</jsSourceFile>
                     <jsSourceFile>app/game/object/hammer.js</jsSourceFile>

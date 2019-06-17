@@ -42,7 +42,7 @@ ToolLevel.prototype.addZone = function() {
     warp: []
   };
   
-  this.level.zones.push(new Zone(this.level, data));
+  this.level.zones.push(new Zone(this.game, this.level, data));
   
   app.menu.list.generate();
 };

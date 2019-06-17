@@ -745,8 +745,15 @@ NET018.decode = function(/* NET011_SERV */ a) {
   };
 };
 
+var NET019 = {}; // PLAYER_SNITCH [0x19] // As Uint8Array
+/* ======================================================================================== */
+NET019.DESIGNATION = 0x19;
+NET019.BYTES = 3;
 
-
+/* Client->Server */
+NET019.encode = function() {
+  return new Uint8Array([NET019.DESIGNATION]);
+};
 
 var NET020 = {}; // OBJECT_EVENT_TRIGGER [0x20] // As Uint8Array
 /* ======================================================================================== */

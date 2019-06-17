@@ -2,13 +2,22 @@
     <head>
         <title>Mario Royale</title>
         <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" id="meta-zoom" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
         <link rel='icon' href='img/home/icon.png'>
         <link rel='stylesheet' type='text/css' href='css/home.css'>
         <link rel='stylesheet' type='text/css' href='css/spinner.css'>
         <link rel='stylesheet' type='text/css' href='css/link.css'>
+        <script>
+          /* Prevent phones from zooming screen. The webapp handles this. */
+          document.addEventListener('touchmove', function(event) {
+            event = event.originalEvent || event;
+            if (event.scale !== undefined) { event.preventDefault(); }
+          }, false);
+        </script>
     </head>
     
-    <body id='body' style='display: none;'>
+    <body id='body' ondragstart="return false;" ondrop="return false;" style='display: none;'>
       <!-- Links -->
       <div id='link'>
         <div class="link-r">
@@ -16,7 +25,7 @@
           <div class="link-patr" onclick="window.open('https://www.patreon.com/infernoplus')"></div>
         </div>
         <div class="link-l">
-          <div class="link-patch" onclick="window.open('./patch.html')">v1.0.2b Patch Notes</div>
+          <div class="link-patch" onclick="window.open('./patch.html')">v1.1.0 Patch Notes</div>
         </div>
       </div>
       
@@ -53,13 +62,14 @@
       <!-- Enter Name -->
       <div id='name' class='container-center'>
         <div class='name'><input id='name-input' type='text' class='name-input' placeholder='Name'/></div>
-          <div class='container-launch'>
+        <div class='team'><input id='team-input' type='text' class='team-input' maxlength="3" placeholder='Squad Code'/></div>
+          <div class='container-go'>
           <span id ='name-launch' class='launch'>Go!</span>
         </div>
       </div>
       
       <!-- Game -->
-      <div id='game' class='fullscreen'>
+      <div id='game' class='fullscreen' oncontextmenu="return false">
           <canvas id="game-canvas" width="320" height="240">
             Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.
           </canvas>
@@ -70,7 +80,7 @@
       <script src='js/lib/cookie/js.cookie.min.js'></script>
       
       <!-- Core -->
-      <script src='js/game.min.js?v=1.0.2'></script>
-      
+      <script src='js/game.min.js?v=1.1.0'></script>
+
     </body>        
 </html>

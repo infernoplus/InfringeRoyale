@@ -16,7 +16,7 @@ public final class RoyaleSession {
   private final WebSocketSession webSocket;
   private final DaoContainer dao;
   
-  private String name;
+  private String name, team;
   private final String sid;
   private final SessionThread sessionThread;
   private SessionState sessionState;
@@ -95,8 +95,9 @@ public final class RoyaleSession {
     changeState("g", gl);
   }
   
-  public void login(String name) {
+  public void login(String name, String team) {
     this.name = name;
+    this.team = team;
   }
   
   public boolean loggedIn() {
@@ -105,6 +106,10 @@ public final class RoyaleSession {
 
   public String getUser() {
     return name;
+  }
+  
+  public String getTeam() {
+    return team;
   }
 
   public String getSessionId() {

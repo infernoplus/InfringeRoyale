@@ -3,7 +3,7 @@
 /* global GameObject */
 /* global NET011, NET020 */
 
-function FireObject(game, level, zone, pos, oid, start) {
+function FireObject(game, level, zone, pos, oid, start, size) {
   GameObject.call(this, game, level, zone, pos);
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
@@ -16,6 +16,7 @@ function FireObject(game, level, zone, pos, oid, start) {
   
   /* Physics */
   this.dim = vec2.make(.5, .5);
+  this.size = isNaN(parseInt(size))?FireObject.PARTS:parseInt(size);
 }
 
 
@@ -80,7 +81,7 @@ FireObject.prototype.interaction = function() {
   
   var plyr = this.game.getPlayer();
   if(plyr && plyr.isTangible() && plyr.level === this.level && plyr.zone === this.zone) {
-    for(var i=0;i<FireObject.PARTS;i++) {
+    for(var i=0;i<this.size;i++) {
       var pos = vec2.add(vec2.add(this.pos, FireObject.OFFSET), vec2.scale(vec, FireObject.SPACING*i));
       var hit = squar.intersection(plyr.pos, plyr.dim, pos, this.dim);
       if(hit) { plyr.damage(this); }
@@ -107,7 +108,7 @@ FireObject.prototype.setState = function(STATE) {
 
 FireObject.prototype.draw = function(sprites) {
   var vec = vec2.normalize(vec2.make(Math.sin(-this.anim/FireObject.SPIN_RATE), Math.cos(-this.anim/FireObject.SPIN_RATE)));
-  for(var i=0;i<FireObject.PARTS;i++) {
+  for(var i=0;i<this.size;i++) {
     sprites.push({pos: vec2.add(this.pos, vec2.scale(vec, FireObject.SPACING*i)), reverse: false, index: this.sprite.INDEX, mode: 0x00});
   }
 };

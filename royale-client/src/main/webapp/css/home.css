@@ -89,15 +89,45 @@ img {
   font-size: 64px;
 }
 
+@media only screen and (max-width: 769px) {
+  .title {
+    font-size: 28px;
+    text-align: center;
+  }
+}
+
 .container-launch {
   font-size: 32px;
 }
 
+@media only screen and (max-width: 769px) {
+  .container-launch {
+    font-size: 16px;
+  }
+}
+
+.container-go {
+  font-size: 32px;
+  text-align: center;
+}
+
+@media only screen and (max-width: 769px) {
+  .container-go {
+    font-size: 16px;
+  }
+}
+
 .launch {
   cursor: pointer;
-  margin-left: 8px;
+  margin-left: 6px;
    
   animation: glow 1s infinite alternate;
+}
+
+@media only screen and (max-width: 769px) {
+  .launch {
+    margin-left: 2px;
+  }
 }
 
 .launch:hover {
@@ -113,6 +143,12 @@ img {
 
 .player-number {
   color: #00FF00;
+}
+
+@media only screen and (max-width: 769px) {
+  .players {
+    font-size: 16px;
+  }
 }
 
 .name {
@@ -135,6 +171,39 @@ img {
   color: rgba(255, 255, 255, 0.25);
 }
 
+@media only screen and (max-width: 769px) {
+  .name-input {
+    font-size: 20px;
+  }
+}
+
+.team {
+
+}
+
+.team-input {
+  font-family: SmbWeb;
+  font-size: 32px;
+  color: white;
+  text-align: center;
+  
+  background: transparent;
+  border: none;
+  border-bottom: 5px dashed #FFFFFF; 
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.team-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+@media only screen and (max-width: 769px) {
+  .team-input {
+    font-size: 12px;
+  }
+}
+
 .dis-lg {
   font-size: 24px;
   text-align: center;
@@ -146,6 +215,19 @@ img {
   text-align: center;
   margin-bottom: 8px;
   white-space: normal;
+}
+
+@media only screen and (max-width: 769px) {
+  .dis-lg {
+    font-size: 8px;
+    margin-bottom: 8px;
+    white-space: normal;
+  }
+  
+  .dis-sm {
+    font-size: 4px;
+    white-space: normal;
+  }
 }
 
 .warn {

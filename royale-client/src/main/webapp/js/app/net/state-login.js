@@ -17,14 +17,14 @@ StateLogin.prototype.handleBinary = function(packet) {
 };
 
 StateLogin.prototype.ready = function() {
-  this.send({type: "l00", name: app.net.prefName});
+  this.send({type: "l00", name: app.net.prefName, team: app.net.prefTeam});
 };
 
 // L01
 StateLogin.prototype.loggedIn = function(p) {
   app.net.name = p.name;
   app.net.sid = p.sid;
-  console.log("Logged in: " + p.name + " // " + p.sid);
+  console.log("Logged in: " + p.name + " :: " + p.team + " // " + p.sid);
 };
 
 StateLogin.prototype.send = function(data) {

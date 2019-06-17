@@ -25,7 +25,7 @@ public class Controller {
   public boolean garbage;  // If flagged, we will delete this controler on next update.
   
   /* Anti Cheat Vars*/
-  private static final int AC_STAR_MIN_TIME = 700;   // Minimum time from start of game before you could feasibly get a star.
+  private static final int AC_STAR_MIN_TIME = 600;   // Minimum time from start of game before you could feasibly get a star.
   private static final int AC_STAR_MAX_COUNT = 3;    // If a player gets more than this number of stars they are cheating.
   private static final int AC_MIN_WIN_TIME = 2700;   // Minimum time for a player to win a game. 90 seconds atm
   
@@ -84,6 +84,7 @@ public class Controller {
           case 0x12 : { process012((ByteMe.NET012)n); loc.add(n); break; }
           case 0x13 : { process013((ByteMe.NET013)n); if(!ban) { glo.add(n); } break; }
           case 0x18 : { glo.add(process018((ByteMe.NET018)n)); break; }
+          case 0x19 : { process019((ByteMe.NET019)n); break; }
           case 0x20 : { process020((ByteMe.NET020)n); if(!ban) { glo.add(n); } break; }
           case 0x30 : { process030((ByteMe.NET030)n); if(!ban) { glo.add(n); } break; }
         }
@@ -131,6 +132,12 @@ public class Controller {
     return new ByteMe.NET018(n.pid, result);
   }
   
+  /* PLAYER_SNITCH */
+  public void process019(ByteMe.NET019 n) {
+    /* Anti Cheat */
+    ban();
+  }
+  
   /* OBJECT_EVENT_TRIGGER */
   public void process020(ByteMe.NET020 n) {
     
@@ -143,8 +150,8 @@ public class Controller {
   
   /* Essentially a shadow ban. The player is able to keep playing but their actions no longer affect the game. They are also barred from winning. */
   public void ban() {
+    if(!ban) { Oak.log(Oak.Level.WARN, "Player banned for potential cheating: '" + getName() +"', F: " + game.frame + ", IP: " + session.getIP()); }
     ban = true;
-    Oak.log(Oak.Level.INFO, "Player banned for potential cheating: '" + getName() +"', F: " + game.frame + ", IP: " + session.getIP());
   }
   
   public void send(Packet p) {
@@ -158,6 +165,7 @@ public class Controller {
   public boolean isDead() { return dead; }
   
   public String getName() { return session.getUser(); }
+  public String getTeam() { return session.getTeam(); }
   
   /* Called when the player using this controller disconnects */
   public void destroy() {

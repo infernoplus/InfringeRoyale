@@ -113,7 +113,7 @@ Editor.prototype.doInput = function() {
 Editor.prototype.doStep = function() {  
   
   /* Step world to update bumps & effects & etc */
-  this.world.step();
+  //this.world.step();
   
 };
 

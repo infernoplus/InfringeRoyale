@@ -18,6 +18,7 @@ function Game(data) {
   
   this.objects = [];
   this.pid = undefined; /* Unique player id for this client. Assigned during init packet. */
+  this.team = undefined; /* Team this player is set to */
   this.players = []; /* List of player names and associated pids */
   this.sounds = []; /* Array of currently playing global sounds */
   
@@ -32,7 +33,13 @@ function Game(data) {
   
   this.ready = false;
   this.startTimer = -1;          // If > 0 we draw a timer to the screen in display
-  this.startDelta = undefined;   // Millisecond time of the first frame of the game.
+  
+  this.touchMode = document.documentElement <= 769; // True when we are using touch controls
+  this.touchFull = false;        // When we go into touch mode we try to go fullscreen
+  this.thumbId = undefined;
+  this.thumbOrigin = undefined;
+  this.thumbPos = undefined;
+  this.touchRun = false;
   
   this.remain = 0;               // Number of players still alive
   
@@ -107,6 +114,9 @@ Game.prototype.handlePacket = function(packet) {
 /* G12 */
 Game.prototype.updatePlayerList = function(packet) {
   this.players = packet.players;
+  if(this.pid === undefined) { return; }
+  
+  this.updateTeam();
 };
 
 /* G13*/
@@ -114,6 +124,20 @@ Game.prototype.gameStartTimer = function(packet) {
   if(this.startTimer < 0) { this.play("sfx/alert.wav",1.,0.); }
   if(packet.time > 0) { this.startTimer = packet.time; this.remain = this.players.length; }
   else { this.doStart(); }
+};
+
+/* Checks all players for team */
+Game.prototype.updateTeam = function() {
+  this.team = this.getPlayerInfo(this.pid).team;
+  if(!this.team) { return; }
+  
+  for(var i=0;i<this.players.length;i++) {
+    var ply = this.players[i];
+    if(ply.id !== this.pid && ply.team === this.team) {
+      var obj = this.getGhost(ply.id);
+      if(obj) { obj.name = ply.name; }
+    }
+  }
 };
 
 Game.prototype.handleBinary = function(data) {
@@ -159,6 +183,14 @@ Game.prototype.doNET010 = function(n) {
   if(n.pid === this.pid) { return; }
   var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid]);
   obj.setState(PlayerObject.SNAME.GHOST);
+  
+  /* Check if we need to apply a team name to this new mario */
+  if(!this.team) { return; }
+  var ply = this.getPlayerInfo(n.pid);
+  if(ply && ply.id !== this.pid && ply.team === this.team) {
+    var obj = this.getGhost(ply.id);
+    if(obj) { obj.name = ply.name; }
+  }
 };
 
 /* KILL_PLAYER_OBJECT [0x11] */
@@ -193,7 +225,7 @@ Game.prototype.doNET018 = function(n) {
   if(obj) { 
     var txt = this.getText(obj.level, obj.zone, n.result.toString());
     if(txt) {
-      var nam = this.getPlayerInfo(n.pid).name;
+      var nam = this.getPlayerInfo(n.pid).name; /* @TODO: unsafe, may return null rarely */
       this.createObject(TextObject.ID, txt.level, txt.zone, vec2.add(txt.pos, vec2.make(0, -3)), [undefined, -0.1, 0.25, "#FFFFFF", nam]);
     }
   }
@@ -226,9 +258,109 @@ Game.prototype.doStart = function() {
   this.doSpawn();
 };
 
-/* Handle player input */
-Game.prototype.doInput = function() {
-  var imp = this.input.pop();
+/* Determine input method then process */
+Game.prototype.doDetermine = function() {
+  var imp = this.input.pop(); // Pops Impulse inputs for this frame
+  
+  if(imp.touch.length > 0) { this.touchMode = true; }
+  else if(imp.keyboard.length > 0) { this.touchMode = false; }
+  
+  if(!this.touchMode) { this.doInput(imp); }
+  else { this.doTouch(imp); }
+};
+
+/* Handle player input on touch screens */
+Game.prototype.doTouch = function(imp) {
+  var inp = this.input;
+  var ply = this.getPlayer();
+  this.display.camera.scale = 2.; /* Phones need a smaller draw size to fit stuff in */
+  
+  /* Attempt to go full screen */
+  if(!this.touchFull) {
+    var body = document.documentElement;
+    if (body.requestFullscreen) {
+      this.container.requestFullscreen();
+    } else if (body.mozRequestFullScreen) { /* Firefox */
+      body.mozRequestFullScreen();
+    } else if (body.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+      body.webkitRequestFullscreen();
+    } else if (body.msRequestFullscreen) { /* IE/Edge */
+      body.msRequestFullscreen();
+    }
+    this.touchFull = true;
+  }
+  
+  var tmp = this;
+  var W = this.display.canvas.width;
+  var H = this.display.canvas.height;
+  var S = 85;
+  var a = false;
+  var b = false;
+  var btns = [
+    {pos: vec2.make(W-S, H-S), dim: vec2.make(S, S), press: function() { a = true; }},
+    {pos: vec2.make(W-S, H-(S*2)), dim: vec2.make(S, S), press: function() { b = true; }},
+    {pos: vec2.make(W-S, H-(S*3)), dim: vec2.make(S, S), click: function() { tmp.touchRun = !tmp.touchRun; }},
+    {pos: vec2.make(W-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteMusic = !tmp.audio.muteMusic; tmp.audio.saveSettings(); }},
+    {pos: vec2.make(W-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteSound = !tmp.audio.muteSound; tmp.audio.saveSettings(); }}
+  ];
+  
+  /* Check to see if we touched any of the on screen buttons */
+  /* Any touches that hit a button are removed, otherwise they pass through to thumbstick test */
+  /* If we have a thumbstick the thumb touch is picked out */
+  var thmb;
+  for(var i=0;i<inp.touch.pos.length;i++) {
+    var tch = inp.touch.pos[i];
+    if(this.thumbId === tch.id) {
+      thmb = tch;
+      this.thumbId = tch.id;
+      this.thumbPos = tch;
+    }
+    else {
+      for(var i=0;i<btns.length;i++) {
+        var btn = btns[i];
+        if(squar.inside(tch, btn.pos, btn.dim) && btn.press) { btn.press(); }
+      }
+    }
+  }
+  
+  for(var i=0;i<imp.touch.length;i++) {
+    var tch = imp.touch[i];
+    var hit = false;
+    for(var i=0;i<btns.length;i++) {
+      var btn = btns[i];
+      if(squar.inside(tch, btn.pos, btn.dim)) { hit = true; if(btn.click) { btn.click(); } break; }
+    }
+    if(!thmb && !hit) {
+      thmb = tch;
+      this.thumbId = tch.id;
+      this.thumbOrigin = tch;
+      this.thumbPos = tch;
+    }
+  }
+  
+  var lim;
+  if(!thmb) { this.thumbId = undefined; this.thumbOrigin = undefined; this.thumbPos = undefined; }
+  else {
+    var dist = Math.min(64., vec2.distance(this.thumbPos, this.thumbOrigin));
+    var dir = vec2.normalize(vec2.subtract(this.thumbPos, this.thumbOrigin));
+    lim = vec2.scale(dir, dist/64);
+    this.thumbPos = vec2.add(this.thumbOrigin, vec2.scale(dir, dist));
+  }
+  
+  if(ply && dir) {
+    var mov = [0,0];
+    if(lim.x > 0.33) { mov[0]++; }
+    if(lim.x < -0.33) { mov[0]--; }
+    if(lim.y > 0.33) { mov[1]--; }
+    if(lim.y < -0.33) { mov[1]++; }
+
+    ply.input(mov, a, this.touchRun?!b:b);
+  }
+  else if(ply) { ply.input([0,0], a, this.touchRun?!b:b); }
+};
+
+/* Handle player input on mouse/keyboard/controller */
+Game.prototype.doInput = function(imp) {
   this.input.pad.update();
   
   var mous = this.input.mouse;
@@ -334,6 +466,8 @@ Game.prototype.doSpawn = function() {
     this.createObject(PlayerObject.ID, level.id, zone.id, shor2.decode(pos), [this.pid]);
     this.out.push(NET010.encode(level, zone, pos));
   }
+  
+  this.updateTeam();
 };
 
 /* Looks at game state and decides what music we should be playing */
@@ -512,7 +646,7 @@ Game.prototype.loop = function() {
         initial = false;
       }
       
-      this.doInput();
+      this.doDetermine();
       while(target > this.frame) { this.doStep(); }
       this.doPush();
       

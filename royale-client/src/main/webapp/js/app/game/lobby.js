@@ -15,6 +15,7 @@ Lobby.prototype.send = Game.prototype.send;
 Lobby.prototype.handlePacket = Game.prototype.handlePacket;
 Lobby.prototype.updatePlayerList = Game.prototype.updatePlayerList;
 Lobby.prototype.gameStartTimer = function() { /* Null for lobby */ };
+Lobby.prototype.updateTeam = Game.prototype.updateTeam;
 Lobby.prototype.handleBinary = Game.prototype.handleBinary;
 Lobby.prototype.updatePacket = Game.prototype.updatePacket;
 
@@ -29,7 +30,9 @@ Lobby.prototype.doNET020 = Game.prototype.doNET020;
 Lobby.prototype.doNET030 = Game.prototype.doNET030;
 
 Lobby.prototype.doStart = Game.prototype.doStart;
+Lobby.prototype.doDetermine = Game.prototype.doDetermine;
 Lobby.prototype.doInput = Game.prototype.doInput;
+Lobby.prototype.doTouch = Game.prototype.doTouch;
 Lobby.prototype.doStep = function() {
   this.doSpawn(); // If we die in the lobby, just immiedately respawn.
   Game.prototype.doStep.call(this);

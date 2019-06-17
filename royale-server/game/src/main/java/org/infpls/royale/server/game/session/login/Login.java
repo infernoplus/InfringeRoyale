@@ -45,12 +45,17 @@ public class Login extends SessionState {
   /* Validate username, login, return data, automatically choose and join a lobby */
   private void login(final PacketL00 p) throws IOException {
     /* Username */
-    String name = p.name.trim();
+    String name = p.name==null?"Infringio":p.name.trim();
     if(name.length() > 20) { name = name.substring(0, 20); }
     else if(name.length() < 1) { name = "Infringio"; }
     
+    /* Team */
+    String team = p.team==null?"":p.team.trim();
+    if(team.length() > 3) { name = name.substring(0, 3); }
+    else if(name.length() < 1) { name = ""; }
+    
     /* Login */
-    session.login(name);
+    session.login(name, team);
     
     /* Return data */
     sendPacket(new PacketL01(name, session.getSessionId()));
