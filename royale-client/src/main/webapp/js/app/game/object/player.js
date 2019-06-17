@@ -78,7 +78,7 @@ PlayerObject.DEAD_FREEZE_TIME = 7;
 PlayerObject.DEAD_TIME = 70;
 PlayerObject.DEAD_UP_FORCE = 0.65;
 
-PlayerObject.RUN_SPEED_MAX = 0.315;
+PlayerObject.RUN_SPEED_MAX = 0.315; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.MOVE_SPEED_MAX = 0.215;
 PlayerObject.MOVE_SPEED_ACCEL = 0.0125;
 PlayerObject.MOVE_SPEED_DECEL = 0.0225;
@@ -91,7 +91,7 @@ PlayerObject.BOUNCE_LENGTH_MIN = 1;
 PlayerObject.SPRING_LENGTH_MIN = 5;
 PlayerObject.SPRING_LENGTH_MAX = 14;
 PlayerObject.JUMP_LENGTH_MIN = 3;
-PlayerObject.JUMP_LENGTH_MAX = 7;
+PlayerObject.JUMP_LENGTH_MAX = 7;  // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.JUMP_SPEED_INC_THRESHOLD = [0.1, 0.2, 0.25];
 PlayerObject.JUMP_DECEL = 0.005;
 PlayerObject.BLOCK_BUMP_THRESHOLD = 0.12;
@@ -430,7 +430,7 @@ PlayerObject.prototype.control = function() {
       this.setState(PlayerObject.SNAME.SLIDE);
     }
     else {
-      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, this.btnBg?PlayerObject.RUN_SPEED_MAX:PlayerObject.MOVE_SPEED_MAX);
+      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, this.btnBg?0.315:PlayerObject.MOVE_SPEED_MAX);
       this.setState(PlayerObject.SNAME.RUN);
     }
     this.reverse = this.btnD[0] >= 0;
@@ -449,7 +449,7 @@ PlayerObject.prototype.control = function() {
     }
   }
   
-  var jumpMax = this.isSpring?PlayerObject.SPRING_LENGTH_MAX:PlayerObject.JUMP_LENGTH_MAX;
+  var jumpMax = this.isSpring?PlayerObject.SPRING_LENGTH_MAX:7;
   var jumpMin = this.isSpring?PlayerObject.SPRING_LENGTH_MIN:(this.isBounce?PlayerObject.BOUNCE_LENGTH_MIN:PlayerObject.JUMP_LENGTH_MIN);
   
   for(var i=0;i<PlayerObject.JUMP_SPEED_INC_THRESHOLD.length&&Math.abs(this.moveSpeed)>=PlayerObject.JUMP_SPEED_INC_THRESHOLD[i];i++) { jumpMax++; }
