@@ -27,7 +27,7 @@ public class Controller {
   /* Anti Cheat Vars*/
   private static final int AC_STAR_MIN_TIME = 700;   // Minimum time from start of game before you could feasibly get a star.
   private static final int AC_STAR_MAX_COUNT = 3;    // If a player gets more than this number of stars they are cheating.
-  private static final int AC_MIN_WIN_TIME = 3600;   // Minimum time for a player to win a game. 2 minuteS atm.
+  private static final int AC_MIN_WIN_TIME = 2700;   // Minimum time for a player to win a game. 90 seconds atm
   
   public boolean ban; // If flagged, this user will remain in the game but be essentially shadowbanned
   private int starCount;
