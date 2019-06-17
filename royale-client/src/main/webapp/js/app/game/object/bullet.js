@@ -98,7 +98,7 @@ BulletObject.prototype.step = function() {
 
 BulletObject.prototype.physics = function() {
   if(this.pos.x > 0) { this.pos.x -= BulletObject.SPEED; }
-  else { this.destory(); }
+  else { this.destroy(); }
 };
 
 BulletObject.prototype.sound = GameObject.prototype.sound;
