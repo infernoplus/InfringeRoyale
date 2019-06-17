@@ -64,7 +64,7 @@ Game.FDLC_MAX = Game.FDLC_TARGET+2;
 Game.LEVEL_WARP_TIME = 100;
 Game.GAME_OVER_TIME = 200;
 
-Game.COINS_TO_LIFE = 50;
+Game.COINS_TO_LIFE = 30;
 
 Game.prototype.load = function(data) {
   app.menu.load.show();

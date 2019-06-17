@@ -115,6 +115,11 @@ public final class RoyaleSession {
     return webSocket.getId();
   }
   
+  /* Only called when anti cheat triggers. */
+  public String getIP() {
+    return webSocket.getRemoteAddress().toString();
+  }
+  
   public boolean isOpen() { 
     return webSocket.isOpen();
   }

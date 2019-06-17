@@ -56,6 +56,7 @@ Network.prototype.handlePacket = function(packet) {
     case "s00" : { this.setState(packet.state); break; }
     case "s01" : { this.handleBlob(packet.packets); break; }
     case "s02" : { break; } /* Keep alive packet */
+    case "x00" : { app.menu.error.show("Server Exception", packet.message); break; }
     case "x01" : { app.menu.error.show("Server Exception", packet.message, packet.trace); break; }
     default : { app.menu.error.show("Recieved invalid packet type: " + packet.type, JSON.stringify(packet)); break; }
   }

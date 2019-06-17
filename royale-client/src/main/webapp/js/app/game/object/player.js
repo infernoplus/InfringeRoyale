@@ -433,7 +433,7 @@ PlayerObject.prototype.control = function() {
       this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, this.btnBg?PlayerObject.RUN_SPEED_MAX:PlayerObject.MOVE_SPEED_MAX);
       this.setState(PlayerObject.SNAME.RUN);
     }
-    this.reverse = this.btnD[0] >= 0;
+    if(this.grounded) { this.reverse = this.btnD[0] >= 0; }
   }
   else {
     if(Math.abs(this.moveSpeed) > 0.01) {
@@ -663,7 +663,7 @@ PlayerObject.prototype.interaction = function() {
           obj.bonk();
           this.game.out.push(NET020.encode(obj.level, obj.zone, obj.oid, 0x01));
         }
-        if(obj instanceof PlayerObject && obj.starTimer > 0) {
+        if(obj instanceof PlayerObject && obj.starTimer > 0 && !this.autoTarget) {
           /* Touch other player who has Star */
           this.damage(obj);
         }
@@ -741,6 +741,7 @@ PlayerObject.prototype.axe = function(result) {
 };
 
 PlayerObject.prototype.star = function() {
+  if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; }
   this.starTimer = PlayerObject.STAR_LENGTH;
   this.starMusic = this.play("music/star.mp3", 1., .04);
   if(this.starMusic) { this.starMusic.loop(true); }
@@ -817,6 +818,7 @@ PlayerObject.prototype.show = function() {
 };
 
 PlayerObject.prototype.kill = function() {
+  if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; this.starTimer = 0; }
   if(this.isState(PlayerObject.SNAME.GHOST)) { this.setState(PlayerObject.SNAME.DEADGHOST); }
   else { this.setState(PlayerObject.SNAME.DEAD); }
   
@@ -828,7 +830,10 @@ PlayerObject.prototype.kill = function() {
   if(this.game.getPlayer() === this) { this.game.out.push(NET011.encode()); }
 };
 
-PlayerObject.prototype.destroy = GameObject.prototype.destroy;
+PlayerObject.prototype.destroy = function() {
+  if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; this.starTimer = 0; }
+  GameObject.prototype.destroy.call(this);
+};
 PlayerObject.prototype.isTangible = function() {
   return GameObject.prototype.isTangible.call(this) && !this.isState(PlayerObject.SNAME.HIDE) && this.pipeDelay <= 0;
 };

@@ -7,10 +7,11 @@ import java.util.*;
 import org.infpls.royale.server.game.dao.lobby.GameLobby;
 import org.infpls.royale.server.game.session.*;
 import org.infpls.royale.server.game.session.game.*;
-import org.infpls.royale.server.util.Oak;
 
 public abstract class RoyaleCore {
   public final List<Controller> controllers;
+  
+  protected int frame;
   
   public RoyaleCore() {
     controllers = new ArrayList();
@@ -28,6 +29,8 @@ public abstract class RoyaleCore {
   
   /* Sends information to the client about the current gamestate */
   public void update() throws IOException {
+    frame++;
+    
     boolean regenList = false;
     
     List<ByteMe.NETX> local = new ArrayList();
