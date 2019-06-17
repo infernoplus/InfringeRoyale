@@ -58,7 +58,7 @@ public class Login extends SessionState {
     session.login(name, team);
     
     /* Return data */
-    sendPacket(new PacketL01(name, session.getSessionId()));
+    sendPacket(new PacketL01(session.getSessionId(), session.getUser(), session.getTeam()));
     
     /* Choose Lobby */
     final GameLobby lobby = lobbyDao.findLobby();
