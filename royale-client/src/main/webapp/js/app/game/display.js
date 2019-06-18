@@ -110,7 +110,7 @@ Display.prototype.drawObject = function() {
   var dim = zone.dimensions();
   
   /* Culling Bounds */
-  var w = ((this.canvas.width/Display.TEXRES)*.6)/this.camera.scale;
+  var w = ((this.canvas.width/Display.TEXRES)*.75)/this.camera.scale;
   var cx0 = Math.max(0, Math.min(dim.x, parseInt(this.camera.pos.x - w)));
   var cx1 = Math.max(0, Math.min(dim.x, parseInt(this.camera.pos.x + w)));
   

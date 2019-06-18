@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <title>Controls</title>
+        <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+        <link rel='icon' href='img/home/icon.png'>
+        <link rel='stylesheet' type='text/css' href='css/control.css'>
+    </head>
+    
+    <body id='body' class="b">
+      <div class="t" id="k-title">Keyboard Controls</div>
+      <div class="a">
+        <div><span class="n">Up</span> <button class="i" onclick="app.setK('up')">Set</button></div>
+        <div><span class="n">Down</span> <button class="i" onclick="app.setK('down')">Set</button></div>
+        <div><span class="n">Left</span> <button class="i" onclick="app.setK('left')">Set</button></div>
+        <div><span class="n">Right</span> <button class="i" onclick="app.setK('right')">Set</button></div>
+        <div><span class="n">A</span> <button class="i" onclick="app.setK('a')">Set</button></div>
+        <div><span class="n">B</span> <button class="i" onclick="app.setK('b')">Set</button></div>
+      </div>
+      
+      <div class="s"></div>
+      
+      <div class="t" id="g-title">Gamepad Controls</div>
+      <div class="a">
+        <div><span class="n">Up</span> <button class="i" onclick="app.setG('up')">Set</button></div>
+        <div><span class="n">Down</span> <button class="i" onclick="app.setG('down')">Set</button></div>
+        <div><span class="n">Left</span> <button class="i" onclick="app.setG('left')">Set</button></div>
+        <div><span class="n">Right</span> <button class="i" onclick="app.setG('right')">Set</button></div>
+        <div><span class="n">A</span> <button class="i" onclick="app.setG('a')">Set</button></div>
+        <div><span class="n">B</span> <button class="i" onclick="app.setG('b')">Set</button></div>
+      </div>
+      
+      <div class="s"></div>
+      
+      <div class="t">Test</div>
+      <div class="a">
+        <div>
+          <div class="d">Gamepad ID <span class="i" id="test-pad-id"></span></div>
+          <div class="d">Gamepad Analogue <span class="i" id="test-analogue"></span></div>
+          <div class="s"></div>
+          <span class="n" id="test-up">Up</span>
+          <span class="n" id="test-down">Down</span>
+          <span class="n" id="test-left">Left</span>
+          <span class="n" id="test-right">Right</span>
+          <span class="n" id="test-a">A</span>
+          <span class="n" id="test-b">B</span>
+        </div>
+      </div>
+      <!-- Libs -->
+      <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
+      <script src='js/lib/cookie/js.cookie.min.js'></script>
+      
+      <!-- App -->
+      <script src='js/control/app.js'></script>
+      
+    </body>        
+</html>

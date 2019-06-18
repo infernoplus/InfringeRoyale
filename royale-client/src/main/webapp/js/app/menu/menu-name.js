@@ -5,6 +5,7 @@
 function MenuName() {
   this.element = document.getElementById("name");
   this.linkElement = document.getElementById("link");
+  this.winElement = document.getElementById("win");
   this.nameInput = document.getElementById("name-input");
   this.teamInput = document.getElementById("team-input");
   this.launchBtn = document.getElementById("name-launch");
@@ -28,6 +29,9 @@ MenuName.prototype.show = function() {
   var tem = Cookies.get("team");
   this.nameInput.value = nam?nam:"";
   this.teamInput.value = tem?tem:"";
+  var epic = Cookies.get("epic_gamer_moments");
+  this.winElement.style.display = "block";
+  this.winElement.innerHTML = "Wins: " + (epic?epic:"0");
   this.linkElement.style.display = "block";
   this.element.style.display = "block";
 };

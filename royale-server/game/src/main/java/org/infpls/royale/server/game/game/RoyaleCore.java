@@ -109,7 +109,7 @@ public abstract class RoyaleCore {
     return null;
   }
   
-  public abstract byte winRequest();
+  public abstract byte winRequest(boolean inc);
   
   public void send(Packet p) {
     for(int i=0;i<controllers.size();i++) {

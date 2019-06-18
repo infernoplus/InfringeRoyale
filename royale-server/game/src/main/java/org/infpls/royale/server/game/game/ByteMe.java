@@ -162,22 +162,26 @@ public class ByteMe {
   
   public static class NET018 extends NETX {
     public final byte result;
+    public final byte extra;   // Anti cheat value. If set to 0x42 the client offsets result standings.
     public NET018(short pid, ByteBuffer data) {
       super((byte)0x18, pid);
       result = 0;
+      extra = 0;
     }
     
-    public NET018(short pid, byte r) {
+    public NET018(short pid, byte r, boolean e) {
       super((byte)0x18, pid);
       result = r;
+      extra = e?(byte)0x82:(byte)0x00;
     }
     
     @Override
     public ByteBuffer encode() {
-      final ByteBuffer bb = ByteBuffer.allocate(4);
+      final ByteBuffer bb = ByteBuffer.allocate(5);
       bb.put(designation);
       bb.putShort(pid);
       bb.put(result);
+      bb.put(extra);
       return bb;
     }
   }

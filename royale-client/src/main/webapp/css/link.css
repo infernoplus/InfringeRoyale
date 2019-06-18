@@ -61,6 +61,48 @@
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
+.link-b {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  margin-top: 6px;
+  margin-left: 6px;
+  padding: 0px;
+  background-color: rgba(0, 0, 0, 0.0);
+}
+
+.link-con {
+  cursor: pointer;
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  background-image: url(../img/home/con.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 36px 36px;
+}
+
+.link-con:hover {
+  background-image: url(../img/home/con-inv.png);
+}
+
+.link-w {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.win {
+  margin: 4px;
+  font-family: SmbWeb;
+  font-size: 24px;
+  color: white;
+  text-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
 @media only screen and (max-width: 769px) {
   .link-patch {
     font-size: 12px;

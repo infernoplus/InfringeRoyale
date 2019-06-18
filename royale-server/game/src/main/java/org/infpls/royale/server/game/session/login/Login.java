@@ -50,7 +50,7 @@ public class Login extends SessionState {
     else if(name.length() < 1) { name = "Infringio"; }
     
     /* Team */
-    String team = p.team==null?"":p.team.trim();
+    String team = p.team==null?"":p.team.trim().toLowerCase();
     if(team.length() > 3) { name = name.substring(0, 3); }
     else if(name.length() < 1) { name = ""; }
     

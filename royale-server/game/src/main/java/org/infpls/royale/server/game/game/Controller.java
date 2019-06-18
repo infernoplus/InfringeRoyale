@@ -29,8 +29,10 @@ public class Controller {
   private static final int AC_STAR_MAX_COUNT = 3;    // If a player gets more than this number of stars they are cheating.
   private static final int AC_MIN_WIN_TIME = 2700;   // Minimum time for a player to win a game. 90 seconds atm
   
+  public boolean banlock; // If flagged, we stop sending player updates out for this player. Used at end of level for cheaters.
   public boolean ban; // If flagged, this user will remain in the game but be essentially shadowbanned
   private int starCount;
+  private int acSequence; // If a player skips a level they are cheating
   
   public Controller(RoyaleCore game, RoyaleSession session, short pid) {
     this.game = game;
@@ -42,7 +44,7 @@ public class Controller {
     position = null;
     sprite = 0x00;
     
-    result = 0;
+    result = 0x00;
     
     garbage = false;
     
@@ -81,9 +83,15 @@ public class Controller {
         switch(n.designation) {
           case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
           case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
-          case 0x12 : { process012((ByteMe.NET012)n); loc.add(n); break; }
+          case 0x12 : { process012((ByteMe.NET012)n);  if(!banlock) { loc.add(n); } break; }
           case 0x13 : { process013((ByteMe.NET013)n); if(!ban) { glo.add(n); } break; }
-          case 0x18 : { glo.add(process018((ByteMe.NET018)n)); break; }
+          case 0x18 : {
+            final ByteMe.NET018 wr = process018((ByteMe.NET018)n);
+            if(wr == null) { break; }
+            else if(!ban) { glo.add(wr); }
+            else { send(wr.encode().array()); }
+            break;
+          }
           case 0x19 : { process019((ByteMe.NET019)n); break; }
           case 0x20 : { process020((ByteMe.NET020)n); if(!ban) { glo.add(n); } break; }
           case 0x30 : { process030((ByteMe.NET030)n); if(!ban) { glo.add(n); } break; }
@@ -111,6 +119,10 @@ public class Controller {
     zone = n.zone;
     position = n.pos;
     sprite = n.sprite;
+    
+    if(level - acSequence > 1) { ban(); }
+    
+    acSequence = n.level;
   }
   
   /* PLAYER_OBJECT_EVENT */
@@ -127,9 +139,11 @@ public class Controller {
   public ByteMe.NET018 process018(ByteMe.NET018 n) {
     /* Anti Cheat */
     if(game.frame < AC_MIN_WIN_TIME) { ban(); }
-    result = ban?69:game.winRequest();
+    if(result != 0) { return null; }
+    result = game.winRequest(!ban);
+    if(ban) { banlock = true; }
     
-    return new ByteMe.NET018(n.pid, result);
+    return new ByteMe.NET018(n.pid, result, ban);
   }
   
   /* PLAYER_SNITCH */

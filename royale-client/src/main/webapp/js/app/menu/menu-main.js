@@ -1,9 +1,11 @@
 "use strict";
 /* global app */
+/* global Cookies */
 
 function MenuMain() {
   this.element = document.getElementById("main");
   this.linkElement = document.getElementById("link");
+  this.winElement = document.getElementById("win");
   this.launchBtn = document.getElementById("main-launch");
   this.number = document.getElementById("main-number");
   
@@ -21,6 +23,9 @@ MenuMain.prototype.show = function(number) {
   app.menu.navigation("main", "main");
   app.menu.background("a");
   if(number) { this.number.innerHTML = number; }
+  var epic = Cookies.get("epic_gamer_moments");
+  this.winElement.style.display = "block";
+  this.winElement.innerHTML = "Wins: " + (epic?epic:"0");
   this.linkElement.style.display = "block";
   this.element.style.display = "block";
 };

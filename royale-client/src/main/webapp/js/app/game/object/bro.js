@@ -270,11 +270,16 @@ HammerObject.prototype.playerCollide = function(p) {
   p.damage(this);
 };
 
-HammerObject.prototype.playerStomp = HammerObject.prototype.playerCollide;
+HammerObject.prototype.playerStomp = function(p) {
+  if(this.dead || this.garbage) { return; }
+  this.bonk();
+  p.bounce();
+  this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0x01));
+};
 
 HammerObject.prototype.playerBump = HammerObject.prototype.playerCollide;
 
-HammerObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); } };
+HammerObject.prototype.damage = function(p) { if(!this.dead) { this.bonk(); NET020.encode(this.level, this.zone, this.oid, 0x01); } };
 
 /* 'Bonked' is the type of death where an enemy flips upside down and falls off screen */
 /* Generally triggred by shells, fireballs, etc */
