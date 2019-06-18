@@ -35,8 +35,8 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.starMusic = undefined;
   this.damageTimer = 0;      // Post damage invincibility timer
   
-  this.transformTimer = 0;
-  this.transformTarget = -1;
+  this.tfmTimer = 0;
+  this.tfmTarget = -1;
   
   this.pipeWarp = undefined; // Warp point that the pipe we are using is linked to
   this.pipeTimer = 0;        // Timer for warp pipe animation
@@ -81,21 +81,21 @@ PlayerObject.DEAD_TIME = 70;
 PlayerObject.DEAD_UP_FORCE = 0.65;
 
 PlayerObject.RUN_SPEED_MAX = 0.315; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-PlayerObject.MOVE_SPEED_MAX = 0.215;
-PlayerObject.MOVE_SPEED_ACCEL = 0.0125;
+PlayerObject.MOVE_SPEED_MAX = 0.215; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.MOVE_SPEED_ACCEL = 0.0125; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.MOVE_SPEED_DECEL = 0.0225;
 PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025;
 PlayerObject.STUCK_SLIDE_SPEED = 0.08;
 
-PlayerObject.FALL_SPEED_MAX = 0.45;
-PlayerObject.FALL_SPEED_ACCEL = 0.085;
+PlayerObject.FALL_SPEED_MAX = 0.45; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.FALL_SPEED_ACCEL = 0.085; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.BOUNCE_LENGTH_MIN = 1;
 PlayerObject.SPRING_LENGTH_MIN = 5;
-PlayerObject.SPRING_LENGTH_MAX = 14;
+PlayerObject.SPRING_LENGTH_MAX = 14; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.JUMP_LENGTH_MIN = 3;
 PlayerObject.JUMP_LENGTH_MAX = 7;  // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.JUMP_SPEED_INC_THRESHOLD = [0.1, 0.2, 0.25];
-PlayerObject.JUMP_DECEL = 0.005;
+PlayerObject.JUMP_DECEL = 0.005; 
 PlayerObject.BLOCK_BUMP_THRESHOLD = 0.12;
 
 PlayerObject.POWER_INDEX_SIZE = 0x20;
@@ -111,13 +111,13 @@ PlayerObject.ATTACK_DELAY = 7;
 PlayerObject.ATTACK_CHARGE = 25;
 PlayerObject.ATTACK_ANIM_LENGTH = 3;
 
-PlayerObject.PIPE_TIME = 30;
-PlayerObject.PIPE_SPEED = 0.06;
+PlayerObject.PIPE_TIME = 30; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.PIPE_SPEED = 0.06; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.PIPE_EXT_OFFSET = vec2.make(.5,0.); // Horizontal offset from warp point when exiting warp pipe.
 PlayerObject.WEED_EAT_RADIUS = 3;
 
-PlayerObject.POLE_DELAY = 15;
-PlayerObject.POLE_SLIDE_SPEED = 0.15;
+PlayerObject.POLE_DELAY = 15; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.POLE_SLIDE_SPEED = 0.15; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
 PlayerObject.LEVEL_END_MOVE_OFF = vec2.make(10, 0); // Position offset for where auto walk to at the end of a level.
 
 PlayerObject.CLIMB_SPEED = 0.125;
@@ -278,9 +278,9 @@ PlayerObject.prototype.step = function() {
     if(this.poleWait) { }
     else if(this.poleTimer <= 0 && this.autoTarget) { this.setState(PlayerObject.SNAME.STAND); }
     else {
-      var mov = vec2.add(this.pos, vec2.make(0., -PlayerObject.POLE_SLIDE_SPEED));
-      var ext1 = vec2.make(this.pos.x, this.pos.y-PlayerObject.POLE_SLIDE_SPEED);
-      var ext2 = vec2.make(this.dim.x, this.dim.y+PlayerObject.POLE_SLIDE_SPEED);
+      var mov = vec2.add(this.pos, vec2.make(0., -0.15));
+      var ext1 = vec2.make(this.pos.x, this.pos.y-0.15);
+      var ext2 = vec2.make(this.dim.x, this.dim.y+0.15);
 
       var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
       var tdim = vec2.make(1., 1.);
@@ -292,7 +292,7 @@ PlayerObject.prototype.step = function() {
       }
       
       if(hit) {
-        this.poleTimer = PlayerObject.POLE_DELAY;
+        this.poleTimer = 15;
         this.autoTarget = vec2.add(mov, PlayerObject.LEVEL_END_MOVE_OFF);
         this.poleWait = true;
       }
@@ -300,7 +300,7 @@ PlayerObject.prototype.step = function() {
     }
     
     var flag = this.game.getFlag(this.level, this.zone);
-    if(flag.pos.y - PlayerObject.POLE_SLIDE_SPEED >= this.pos.y) { flag.pos.y -= PlayerObject.POLE_SLIDE_SPEED; }
+    if(flag.pos.y - 0.15 >= this.pos.y) { flag.pos.y -= 0.15; }
     else { flag.pos.y = this.pos.y; this.poleWait = false; }
     
     return;
@@ -327,7 +327,7 @@ PlayerObject.prototype.step = function() {
     else if(this.deadTimer > 0) {
       this.deadTimer--;
       this.pos.y += this.fallSpeed;
-      this.fallSpeed = Math.max(this.fallSpeed - PlayerObject.FALL_SPEED_ACCEL, -PlayerObject.FALL_SPEED_MAX);
+      this.fallSpeed = Math.max(this.fallSpeed - 0.085, -0.45);
     }
     else { this.destroy(); }
     return;
@@ -335,18 +335,18 @@ PlayerObject.prototype.step = function() {
   
   /* Transform */
   if(this.isState(PlayerObject.SNAME.TRANSFORM)) {
-    if(--this.transformTimer > 0) {
+    if(--this.tfmTimer > 0) {
       var ind = parseInt(this.anim/PlayerObject.TRANSFORM_ANIMATION_RATE) % 3;
-      var high = this.power>this.transformTarget?this.power:this.transformTarget;
+      var high = this.power>this.tfmTarget?this.power:this.tfmTarget;
       switch(ind) {
         case 0 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).SPRITE[0]; break; }
         case 1 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.TRANSFORM, high).SPRITE[0]; break; }
-        case 2 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.transformTarget).SPRITE[0]; break; }
+        case 2 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.tfmTarget).SPRITE[0]; break; }
       }
     }
     else {
-      this.power = this.transformTarget;
-      this.transformTarget = -1;
+      this.power = this.tfmTarget;
+      this.tfmTarget = -1;
       this.setState(PlayerObject.SNAME.STAND);
       if(this.collisionTest(this.pos, this.dim)) { this.setState(PlayerObject.SNAME.DOWN); }
       this.damageTimer = PlayerObject.DAMAGE_TIME;
@@ -357,12 +357,12 @@ PlayerObject.prototype.step = function() {
   /* Warp Pipe */
   if(this.pipeDelay > 0) { this.pipeDelay--; return; }
   if(this.pipeTimer > 0 && this.pipeDelay <= 0) {
-    if(this.pipeTimer >= PlayerObject.PIPE_TIME) { this.play("sfx/pipe.wav", 1., .04); }
+    if(this.pipeTimer >= 30) { this.play("sfx/pipe.wav", 1., .04); }
     switch(this.pipeDir) {
-      case 1 : { this.pos.y += PlayerObject.PIPE_SPEED; break; }
-      case 2 : { this.pos.y -= PlayerObject.PIPE_SPEED; break; }
-      case 3 : { this.pos.x -= PlayerObject.PIPE_SPEED; break; }
-      case 4 : { this.pos.x += PlayerObject.PIPE_SPEED; break; }
+      case 1 : { this.pos.y += 0.06; break; }
+      case 2 : { this.pos.y -= 0.06; break; }
+      case 3 : { this.pos.x -= 0.06; break; }
+      case 4 : { this.pos.x += 0.06; break; }
     }
     if(--this.pipeTimer === 1 && this.pipeWarp) { this.pipeDelay = this.pipeDelayLength; }
     if(this.pipeTimer <= 0 && this.pipeWarp) {
@@ -370,13 +370,13 @@ PlayerObject.prototype.step = function() {
       this.weedeat();
       this.pipeWarp = undefined;
       switch(this.pipeExt) {
-        case 1 : { this.pos.y -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
-        case 2 : { this.pos.y += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
-        case 3 : { this.pos.x -= ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.RUN); break; }
-        case 4 : { this.pos.x += ((PlayerObject.PIPE_TIME-1)*PlayerObject.PIPE_SPEED); this.setState(PlayerObject.SNAME.RUN); break; }
+        case 1 : { this.pos.y -= ((30-1)*0.06); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 2 : { this.pos.y += ((30-1)*0.06); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 3 : { this.pos.x -= ((30-1)*0.06); this.setState(PlayerObject.SNAME.RUN); break; }
+        case 4 : { this.pos.x += ((30-1)*0.06); this.setState(PlayerObject.SNAME.RUN); break; }
         default : { return; }
       }
-      this.pipeTimer = PlayerObject.PIPE_TIME;
+      this.pipeTimer = 30;
       this.pipeDir = this.pipeExt;
       this.pipeDelay = this.pipeDelayLength;
     }
@@ -437,7 +437,7 @@ PlayerObject.prototype.control = function() {
       this.setState(PlayerObject.SNAME.SLIDE);
     }
     else {
-      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + PlayerObject.MOVE_SPEED_ACCEL, this.btnBg?0.315:PlayerObject.MOVE_SPEED_MAX);
+      this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + 0.0125, this.btnBg?0.315:0.215);
       this.setState(PlayerObject.SNAME.RUN);
     }
     if(this.grounded) { this.reverse = this.btnD[0] >= 0; }
@@ -456,7 +456,7 @@ PlayerObject.prototype.control = function() {
     }
   }
   
-  var jumpMax = this.isSpring?PlayerObject.SPRING_LENGTH_MAX:7;
+  var jumpMax = this.isSpring?14:7;
   var jumpMin = this.isSpring?PlayerObject.SPRING_LENGTH_MIN:(this.isBounce?PlayerObject.BOUNCE_LENGTH_MIN:PlayerObject.JUMP_LENGTH_MIN);
   
   for(var i=0;i<PlayerObject.JUMP_SPEED_INC_THRESHOLD.length&&Math.abs(this.moveSpeed)>=PlayerObject.JUMP_SPEED_INC_THRESHOLD[i];i++) { jumpMax++; }
@@ -491,7 +491,7 @@ PlayerObject.prototype.control = function() {
 
 PlayerObject.prototype.physics = function() {
   if(this.jumping !== -1) {
-    this.fallSpeed = PlayerObject.FALL_SPEED_MAX - (this.jumping*PlayerObject.JUMP_DECEL);
+    this.fallSpeed = 0.45 - (this.jumping*0.005);
     this.jumping++;
     this.grounded = false;
   }
@@ -501,7 +501,7 @@ PlayerObject.prototype.physics = function() {
     if(this.grounded) {
       this.fallSpeed = 0;
     }
-    this.fallSpeed = Math.max(this.fallSpeed - PlayerObject.FALL_SPEED_ACCEL, -PlayerObject.FALL_SPEED_MAX);
+    this.fallSpeed = Math.max(this.fallSpeed - 0.085, -0.45);
   }
   
   var mov = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
@@ -727,7 +727,7 @@ PlayerObject.prototype.damage = function(obj) {
     this.pipeWarp || this.pipeTimer > 0 || this.pipeDelay > 0 ||
     this.autoTarget
   ) { return; }
-  if(this.power > 0) { this.transform(0); this.damageTimer = PlayerObject.DAMAGE_TIME; }
+  if(this.power > 0) { this.tfm(0); this.damageTimer = PlayerObject.DAMAGE_TIME; }
   else { this.kill(); }
 };
 
@@ -737,8 +737,8 @@ PlayerObject.prototype.invuln = function() {
 };
 
 PlayerObject.prototype.powerup = function(obj) {
-  if(obj instanceof MushroomObject && this.power < 1) { this.transform(1); return; }
-  if(obj instanceof FlowerObject && this.power < 2) { this.transform(2); return; }
+  if(obj instanceof MushroomObject && this.power < 1) { this.tfm(1); return; }
+  if(obj instanceof FlowerObject && this.power < 2) { this.tfm(2); return; }
   if(obj instanceof StarObject) { this.star(); this.game.out.push(NET013.encode(0x02)); return; }
   if(obj instanceof LifeObject) { this.game.lifeage(); return; }
   if(obj instanceof CoinObject) { this.game.coinage(); return; }
@@ -761,11 +761,11 @@ PlayerObject.prototype.star = function() {
   if(this.starMusic) { this.starMusic.loop(true); }
 };
 
-PlayerObject.prototype.transform = function(to) {
+PlayerObject.prototype.tfm = function(to) {
   if(this.power<to) { this.play("sfx/powerup.wav", 1., .04); }
   else { this.play("sfx/pipe.wav", 1., .04); }
-  this.transformTarget = to;
-  this.transformTimer = PlayerObject.TRANSFORM_TIME;
+  this.tfmTarget = to;
+  this.tfmTimer = PlayerObject.TRANSFORM_TIME;
   this.setState(PlayerObject.SNAME.TRANSFORM);
 };
 
@@ -786,7 +786,7 @@ PlayerObject.prototype.pipe = function(ent, wid, delay) {
   if(ent === 1 || ent === 2) { this.setState(PlayerObject.SNAME.STAND); }
   var wrp = this.game.world.getLevel(this.level).getWarp(wid);
   this.pipeWarp = wid;
-  this.pipeTimer = PlayerObject.PIPE_TIME;
+  this.pipeTimer = 30;
   this.pipeDir = ent;
   this.pipeExt = wrp.data;
   this.pipeDelayLength = delay;
@@ -810,7 +810,7 @@ PlayerObject.prototype.pole = function(p) {
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.pos.x = p.x;
-  this.poleTimer = PlayerObject.POLE_DELAY;
+  this.poleTimer = 15;
   this.poleSound = false;
 };
 
