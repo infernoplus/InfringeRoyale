@@ -77,7 +77,6 @@
                     <jsSourceFile>app/util/util.js</jsSourceFile>
                     <jsSourceFile>app/util/frame.js</jsSourceFile>
                     <jsSourceFile>app/util/byteme.js</jsSourceFile>
-                    <jsSourceFile>app/util/snitch.js</jsSourceFile>
                     <jsSourceFile>app/util/squar.js</jsSourceFile>
 
                     <!-- Menus -->
@@ -87,6 +86,7 @@
                     <jsSourceFile>app/menu/menu-load.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-disclaim.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-main.js</jsSourceFile>
+                    <jsSourceFile>app/util/snitch.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-name.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-game.js</jsSourceFile>
 
