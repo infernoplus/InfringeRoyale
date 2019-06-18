@@ -1,5 +1,7 @@
 "use strict";
 /* global app */
+/* global vec2 */
+/* global Cookies */
 
 /* Define Input Class */
 function Input(game, container) {
@@ -24,54 +26,60 @@ function Input(game, container) {
   this.mouse.input = this;
   this.keyboard.input = this;
   this.touch.input = this; // Reeeeeeee
+  
+  this.load();
+};
+
+Input.INPUTS = ["up","down","left","right","a","b"];
+Input.K_DEFAULT = [87, 83, 65, 68, 32, 16];
+Input.G_DEFAULT = [0, 1, 2, 3, 4, 5];
+
+Input.prototype.load = function() {
+  this.assignK = {};
+  for(var i=0;i<Input.INPUTS.length;i++) {
+    var val = Cookies.get("k_" + Input.INPUTS[i]);
+    this.assignK[Input.INPUTS[i]] = val?parseInt(val):Input.K_DEFAULT[i];
+  }
+  
+  this.assignG = {};
+  for(var i=0;i<Input.INPUTS.length;i++) {
+    var val = Cookies.get("g_" + Input.INPUTS[i]);
+    this.assignG[Input.INPUTS[i]] = val?parseInt(val):Input.G_DEFAULT[i];
+  }
 };
 
 Input.prototype.pad = {
-  pads: [],
-  ax: vec2.make(0., 0.),
-  a: false,
-  b: false
+  pad: undefined,
+  ax: vec2.make(0., 0.)
 };
 
 Input.prototype.pad.update = function() {
-  if(navigator) { this.pads = navigator.getGamepads(); }
-  else { this.pads = [undefined]; }
+  if(navigator) { this.pad = navigator.getGamepads()[0]; }
+  else { this.pad = undefined; }
   this.analog();
-  this.button();
 };
 
 Input.prototype.pad.analog = function() {
-  var pad = this.pads[0];
-  if(pad) {
-    for(var i=0;i<pad.axes.length-1;i++) {
-      var x = pad.axes[i];
-      var y = pad.axes[i+1];
-      if(Math.abs(x) < 0.1 && Math.abs(y) < 0.1) { continue; }
+  if(this.pad) {
+    for(var i=0;i<this.pad.axes.length-1;i++) {
+      var x = this.pad.axes[i];
+      var y = this.pad.axes[i+1];
+      if(Math.abs(x) < 0.25 && Math.abs(y) < 0.25) { continue; }
       else { this.ax = vec2.make(x,y); return; }
     }
   }
   this.ax = vec2.make(0., 0.);
 };
 
-Input.prototype.pad.button = function() {
-  var pad = this.pads[0];
-  var a = false;
-  var b = false;
-  if(pad) {
-    for(var i=0;i<pad.buttons.length;i++) {
-      var btn = pad.buttons[i];
-      if(btn.value === 1) {
-        if(i%2 === 0) { a = true; }
-        else { b = true; }
-      }
-    }
+Input.prototype.pad.button = function(i) {
+  if(this.pad) {
+    return this.pad.buttons[i].pressed;
   }
-  this.a = a;
-  this.b = b;
+  return false;
 };
 
 Input.prototype.pad.connected = function() {
-  return !!this.pads[0];
+  return !!this.pad;
 };
 
 Input.prototype.mouse = {

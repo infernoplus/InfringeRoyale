@@ -731,7 +731,7 @@ NET013.decode = function(/* NET013_SERV */ a) {
 var NET018 = {}; // PLAYER_RESULT_REQUEST [0x18] // As Uint8Array
 /* ======================================================================================== */
 NET018.DESIGNATION = 0x18;
-NET018.BYTES = 4;
+NET018.BYTES = 5;
 
 /* Client->Server */
 NET018.encode = function() {
@@ -741,7 +741,7 @@ NET018.encode = function() {
 /* Server->>>Client */
 NET018.decode = function(/* NET011_SERV */ a) {
   return {
-    designation: NET018.DESIGNATION, pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00), result: a[2]
+    designation: NET018.DESIGNATION, pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00), result: a[2], extra: a[3]
   };
 };
 

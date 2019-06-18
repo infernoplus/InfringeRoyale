@@ -349,6 +349,7 @@ PlayerObject.prototype.step = function() {
       this.transformTarget = -1;
       this.setState(PlayerObject.SNAME.STAND);
       if(this.collisionTest(this.pos, this.dim)) { this.setState(PlayerObject.SNAME.DOWN); }
+      this.damageTimer = PlayerObject.DAMAGE_TIME;
     }
     return;
   }
@@ -718,9 +719,16 @@ PlayerObject.prototype.bounce = function() {
 };
 
 PlayerObject.prototype.damage = function(obj) {
-  if(this.damageTimer > 0 || this.starTimer > 0) { return; }
-  if(this.power > 0) { this.transform(0); this.damageTimer = PlayerObject.DAMAGE_TIME; return; }
-  this.kill();
+  if(
+    this.damageTimer > 0 || this.starTimer > 0 ||
+    this.isState(PlayerObject.SNAME.TRANSFORM) ||
+    this.isState(PlayerObject.SNAME.CLIMB) ||
+    this.isState(PlayerObject.SNAME.POLE) ||
+    this.pipeWarp || this.pipeTimer > 0 || this.pipeDelay > 0 ||
+    this.autoTarget
+  ) { return; }
+  if(this.power > 0) { this.transform(0); this.damageTimer = PlayerObject.DAMAGE_TIME; }
+  else { this.kill(); }
 };
 
 /* Temp invuln. Called when player loads into a level to prevent instant spawn kill */

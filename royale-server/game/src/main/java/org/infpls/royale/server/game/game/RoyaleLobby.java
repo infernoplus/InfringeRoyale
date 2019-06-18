@@ -7,6 +7,6 @@ public class RoyaleLobby extends RoyaleCore {
   }
   
   @Override
-  public byte winRequest() { return 0x00; }
+  public byte winRequest(boolean inc) { return 0x00; }
   
 }

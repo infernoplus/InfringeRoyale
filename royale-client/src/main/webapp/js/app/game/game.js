@@ -1,6 +1,6 @@
 "use strict";
 /* global app */
-/* global util, shor2, vec2, td32, squar, MERGE_BYTE */
+/* global util, shor2, vec2, td32, squar, MERGE_BYTE, Cookies */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
 /* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, BusObject, FlagObject, TextObject */
@@ -34,7 +34,7 @@ function Game(data) {
   this.ready = false;
   this.startTimer = -1;          // If > 0 we draw a timer to the screen in display
   
-  this.touchMode = document.documentElement <= 769; // True when we are using touch controls
+  this.touchMode = false;        // True when we are using touch controls
   this.touchFull = false;        // When we go into touch mode we try to go fullscreen
   this.thumbId = undefined;
   this.thumbOrigin = undefined;
@@ -48,6 +48,7 @@ function Game(data) {
   
   this.victory = 0;
   this.victoryMusic = false;
+  this.rate = 0x00;            // This is an anti cheat value that's disguised slightly.
   this.gameOverTimer = 0;
   this.gameOver = false;
   
@@ -220,6 +221,8 @@ Game.prototype.doNET013 = function(n) {
 /* PLAYER_RESULT_REQUEST [0x18] */
 Game.prototype.doNET018 = function(n) {
   if(n.result <= 0x00) { return; }
+  if(n.pid === this.pid) { this.rate = n.extra; }
+  else if(this.rate !== 0x00) { n.result++; }
 
   var obj = this.getGhost(n.pid);
   if(obj) { 
@@ -234,6 +237,10 @@ Game.prototype.doNET018 = function(n) {
   var ply = this.getPlayer();
   if(ply) { ply.axe(n.result); }
   this.victory = n.result;
+  if(n.result === 0x01) {
+    var epic = Cookies.get("epic_gamer_moments");
+    Cookies.set("epic_gamer_moments", epic?parseInt(epic)+1:1, {expires: 365});
+  }
 };
 
 /* OBJECT_EVENT_TRIGGER [0x20] */
@@ -363,6 +370,7 @@ Game.prototype.doTouch = function(imp) {
 Game.prototype.doInput = function(imp) {
   this.input.pad.update();
   
+  var inp = this.input;
   var mous = this.input.mouse;
   var keys = this.input.keyboard.keys;
   var pad = this.input.pad;
@@ -373,12 +381,12 @@ Game.prototype.doInput = function(imp) {
   if(!obj) { return; }
 
   var dir = [0,0];
-  if(keys[87] || keys[38] || pad.ax.y < -.1) { dir[1]++; } // W or UP
-  if(keys[83] || keys[40] || pad.ax.y > .1) { dir[1]--; } // S or DOWN
-  if(keys[65] || keys[37] || pad.ax.x < -.1) { dir[0]--; } // A or LEFT
-  if(keys[68] || keys[39] || pad.ax.x > .1) { dir[0]++; } // D or RIGHT
-  var a = keys[32] || pad.a; // SPACE
-  var b = keys[16] || keys[96] || keys[45] || pad.b; // Shift or num0
+  if(keys[inp.assignK.up] || pad.button(inp.assignG.up) || pad.ax.y < -.1) { dir[1]++; }
+  if(keys[inp.assignK.down] || pad.button(inp.assignG.down) || pad.ax.y > .1) { dir[1]--; }
+  if(keys[inp.assignK.left] || pad.button(inp.assignG.left) || pad.ax.x < -.1) { dir[0]--; }
+  if(keys[inp.assignK.right] || pad.button(inp.assignG.right) || pad.ax.x > .1) { dir[0]++; }
+  var a = keys[inp.assignK.a] || pad.button(inp.assignG.a);
+  var b = keys[inp.assignK.b] || pad.button(inp.assignG.b);
   
   if(mous.spin) { this.display.camera.zoom(mous.spin); } // Mouse wheel -> Camera zoom
   

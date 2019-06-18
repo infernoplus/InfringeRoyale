@@ -1,0 +1,35 @@
+.b {
+  background-color: #FFFFFF;
+  font-family: Calibri, sans-serif;
+}
+
+.t {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.a {
+  background-color: #AAAAAA;
+  border: 2px dashed #777777;
+  margin: 2px;
+}
+
+.n {
+  font-weight: bold;
+  width: 64px;
+  display: inline-block;
+}
+
+.d {
+  font-weight: bold;
+}
+
+.i {
+  font-weight: normal;
+}
+
+.s {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-bottom: dashed 2px black;
+}
