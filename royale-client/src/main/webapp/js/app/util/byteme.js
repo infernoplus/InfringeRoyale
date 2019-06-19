@@ -575,6 +575,7 @@ NETX.decode = function(/* Uint8Array */ data) {
       case 0x11 : { de.push(NET011.decode(data.slice(i, i+=NET011.BYTES-1))); break; }
       case 0x12 : { de.push(NET012.decode(data.slice(i, i+=NET012.BYTES-1))); break; }
       case 0x13 : { de.push(NET013.decode(data.slice(i, i+=NET013.BYTES-1))); break; }
+      case 0x17 : { de.push(NET017.decode(data.slice(i, i+=NET017.BYTES-1))); break; }
       case 0x18 : { de.push(NET018.decode(data.slice(i, i+=NET018.BYTES-1))); break; }
       case 0x20 : { de.push(NET020.decode(data.slice(i, i+=NET020.BYTES-1))); break; }
       case 0x30 : { de.push(NET030.decode(data.slice(i, i+=NET030.BYTES-1))); break; }
@@ -723,6 +724,25 @@ NET013.decode = function(/* NET013_SERV */ a) {
     designation: NET013.DESIGNATION,
     pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
     type: a[2]
+  };
+};
+
+var NET017 = {}; // PLAYER_KILL_EVENT [0x17] // As Uint8Array
+/* ======================================================================================== */
+NET017.DESIGNATION = 0x17;
+NET017.BYTES = 5;
+
+/* Client->Server */
+NET017.encode = function(/* short */ killer) {
+  return new Uint8Array([NET017.DESIGNATION, killer >> 8 & 0xFF, killer & 0xFF]);
+};
+
+/* Server->Client */
+NET017.decode = function(/* NET017_SERV */ a) {
+  return {
+    designation: NET017.DESIGNATION,
+    pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
+    killer: (a[3] & 0x00FF) | ((a[2] << 8) & 0xFF00)
   };
 };
 

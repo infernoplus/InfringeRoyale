@@ -33,3 +33,8 @@
   margin-bottom: 8px;
   border-bottom: dashed 2px black;
 }
+
+.v {
+  font-style: italic;
+  margin-left: 8px;
+}

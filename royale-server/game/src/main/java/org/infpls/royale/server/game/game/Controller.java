@@ -85,6 +85,7 @@ public class Controller {
           case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
           case 0x12 : { process012((ByteMe.NET012)n);  if(!banlock) { loc.add(n); } break; }
           case 0x13 : { process013((ByteMe.NET013)n); if(!ban) { glo.add(n); } break; }
+          case 0x17 : { process017((ByteMe.NET017)n); break; }
           case 0x18 : {
             final ByteMe.NET018 wr = process018((ByteMe.NET018)n);
             if(wr == null) { break; }
@@ -120,7 +121,7 @@ public class Controller {
     position = n.pos;
     sprite = n.sprite;
     
-    if(level - acSequence > 1) { ban(); }
+    if(level - acSequence > 1) { ban("Level Sequence Skip"); }
     
     acSequence = n.level;
   }
@@ -129,16 +130,22 @@ public class Controller {
   public void process013(ByteMe.NET013 n) {
     /* Anti Cheat */
     if(n.type == 0x02) {
-      if(game instanceof RoyaleLobby) { ban(); }
-      if(game.frame < AC_STAR_MIN_TIME) { ban(); }
-      if(starCount++ > AC_STAR_MAX_COUNT) { ban(); }
+      if(game instanceof RoyaleLobby) { ban("Star In Lobby"); }
+      if(game.frame < AC_STAR_MIN_TIME) { ban("Star Early"); }
+      if(starCount++ > AC_STAR_MAX_COUNT) { ban("Too Many Stars"); }
     }
+  }
+  
+  /* PLAYER_KILL_EVENT */
+  public void process017(ByteMe.NET017 n) {
+    final Controller kler = game.getController(n.killer);
+    if(kler != null) { kler.send(n.encode().array()); }
   }
   
   /* PLAYER_RESULT_REQUEST */
   public ByteMe.NET018 process018(ByteMe.NET018 n) {
     /* Anti Cheat */
-    if(game.frame < AC_MIN_WIN_TIME) { ban(); }
+    if(game.frame < AC_MIN_WIN_TIME) { ban("Completion too Early"); }
     if(result != 0) { return null; }
     result = game.winRequest(!ban);
     if(ban) { banlock = true; }
@@ -149,7 +156,7 @@ public class Controller {
   /* PLAYER_SNITCH */
   public void process019(ByteMe.NET019 n) {
     /* Anti Cheat */
-    ban();
+    ban("Snitched");
   }
   
   /* OBJECT_EVENT_TRIGGER */
@@ -163,8 +170,8 @@ public class Controller {
   }
   
   /* Essentially a shadow ban. The player is able to keep playing but their actions no longer affect the game. They are also barred from winning. */
-  public void ban() {
-    if(!ban) { Oak.log(Oak.Level.WARN, "Player banned for potential cheating: '" + getName() +"', F: " + game.frame + ", IP: " + session.getIP()); }
+  public void ban(String rsn) {
+    if(!ban) { Oak.log(Oak.Level.WARN, "Player banned for '" + rsn + "' : '" + getName() +"', F: " + game.frame + ", IP: " + session.getIP()); }
     ban = true;
   }
   

@@ -4,7 +4,7 @@
 /* global NET011, NET020 */
 
 function PlantObject(game, level, zone, pos, oid, variant) {
-  GameObject.call(this, game, level, zone, vec2.add(pos, vec2.make(.5,0.)));
+  GameObject.call(this, game, level, zone, vec2.add(pos, vec2.make(.6,0.)));
   
   this.oid = oid; // Unique Object ID, is the shor2 of the spawn location
   
@@ -19,7 +19,7 @@ function PlantObject(game, level, zone, pos, oid, variant) {
   
   /* Physics */
   this.loc = [vec2.copy(this.pos), vec2.add(this.pos, vec2.make(0., -1.5))];
-  this.dim = vec2.make(1., 1.);
+  this.dim = vec2.make(.8, 1.);
   this.moveSpeed = 0;  // These are only used during a bonk.
   this.fallSpeed = 0; 
   
@@ -35,6 +35,7 @@ PlantObject.NAME = "UNSPELLABLE PLANT"; // Used by editor
 
 PlantObject.ANIMATION_RATE = 3;
 PlantObject.VARIANT_OFFSET = 0x20; //2 rows down in the sprite sheet
+PlantObject.SOFFSET = vec2.make(-.1, 0.);
 
 PlantObject.BONK_TIME = 90;
 PlantObject.BONK_IMP = vec2.make(0.25, 0.4);
@@ -176,7 +177,7 @@ PlantObject.prototype.draw = function(sprites) {
           case 1 : { sp += PlantObject.VARIANT_OFFSET; break; }
           default : { break; }
         }
-        sprites.push({pos: vec2.add(this.pos, vec2.make(j,i)), reverse: !this.dir, index: sp, mode: mod});
+        sprites.push({pos: vec2.add(vec2.add(this.pos, vec2.make(j,i)), PlantObject.SOFFSET), reverse: !this.dir, index: sp, mode: mod});
       }
     }
   }
@@ -186,7 +187,7 @@ PlantObject.prototype.draw = function(sprites) {
       case 1 : { sp += PlantObject.VARIANT_OFFSET; break; }
       default : { break; }
     }
-    sprites.push({pos: this.pos, reverse: !this.dir, index: sp, mode: mod});
+    sprites.push({pos: vec2.add(this.pos, PlantObject.SOFFSET), reverse: !this.dir, index: sp, mode: mod});
   }
 };
 

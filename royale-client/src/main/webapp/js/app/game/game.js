@@ -165,6 +165,7 @@ Game.prototype.doUpdate = function(data) {
       case 0x11 : { this.doNET011(n); break; }
       case 0x12 : { this.doNET012(n); break; }
       case 0x13 : { this.doNET013(n); break; }
+      case 0x17 : { this.doNET017(n); break; }
       case 0x18 : { this.doNET018(n); break; }
       case 0x20 : { this.doNET020(n); break; }
       case 0x30 : { this.doNET030(n); break; }
@@ -216,6 +217,12 @@ Game.prototype.doNET013 = function(n) {
   if(n.pid === this.pid) { return; }
   var obj = this.getGhost(n.pid);
   obj.trigger(n.type);
+};
+
+/* PLAYER_KILL_EVENT [0x17] */
+Game.prototype.doNET017 = function(n) {
+  var epic = Cookies.get("heated_gamer_moments");
+  Cookies.set("heated_gamer_moments", epic?parseInt(epic)+1:1, {expires: 365});
 };
 
 /* PLAYER_RESULT_REQUEST [0x18] */
@@ -468,11 +475,10 @@ Game.prototype.doSpawn = function() {
   var ply = this.getPlayer();
   
   if(!ply) {
-    var level = this.world.getInitialLevel();
-    var zone = this.world.getInitialZone();
-    var pos = zone.initial; // shor2
-    this.createObject(PlayerObject.ID, level.id, zone.id, shor2.decode(pos), [this.pid]);
-    this.out.push(NET010.encode(level, zone, pos));
+    var zon = this.getZone();
+    var pos = zon.initial; // shor2
+    this.createObject(PlayerObject.ID, zon.level, zon.id, shor2.decode(pos), [this.pid]);
+    this.out.push(NET010.encode(zon.level, zon, pos));
   }
   
   this.updateTeam();

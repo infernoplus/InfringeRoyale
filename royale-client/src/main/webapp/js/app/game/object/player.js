@@ -1,7 +1,7 @@
 "use strict";
 /* global util, vec2, squar, td32 */
-/* global GameObject, MushroomObject, FlowerObject, StarObject, LifeObject, CoinObject, AxeObject, FireballProj, PlantObject */
-/* global NET011, NET013, NET018, NET020 */
+/* global GameObject, MushroomObject, PoisonObject, FlowerObject, StarObject, LifeObject, CoinObject, AxeObject, FireballProj, PlantObject */
+/* global NET011, NET013, NET017, NET018, NET020 */
 
 function PlayerObject(game, level, zone, pos, pid) {
   GameObject.call(this, game, level, zone, pos);
@@ -673,6 +673,7 @@ PlayerObject.prototype.interaction = function() {
         if(obj instanceof PlayerObject && obj.starTimer > 0 && !this.autoTarget) {
           /* Touch other player who has Star */
           this.damage(obj);
+          if(this.dead) { this.game.out.push(NET017.encode(obj.pid)); }
         }
         if(this.lastPos.y > obj.pos.y + (obj.dim.y*.66) - Math.max(0., obj.fallSpeed)) {
           /* Stomped */
@@ -743,6 +744,7 @@ PlayerObject.prototype.powerup = function(obj) {
   if(obj instanceof LifeObject) { this.game.lifeage(); return; }
   if(obj instanceof CoinObject) { this.game.coinage(); return; }
   if(obj instanceof AxeObject) { this.game.out.push(NET018.encode()); return; }  // Asks server what result to get from picking up the axe and 'winning'
+  if(obj instanceof PoisonObject) { this.damage(obj); return; }
 };
 
 /* This essentially is the win state. */

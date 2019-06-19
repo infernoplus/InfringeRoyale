@@ -16,8 +16,18 @@ function App() {
   this.settingK = undefined;
   this.settingG = undefined;
   
+  this.elementK = undefined;
+  this.elementG = undefined;
+  
   document.onkeyup = function(event) { that.keyEvent(event, false); };
   document.onkeydown = function(event) { that.keyEvent(event, true); };
+  
+  /* Prevents keyup from triggering button clicks */
+  document.querySelectorAll("button").forEach( function(item) {
+      item.addEventListener('focus', function() {
+          this.blur();
+      });
+  });
   
   this.kTitle = document.getElementById("k-title");
   this.gTitle = document.getElementById("g-title");
@@ -34,17 +44,24 @@ function App() {
 };
 
 App.prototype.load = function() {
+  
+  this.elementK = {};
   this.assignK = {};
   for(var i=0;i<INPUTS.length;i++) {
     var val = Cookies.get("k_" + INPUTS[i]);
     this.assignK[INPUTS[i]] = val?parseInt(val):K_DEFAULT[i];
+    this.elementK[INPUTS[i]] = document.getElementById("key-" + INPUTS[i]);
   }
   
+
+  this.elementG = {};
   this.assignG = {};
   for(var i=0;i<INPUTS.length;i++) {
     var val = Cookies.get("g_" + INPUTS[i]);
     this.assignG[INPUTS[i]] = val?parseInt(val):G_DEFAULT[i];
+    this.elementG[INPUTS[i]] = document.getElementById("pad-" + INPUTS[i]);
   }
+  
 };
 
 App.prototype.save = function() {
@@ -136,6 +153,11 @@ App.prototype.draw = function() {
     var ktest = this.keys[this.assignK[INPUTS[i]]];
     if(this.pad) { var gtest = this.pad.buttons[this.assignG[INPUTS[i]]].pressed; }
     this.test[INPUTS[i]].style.color = ktest||gtest?"#00FF00":"#FF0000";
+  }
+  
+  for(var i=0;i<INPUTS.length;i++) {
+    this.elementK[INPUTS[i]].innerHTML = "0x" + this.assignK[INPUTS[i]].toString(16).toUpperCase();
+    this.elementG[INPUTS[i]].innerHTML = "0x" + this.assignG[INPUTS[i]].toString(16).toUpperCase();
   }
   
   if(this.analogue.x > 0.25) { this.test.right.style.color = "#00FF00"; }
