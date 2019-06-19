@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, PlayerObject */
+/* global GameObject, CheepCheepObject */
 /* global NET011, NET020 */
 
 function KoopaObject(game, level, zone, pos, oid, fly, variant) {
@@ -234,7 +234,7 @@ KoopaObject.prototype.interaction = function() {
   if(this.state !== KoopaObject.STATE.SPIN) { return; }
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj === this || obj instanceof PlayerObject || !obj.isTangible() || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
+    if(obj === this || obj instanceof CheepCheepObject || !obj.isTangible() || !obj.damage) { continue; }  // Skip players and objects that lack a damage function to call
     if(obj.level === this.level && obj.zone === this.zone) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) { obj.damage(this); }  // We don't sync this event since it's not a direct player interaction. It *should* synchronize naturally though.

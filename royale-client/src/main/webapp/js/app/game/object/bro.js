@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, HammerProj, PlayerObject */
+/* global GameObject, HammerProj, CheepCheepObject */
 /* global NET011, NET020 */
 
 function HammerObject(game, level, zone, pos, oid, reverse) {
@@ -234,7 +234,7 @@ HammerObject.prototype.face = function() {
   var nearest;
   for(var i=0;i<this.game.objects.length;i++) {
      var obj = this.game.objects[i];
-     if(obj instanceof PlayerObject && obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
+     if(obj instanceof CheepCheepObject && obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
        if(!nearest || Math.abs(nearest) > vec2.distance(obj.pos, this.pos)) { nearest = obj.pos.x - this.pos.x; }
      }
   }

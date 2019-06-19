@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, PlayerObject */
+/* global GameObject, CheepCheepObject */
 /* global NET011, NET020 */
 
 /* Bowser Firebreath Projectile Object */
@@ -96,7 +96,7 @@ FireBreathProj.prototype.physics = function() {
 FireBreathProj.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(!(obj instanceof PlayerObject) || !obj.isTangible()) { continue; }  // Skip everything thats not a living player
+    if(!(obj instanceof CheepCheepObject) || !obj.isTangible()) { continue; }  // Skip everything thats not a living player
     if(obj.level === this.level && obj.zone === this.zone) {
       if(squar.intersection(obj.pos, obj.dim, this.pos, this.dim)) {
         if(obj.pid === this.game.pid) { obj.damage(this); }

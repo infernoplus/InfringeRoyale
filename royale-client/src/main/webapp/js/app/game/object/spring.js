@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, PlayerObject */
+/* global GameObject, CheepCheepObject */
 /* global NET011, NET020 */
 
 function SpringObject(game, level, zone, pos, oid) {
@@ -74,7 +74,7 @@ SpringObject.prototype.interaction = function() {
   if(ply && ply.level === this.level && ply.zone === this.zone && ply.isTangible()) {
     if(squar.intersection(this.pos, this.dim, ply.pos, ply.dim)) {
       var cmp = Math.pow(1.-(Math.min(Math.max(0, ply.pos.y - this.pos.y), 2.)*.5),2.);
-      if(ply.fallSpeed >= PlayerObject.FALL_SPEED_MAX*.75 && ply.btnA) { ply.jumping = 0; ply.isSpring = true; } /* hacky but works */
+      if(ply.fallSpeed >= CheepCheepObject.FALL_SPEED_MAX*.75 && ply.btnA) { ply.jumping = 0; ply.isSpring = true; } /* hacky but works */
       ply.fallSpeed += cmp*SpringObject.POWER;
       ply.grounded = false;
     }
@@ -83,7 +83,7 @@ SpringObject.prototype.interaction = function() {
   var min = 2.;
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj instanceof PlayerObject && obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
+    if(obj instanceof CheepCheepObject && obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
       if(squar.intersection(this.pos, this.dim, obj.pos, obj.dim)) {
         var h = Math.min(Math.max(0, obj.pos.y - this.pos.y), 2.);
         if(h < min) { min = h; }
