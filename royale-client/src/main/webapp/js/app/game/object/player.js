@@ -661,7 +661,7 @@ PlayerObject.prototype.collisionTest = function(pos, dim) {
 PlayerObject.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj === this) { continue; }
+    if(obj === this || this.dead) { continue; }
     if(obj.level === this.level && obj.zone === this.zone && obj.isTangible()) {
       var hit = squar.intersection(obj.pos, obj.dim, this.pos, this.dim);
       if(hit) {
