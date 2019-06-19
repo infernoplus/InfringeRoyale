@@ -160,7 +160,7 @@ Game.prototype.doUpdate = function(data) {
   for(var i=0;i<data.length;i++) {
     var n = data[i];
     switch(n.designation) {
-      case 0x01 : { this.doNET001(n); break; }
+      case 0x02 : { this.doNET001(n); break; }
       case 0x10 : { this.doNET010(n); break; }
       case 0x11 : { this.doNET011(n); break; }
       case 0x12 : { this.doNET012(n); break; }

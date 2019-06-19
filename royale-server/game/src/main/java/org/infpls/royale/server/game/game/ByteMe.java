@@ -48,9 +48,11 @@ public class ByteMe {
     public abstract ByteBuffer encode();
   }
   
+  
+  /* Anti cheat... we change the designator for this packet occasionally to prevent old version cheats */
   public static class NET001 extends NETX {
     public NET001(short pid) {
-      super((byte)0x01, pid);
+      super((byte)0x02, pid);
     }
     
     @Override
