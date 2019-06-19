@@ -570,7 +570,7 @@ NETX.decode = function(/* Uint8Array */ data) {
   while(i<data.length) {
     var desig = data.slice(i++, i)[0];
     switch(desig) {
-      case 0x01 : { de.push(NET001.decode(data.slice(i, i+=NET001.BYTES-1))); break; }
+      case 0x02 : { de.push(NET001.decode(data.slice(i, i+=NET001.BYTES-1))); break; }
       case 0x10 : { de.push(NET010.decode(data.slice(i, i+=NET010.BYTES-1))); break; }
       case 0x11 : { de.push(NET011.decode(data.slice(i, i+=NET011.BYTES-1))); break; }
       case 0x12 : { de.push(NET012.decode(data.slice(i, i+=NET012.BYTES-1))); break; }
@@ -597,7 +597,7 @@ NETX.decode = function(/* Uint8Array */ data) {
 
 var NET001 = {}; // ASSIGN_PID [0x1] // As Uint8Array
 /* ======================================================================================== */
-NET001.DESIGNATION = 0x01;
+NET001.DESIGNATION = 0x02;
 NET001.BYTES = 3;
 
 /* Server->Client */
