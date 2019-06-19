@@ -86,7 +86,6 @@
                     <jsSourceFile>app/menu/menu-load.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-disclaim.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-main.js</jsSourceFile>
-                    <jsSourceFile>app/util/snitch.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-name.js</jsSourceFile>
                     <jsSourceFile>app/menu/menu-game.js</jsSourceFile>
 
@@ -128,6 +127,7 @@
                     <jsSourceFile>app/game/effect/break.js</jsSourceFile>
                     <jsSourceFile>app/game/effect/coin.js</jsSourceFile>
                     <jsSourceFile>app/game/input.js</jsSourceFile>
+                    <jsSourceFile>app/util/snitch.js</jsSourceFile>
                     <jsSourceFile>app/game/display/resource.js</jsSourceFile>
                     <jsSourceFile>app/game/display/camera.js</jsSourceFile>
                     <jsSourceFile>app/game/audio/data.js</jsSourceFile>
