@@ -36,6 +36,7 @@ body {
 
 .background-a {
   image-rendering: pixelated;
+  image-rendering: crisp-edges;
   background-color: #6b8cff;
   background-image: url(../img/home/bkga.png);
   background-repeat: repeat-x;
@@ -49,6 +50,7 @@ body {
 
 .background-b {
   image-rendering: pixelated;
+  image-rendering: crisp-edges;
   background-color: #000000;
   background-image: url(../img/home/bkgb.png);
   background-repeat: repeat-x;
