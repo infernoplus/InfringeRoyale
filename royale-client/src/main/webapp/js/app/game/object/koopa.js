@@ -325,6 +325,9 @@ KoopaObject.prototype.setState = function(STATE) {
 };
 
 KoopaObject.prototype.draw = function(sprites) {
+  /* Disabled */
+  if(this.disabled) { return; }
+  
   var mod;
   if(this.state === KoopaObject.STATE.BONK) { mod = 0x03; }
   else if(this.disabledTimer > 0) { mod = 0xA0 + parseInt((1.-(this.disabledTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }

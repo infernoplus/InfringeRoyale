@@ -23,9 +23,10 @@ MenuMain.prototype.show = function(number) {
   app.menu.navigation("main", "main");
   app.menu.background("a");
   if(number) { this.number.innerHTML = number; }
-  var epic = Cookies.get("epic_gamer_moments");
+  var w = Cookies.get("epic_gamer_moments");
+  var k = Cookies.get("heated_gamer_moments");
   this.winElement.style.display = "block";
-  this.winElement.innerHTML = "Wins: " + (epic?epic:"0");
+  this.winElement.innerHTML = "Wins: " + (w?w:"0") + " <span class='kill'>Kills: " + (k?k:"0") + "</span>";
   this.linkElement.style.display = "block";
   this.element.style.display = "block";
 };

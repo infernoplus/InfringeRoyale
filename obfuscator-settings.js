@@ -14,8 +14,8 @@ module.exports = {
     renameGlobals: true,
     reservedNames: [],
     rotateStringArray: true,
-    seed: 17,
-    selfDefending: false,
+    seed: 21,
+    selfDefending: true,
     sourceMap: false,
     sourceMapBaseUrl: '',
     sourceMapFileName: '',
@@ -25,5 +25,5 @@ module.exports = {
     stringArrayThreshold: 1.0,
     target: 'browser',
     transformObjectKeys: true,
-    unicodeEscapeSequence: false
+    unicodeEscapeSequence: true
 }

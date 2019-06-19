@@ -283,6 +283,9 @@ TroopaObject.prototype.isTangible = KoopaObject.prototype.isTangible;
 TroopaObject.prototype.setState = KoopaObject.prototype.setState;
 
 TroopaObject.prototype.draw = function(sprites) {
+  /* Disabled */
+  if(this.disabled) { return; }
+  
   var mod;
   if(this.state === TroopaObject.STATE.BONK) { mod = 0x03; }
   else if(this.disabledTimer > 0) { mod = 0xA0 + parseInt((1.-(this.disabledTimer/KoopaObject.ENABLE_FADE_TIME))*32.); }

@@ -109,6 +109,16 @@ public abstract class RoyaleCore {
     return null;
   }
   
+  public Controller getController(short pid) {
+    for(int i=0;i<controllers.size();i++) {
+      final Controller controller = controllers.get(i);
+      if(controller.pid == pid) {
+        return controller;
+      }
+    }
+    return null;
+  }
+  
   public abstract byte winRequest(boolean inc);
   
   public void send(Packet p) {

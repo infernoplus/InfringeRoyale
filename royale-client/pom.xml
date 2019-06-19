@@ -120,6 +120,7 @@
                     <jsSourceFile>app/game/object/star.js</jsSourceFile>
                     <jsSourceFile>app/game/object/life.js</jsSourceFile>
                     <jsSourceFile>app/game/object/axe.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/poison.js</jsSourceFile>
                     <jsSourceFile>app/game/object/coin.js</jsSourceFile>
                     <jsSourceFile>app/game/object/checkmark.js</jsSourceFile>
                     <jsSourceFile>app/game/object/text.js</jsSourceFile>
@@ -207,6 +208,7 @@
                     <jsSourceFile>app/game/object/life.js</jsSourceFile>
                     <jsSourceFile>app/game/object/coin.js</jsSourceFile>
                     <jsSourceFile>app/game/object/axe.js</jsSourceFile>
+                    <jsSourceFile>app/game/object/poison.js</jsSourceFile>
                     <jsSourceFile>app/game/object/checkmark.js</jsSourceFile>
                     <jsSourceFile>app/game/object/text.js</jsSourceFile>
                     <jsSourceFile>app/game/effect/effect.js</jsSourceFile>

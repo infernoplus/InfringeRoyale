@@ -11,7 +11,7 @@ import org.infpls.royale.server.util.*;
 
 public abstract class GameLobby {
   private final static String LOBBY_FILE = "lobby";
-  private final static String[] GAME_FILES = new String[]{ "world-1", "world-2", "world-3", "world-5", "world-6", "world-p" };
+  private final static String[] GAME_FILES = new String[]{ "world-1", "world-2", "world-3", "world-5", "world-6", "world-p", "world-l1" };
   
   
   private final static int MIN_PLAYERS = 20;          // Min players needed to vote start
