@@ -1,6 +1,6 @@
 "use strict";
 /* global app, util, vec2, squar */
-/* global CheepCheepObject, CoinObject, CheckObject */
+/* global PlayerObject, CoinObject, CheckObject */
 
 var shor2 = {}; // Two Shorts 32bits // Stored as an int32
 /* ======================================================================================== */
@@ -77,7 +77,7 @@ td32.GEN_FUNC.BUMP = function(game, pid, td, level, zone, x, y, type) {
     var obj = game.objects[i];
     if(!obj.dead && obj.level === level && obj.zone === zone && obj.dim) {
       if(squar.intersection(tpos, tdim, obj.pos, obj.dim)) {
-        if(obj instanceof CheepCheepObject) { obj.bounce(); }
+        if(obj instanceof PlayerObject) { obj.bounce(); }
         else if(obj.bounce) { obj.bounce(); }
         else if(obj.bonk) { obj.bonk(); }
         else if(obj instanceof CoinObject) {
@@ -98,7 +98,7 @@ td32.GEN_FUNC.BREAK = function(game, pid, td, level, zone, x, y, type) {
     var obj = game.objects[i];
     if(!obj.dead && obj.level === level && obj.zone === zone && obj.dim) {
       if(squar.intersection(tpos, tdim, obj.pos, obj.dim)) {
-        if(obj instanceof CheepCheepObject) { obj.bounce(); }
+        if(obj instanceof PlayerObject) { obj.bounce(); }
         else if(obj.bounce) { obj.bounce(); }
         else if(obj.bonk) { obj.bonk(); }
         else if(obj instanceof CoinObject) {

@@ -3,7 +3,7 @@
 /* global GameObject, MushroomObject, PoisonObject, FlowerObject, StarObject, LifeObject, CoinObject, AxeObject, FireballProj, PlantObject */
 /* global NET011, NET013, NET017, NET018, NET020 */
 
-function CheepCheepObject(game, level, zone, pos, pid) {
+function PlayerObject(game, level, zone, pos, pid) {
   GameObject.call(this, game, level, zone, pos);
   
   this.pid = pid; // Unique Player ID
@@ -51,7 +51,7 @@ function CheepCheepObject(game, level, zone, pos, pid) {
   
   this.vineWarp = undefined; // The warp id that we are going to warp to when we climb up this vine
   
-  this.attackCharge = CheepCheepObject.MAX_CHARGE;
+  this.attackCharge = PlayerObject.MAX_CHARGE;
   this.attackTimer = 0;
   
   this.autoTarget = undefined; // Vec2 target for automatic movement.
@@ -64,83 +64,83 @@ function CheepCheepObject(game, level, zone, pos, pid) {
   this.btnBde = false; // Pressed
   
   /* State */
-  this.setState(CheepCheepObject.SNAME.STAND);
+  this.setState(PlayerObject.SNAME.STAND);
 }
 
 
 /* === STATIC =============================================================== */
-CheepCheepObject.ASYNC = false;
-CheepCheepObject.ID = 0x01;
-CheepCheepObject.NAME = "PLAYER"; // Used by editor
+PlayerObject.ASYNC = false;
+PlayerObject.ID = 0x01;
+PlayerObject.NAME = "PLAYER"; // Used by editor
 
-CheepCheepObject.ANIMATION_RATE = 3;
-CheepCheepObject.DIM_OFFSET = vec2.make(-.05, 0.);
+PlayerObject.ANIMATION_RATE = 3;
+PlayerObject.DIM_OFFSET = vec2.make(-.05, 0.);
 
-CheepCheepObject.DEAD_FREEZE_TIME = 7;
-CheepCheepObject.DEAD_TIME = 70;
-CheepCheepObject.DEAD_UP_FORCE = 0.65;
+PlayerObject.DEAD_FREEZE_TIME = 7;
+PlayerObject.DEAD_TIME = 70;
+PlayerObject.DEAD_UP_FORCE = 0.65;
 
-CheepCheepObject.RUN_SPEED_MAX = 0.315; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.MOVE_SPEED_MAX = 0.215; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.MOVE_SPEED_ACCEL = 0.0125; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.MOVE_SPEED_DECEL = 0.0225;
-CheepCheepObject.MOVE_SPEED_ACCEL_AIR = 0.0025;
-CheepCheepObject.STUCK_SLIDE_SPEED = 0.08;
+PlayerObject.RUN_SPEED_MAX = 0.315; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.MOVE_SPEED_MAX = 0.215; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.MOVE_SPEED_ACCEL = 0.0125; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.MOVE_SPEED_DECEL = 0.0225;
+PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025;
+PlayerObject.STUCK_SLIDE_SPEED = 0.08;
 
-CheepCheepObject.FALL_SPEED_MAX = 0.45; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.FALL_SPEED_ACCEL = 0.085; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.BOUNCE_LENGTH_MIN = 1;
-CheepCheepObject.SPRING_LENGTH_MIN = 5;
-CheepCheepObject.SPRING_LENGTH_MAX = 14; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.JUMP_LENGTH_MIN = 3;
-CheepCheepObject.JUMP_LENGTH_MAX = 7;  // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.JUMP_SPEED_INC_THRESHOLD = [0.1, 0.2, 0.25];
-CheepCheepObject.JUMP_DECEL = 0.005; 
-CheepCheepObject.BLOCK_BUMP_THRESHOLD = 0.12;
+PlayerObject.FALL_SPEED_MAX = 0.45; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.FALL_SPEED_ACCEL = 0.085; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.BOUNCE_LENGTH_MIN = 1;
+PlayerObject.SPRING_LENGTH_MIN = 5;
+PlayerObject.SPRING_LENGTH_MAX = 14; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.JUMP_LENGTH_MIN = 3;
+PlayerObject.JUMP_LENGTH_MAX = 7;  // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.JUMP_SPEED_INC_THRESHOLD = [0.1, 0.2, 0.25];
+PlayerObject.JUMP_DECEL = 0.005; 
+PlayerObject.BLOCK_BUMP_THRESHOLD = 0.12;
 
-CheepCheepObject.POWER_INDEX_SIZE = 0x20;
-CheepCheepObject.GENERIC_INDEX = 0x60;
+PlayerObject.POWER_INDEX_SIZE = 0x20;
+PlayerObject.GENERIC_INDEX = 0x60;
 
-CheepCheepObject.DAMAGE_TIME = 45;
-CheepCheepObject.TRANSFORM_TIME = 18;
-CheepCheepObject.TRANSFORM_ANIMATION_RATE = 2;
-CheepCheepObject.STAR_LENGTH = 360;
-CheepCheepObject.PROJ_OFFSET = vec2.make(0.75, 1.5);
-CheepCheepObject.MAX_CHARGE = 60;
-CheepCheepObject.ATTACK_DELAY = 7;
-CheepCheepObject.ATTACK_CHARGE = 25;
-CheepCheepObject.ATTACK_ANIM_LENGTH = 3;
+PlayerObject.DAMAGE_TIME = 45;
+PlayerObject.TRANSFORM_TIME = 18;
+PlayerObject.TRANSFORM_ANIMATION_RATE = 2;
+PlayerObject.STAR_LENGTH = 360;
+PlayerObject.PROJ_OFFSET = vec2.make(0.75, 1.5);
+PlayerObject.MAX_CHARGE = 60;
+PlayerObject.ATTACK_DELAY = 7;
+PlayerObject.ATTACK_CHARGE = 25;
+PlayerObject.ATTACK_ANIM_LENGTH = 3;
 
-CheepCheepObject.PIPE_TIME = 30; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.PIPE_SPEED = 0.06; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.PIPE_EXT_OFFSET = vec2.make(.5,0.); // Horizontal offset from warp point when exiting warp pipe.
-CheepCheepObject.WEED_EAT_RADIUS = 3;
+PlayerObject.PIPE_TIME = 30; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.PIPE_SPEED = 0.06; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.PIPE_EXT_OFFSET = vec2.make(.5,0.); // Horizontal offset from warp point when exiting warp pipe.
+PlayerObject.WEED_EAT_RADIUS = 3;
 
-CheepCheepObject.POLE_DELAY = 15; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.POLE_SLIDE_SPEED = 0.15; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
-CheepCheepObject.LEVEL_END_MOVE_OFF = vec2.make(10, 0); // Position offset for where auto walk to at the end of a level.
+PlayerObject.POLE_DELAY = 15; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.POLE_SLIDE_SPEED = 0.15; // VARIABLE FLATTENED INTO CODE FOR ANTI CHEAT
+PlayerObject.LEVEL_END_MOVE_OFF = vec2.make(10, 0); // Position offset for where auto walk to at the end of a level.
 
-CheepCheepObject.CLIMB_SPEED = 0.125;
+PlayerObject.CLIMB_SPEED = 0.125;
 
-CheepCheepObject.PLATFORM_SNAP_DIST = 0.15;
+PlayerObject.PLATFORM_SNAP_DIST = 0.15;
 
-CheepCheepObject.ARROW_SPRITE = 0x0FD;
-CheepCheepObject.ARROW_TEXT = "YOU";
-CheepCheepObject.ARROW_OFFSET = vec2.make(0., 0.1);
-CheepCheepObject.TEXT_OFFSET = vec2.make(0., 0.55);
-CheepCheepObject.TEXT_SIZE = .65;
-CheepCheepObject.TEXT_COLOR = "#FFFFFF";
-CheepCheepObject.ARROW_RAD_IN = 3;
-CheepCheepObject.ARROW_RAD_OUT = 7;
-CheepCheepObject.ARROW_THRESHOLD_MIN = 4;
-CheepCheepObject.ARROW_THRESHOLD_MAX = 6;
+PlayerObject.ARROW_SPRITE = 0x0FD;
+PlayerObject.ARROW_TEXT = "YOU";
+PlayerObject.ARROW_OFFSET = vec2.make(0., 0.1);
+PlayerObject.TEXT_OFFSET = vec2.make(0., 0.55);
+PlayerObject.TEXT_SIZE = .65;
+PlayerObject.TEXT_COLOR = "#FFFFFF";
+PlayerObject.ARROW_RAD_IN = 3;
+PlayerObject.ARROW_RAD_OUT = 7;
+PlayerObject.ARROW_THRESHOLD_MIN = 4;
+PlayerObject.ARROW_THRESHOLD_MAX = 6;
 
-CheepCheepObject.TEAM_OFFSET = vec2.make(0., 0.);
-CheepCheepObject.TEAM_SIZE = .3;
-CheepCheepObject.TEAM_COLOR = "rgba(255,255,255,0.75)";
+PlayerObject.TEAM_OFFSET = vec2.make(0., 0.);
+PlayerObject.TEAM_SIZE = .3;
+PlayerObject.TEAM_COLOR = "rgba(255,255,255,0.75)";
 
-CheepCheepObject.SPRITE = {};
-CheepCheepObject.SPRITE_LIST = [
+PlayerObject.SPRITE = {};
+PlayerObject.SPRITE_LIST = [
   /* [S]mall mario */
   {NAME: "S_STAND", ID: 0x00, INDEX: 0x000D},
   {NAME: "S_RUN0", ID: 0x01, INDEX: 0x000A},
@@ -179,13 +179,13 @@ CheepCheepObject.SPRITE_LIST = [
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */
-for(var i=0;i<CheepCheepObject.SPRITE_LIST.length;i++) {
-  CheepCheepObject.SPRITE[CheepCheepObject.SPRITE_LIST[i].NAME] = CheepCheepObject.SPRITE_LIST[i];
-  CheepCheepObject.SPRITE[CheepCheepObject.SPRITE_LIST[i].ID] = CheepCheepObject.SPRITE_LIST[i];
+for(var i=0;i<PlayerObject.SPRITE_LIST.length;i++) {
+  PlayerObject.SPRITE[PlayerObject.SPRITE_LIST[i].NAME] = PlayerObject.SPRITE_LIST[i];
+  PlayerObject.SPRITE[PlayerObject.SPRITE_LIST[i].ID] = PlayerObject.SPRITE_LIST[i];
 }
 
 /* State Name */
-CheepCheepObject.SNAME = {
+PlayerObject.SNAME = {
   STAND: "STAND",
   DOWN: "DOWN",
   RUN: "RUN",
@@ -203,80 +203,80 @@ CheepCheepObject.SNAME = {
 
 let DIM0 = vec2.make(0.9,0.95);  // Temp vars
 let DIM1 = vec2.make(0.9,1.9);
-CheepCheepObject.STATE = [
+PlayerObject.STATE = [
   /* Small Mario -> 0x00*/
-  {NAME: CheepCheepObject.SNAME.STAND, ID: 0x00, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_STAND]},
-  {NAME: CheepCheepObject.SNAME.DOWN, ID: 0x01, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_STAND]},
-  {NAME: CheepCheepObject.SNAME.RUN, ID: 0x02, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_RUN2,CheepCheepObject.SPRITE.S_RUN1,CheepCheepObject.SPRITE.S_RUN0]},
-  {NAME: CheepCheepObject.SNAME.SLIDE, ID: 0x03, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_SLIDE]},
-  {NAME: CheepCheepObject.SNAME.FALL, ID: 0x04, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_FALL]},
-  {NAME: CheepCheepObject.SNAME.TRANSFORM, ID: 0x05, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_STAND]},
-  {NAME: CheepCheepObject.SNAME.POLE, ID: 0x06, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_CLIMB1]},
-  {NAME: CheepCheepObject.SNAME.CLIMB, ID: 0x07, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.S_CLIMB0,CheepCheepObject.SPRITE.S_CLIMB1]},
+  {NAME: PlayerObject.SNAME.STAND, ID: 0x00, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_STAND]},
+  {NAME: PlayerObject.SNAME.DOWN, ID: 0x01, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_STAND]},
+  {NAME: PlayerObject.SNAME.RUN, ID: 0x02, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_RUN2,PlayerObject.SPRITE.S_RUN1,PlayerObject.SPRITE.S_RUN0]},
+  {NAME: PlayerObject.SNAME.SLIDE, ID: 0x03, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_SLIDE]},
+  {NAME: PlayerObject.SNAME.FALL, ID: 0x04, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_FALL]},
+  {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x05, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_STAND]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x06, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_CLIMB1]},
+  {NAME: PlayerObject.SNAME.CLIMB, ID: 0x07, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.S_CLIMB0,PlayerObject.SPRITE.S_CLIMB1]},
   /* Big Mario -> 0x20 */
-  {NAME: CheepCheepObject.SNAME.STAND, ID: 0x20, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.B_STAND]},
-  {NAME: CheepCheepObject.SNAME.DOWN, ID: 0x21, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.B_DOWN]},
-  {NAME: CheepCheepObject.SNAME.RUN, ID: 0x22, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.B_RUN2,CheepCheepObject.SPRITE.B_RUN1,CheepCheepObject.SPRITE.B_RUN0]},
-  {NAME: CheepCheepObject.SNAME.SLIDE, ID: 0x23, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.B_SLIDE]},
-  {NAME: CheepCheepObject.SNAME.FALL, ID: 0x24, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.B_FALL]},
-  {NAME: CheepCheepObject.SNAME.TRANSFORM, ID: 0x25, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.B_TRANSFORM]},
-  {NAME: CheepCheepObject.SNAME.POLE, ID: 0x26, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.B_CLIMB0]},
-  {NAME: CheepCheepObject.SNAME.CLIMB, ID: 0x27, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.B_CLIMB0,CheepCheepObject.SPRITE.B_CLIMB1]},
+  {NAME: PlayerObject.SNAME.STAND, ID: 0x20, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_STAND]},
+  {NAME: PlayerObject.SNAME.DOWN, ID: 0x21, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.B_DOWN]},
+  {NAME: PlayerObject.SNAME.RUN, ID: 0x22, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_RUN2,PlayerObject.SPRITE.B_RUN1,PlayerObject.SPRITE.B_RUN0]},
+  {NAME: PlayerObject.SNAME.SLIDE, ID: 0x23, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_SLIDE]},
+  {NAME: PlayerObject.SNAME.FALL, ID: 0x24, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_FALL]},
+  {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x25, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.B_TRANSFORM]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x26, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_CLIMB0]},
+  {NAME: PlayerObject.SNAME.CLIMB, ID: 0x27, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.B_CLIMB0,PlayerObject.SPRITE.B_CLIMB1]},
   /* Fire Mario -> 0x40 */
-  {NAME: CheepCheepObject.SNAME.STAND, ID: 0x40, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.F_STAND]},
-  {NAME: CheepCheepObject.SNAME.DOWN, ID: 0x41, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.F_DOWN]},
-  {NAME: CheepCheepObject.SNAME.RUN, ID: 0x42, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.F_RUN2,CheepCheepObject.SPRITE.F_RUN1,CheepCheepObject.SPRITE.F_RUN0]},
-  {NAME: CheepCheepObject.SNAME.SLIDE, ID: 0x43, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.F_SLIDE]},
-  {NAME: CheepCheepObject.SNAME.FALL, ID: 0x44, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.F_FALL]},
-  {NAME: CheepCheepObject.SNAME.ATTACK, ID: 0x45, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.F_ATTACK]},
-  {NAME: CheepCheepObject.SNAME.TRANSFORM, ID: 0x46, DIM: DIM0, SPRITE: [CheepCheepObject.SPRITE.F_TRANSFORM]},
-  {NAME: CheepCheepObject.SNAME.POLE, ID: 0x47, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.F_CLIMB0]},
-  {NAME: CheepCheepObject.SNAME.CLIMB, ID: 0x48, DIM: DIM1, SPRITE: [CheepCheepObject.SPRITE.F_CLIMB0,CheepCheepObject.SPRITE.F_CLIMB1]},
+  {NAME: PlayerObject.SNAME.STAND, ID: 0x40, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_STAND]},
+  {NAME: PlayerObject.SNAME.DOWN, ID: 0x41, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.F_DOWN]},
+  {NAME: PlayerObject.SNAME.RUN, ID: 0x42, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_RUN2,PlayerObject.SPRITE.F_RUN1,PlayerObject.SPRITE.F_RUN0]},
+  {NAME: PlayerObject.SNAME.SLIDE, ID: 0x43, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_SLIDE]},
+  {NAME: PlayerObject.SNAME.FALL, ID: 0x44, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_FALL]},
+  {NAME: PlayerObject.SNAME.ATTACK, ID: 0x45, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_ATTACK]},
+  {NAME: PlayerObject.SNAME.TRANSFORM, ID: 0x46, DIM: DIM0, SPRITE: [PlayerObject.SPRITE.F_TRANSFORM]},
+  {NAME: PlayerObject.SNAME.POLE, ID: 0x47, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_CLIMB0]},
+  {NAME: PlayerObject.SNAME.CLIMB, ID: 0x48, DIM: DIM1, SPRITE: [PlayerObject.SPRITE.F_CLIMB0,PlayerObject.SPRITE.F_CLIMB1]},
   /* Generic -> 0x60 */
-  {NAME: CheepCheepObject.SNAME.DEAD, DIM: DIM0, ID: 0x60, SPRITE: [CheepCheepObject.SPRITE.G_DEAD]},
-  {NAME: CheepCheepObject.SNAME.HIDE, DIM: DIM0, ID: 0x70, SPRITE: [CheepCheepObject.SPRITE.G_HIDE]},
-  {NAME: CheepCheepObject.SNAME.GHOST, DIM: DIM0, ID: 0xFF, SPRITE: []},
-  {NAME: CheepCheepObject.SNAME.DEADGHOST, DIM: DIM0, ID: 0xFE, SPRITE: [CheepCheepObject.SPRITE.G_DEAD]}
+  {NAME: PlayerObject.SNAME.DEAD, DIM: DIM0, ID: 0x60, SPRITE: [PlayerObject.SPRITE.G_DEAD]},
+  {NAME: PlayerObject.SNAME.HIDE, DIM: DIM0, ID: 0x70, SPRITE: [PlayerObject.SPRITE.G_HIDE]},
+  {NAME: PlayerObject.SNAME.GHOST, DIM: DIM0, ID: 0xFF, SPRITE: []},
+  {NAME: PlayerObject.SNAME.DEADGHOST, DIM: DIM0, ID: 0xFE, SPRITE: [PlayerObject.SPRITE.G_DEAD]}
 ];
 
 /* === INSTANCE ============================================================= */
 
-CheepCheepObject.prototype.update = function(data) {
+PlayerObject.prototype.update = function(data) {
   if(this.dead || this.garbage) { return; } // Don't do ghost playback if character is dead
   
   /* Ghost playback update */
-  this.setState(CheepCheepObject.SNAME.GHOST);
+  this.setState(PlayerObject.SNAME.GHOST);
   this.level = data.level;
   this.zone = data.zone;
   this.pos = data.pos;
-  this.sprite = CheepCheepObject.SPRITE[data.sprite];
+  this.sprite = PlayerObject.SPRITE[data.sprite];
   this.reverse = data.reverse;
 };
 
-CheepCheepObject.prototype.trigger = function(type) {
+PlayerObject.prototype.trigger = function(type) {
   switch(type) {
     case 0x01 : { this.attack(); break; }
     case 0x02 : { this.star(); break; }
   }
 };
 
-CheepCheepObject.prototype.step = function() {
+PlayerObject.prototype.step = function() {
   if(this.starTimer > 0) { this.starTimer--; }
   else if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; }
   
   /* Ghost playback */
-  if(this.isState(CheepCheepObject.SNAME.GHOST)) { this.sound(); return; }
+  if(this.isState(PlayerObject.SNAME.GHOST)) { this.sound(); return; }
   
   /* Player Hidden */
-  if(this.isState(CheepCheepObject.SNAME.HIDE)) { return; }
+  if(this.isState(PlayerObject.SNAME.HIDE)) { return; }
     
   /* Flagpole Slide */
-  if(this.isState(CheepCheepObject.SNAME.POLE)) {
+  if(this.isState(PlayerObject.SNAME.POLE)) {
     if(this.poleTimer > 0 && !this.poleWait) { this.poleTimer--; return; }
     else if(!this.poleSound) { this.poleSound = true; this.play("sfx/flagpole.wav", 1., 0.); }
         
     if(this.poleWait) { }
-    else if(this.poleTimer <= 0 && this.autoTarget) { this.setState(CheepCheepObject.SNAME.STAND); }
+    else if(this.poleTimer <= 0 && this.autoTarget) { this.setState(PlayerObject.SNAME.STAND); }
     else {
       var mov = vec2.add(this.pos, vec2.make(0., -0.15));
       var ext1 = vec2.make(this.pos.x, this.pos.y-0.15);
@@ -293,7 +293,7 @@ CheepCheepObject.prototype.step = function() {
       
       if(hit) {
         this.poleTimer = 15;
-        this.autoTarget = vec2.add(mov, CheepCheepObject.LEVEL_END_MOVE_OFF);
+        this.autoTarget = vec2.add(mov, PlayerObject.LEVEL_END_MOVE_OFF);
         this.poleWait = true;
       }
       else { this.pos = mov; }
@@ -307,22 +307,22 @@ CheepCheepObject.prototype.step = function() {
   }
   
   /* Anim */
-  if(this.isState(CheepCheepObject.SNAME.RUN)) { this.anim += Math.max(.5, Math.abs(this.moveSpeed*5)); }
+  if(this.isState(PlayerObject.SNAME.RUN)) { this.anim += Math.max(.5, Math.abs(this.moveSpeed*5)); }
   else { this.anim++; }
-  this.sprite = this.state.SPRITE[parseInt(parseInt(this.anim)/CheepCheepObject.ANIMATION_RATE) % this.state.SPRITE.length];
+  this.sprite = this.state.SPRITE[parseInt(parseInt(this.anim)/PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length];
   
   /* Climb a vine */
-  if(this.isState(CheepCheepObject.SNAME.CLIMB)) {
-    this.pos.y += CheepCheepObject.CLIMB_SPEED;
+  if(this.isState(PlayerObject.SNAME.CLIMB)) {
+    this.pos.y += PlayerObject.CLIMB_SPEED;
     if(this.pos.y >= this.game.world.getZone(this.level, this.zone).dimensions().y) {
       this.warp(this.vineWarp);
-      this.setState(CheepCheepObject.SNAME.FALL);
+      this.setState(PlayerObject.SNAME.FALL);
     }
     return;
   }
   
   /* Dead */
-  if(this.isState(CheepCheepObject.SNAME.DEAD) || this.isState(CheepCheepObject.SNAME.DEADGHOST)) {
+  if(this.isState(PlayerObject.SNAME.DEAD) || this.isState(PlayerObject.SNAME.DEADGHOST)) {
     if(this.deadFreezeTimer > 0) { this.deadFreezeTimer--; }
     else if(this.deadTimer > 0) {
       this.deadTimer--;
@@ -334,22 +334,22 @@ CheepCheepObject.prototype.step = function() {
   }
   
   /* Transform */
-  if(this.isState(CheepCheepObject.SNAME.TRANSFORM)) {
+  if(this.isState(PlayerObject.SNAME.TRANSFORM)) {
     if(--this.tfmTimer > 0) {
-      var ind = parseInt(this.anim/CheepCheepObject.TRANSFORM_ANIMATION_RATE) % 3;
+      var ind = parseInt(this.anim/PlayerObject.TRANSFORM_ANIMATION_RATE) % 3;
       var high = this.power>this.tfmTarget?this.power:this.tfmTarget;
       switch(ind) {
-        case 0 : { this.sprite = this.getStateByPowerIndex(CheepCheepObject.SNAME.STAND, this.power).SPRITE[0]; break; }
-        case 1 : { this.sprite = this.getStateByPowerIndex(CheepCheepObject.SNAME.TRANSFORM, high).SPRITE[0]; break; }
-        case 2 : { this.sprite = this.getStateByPowerIndex(CheepCheepObject.SNAME.STAND, this.tfmTarget).SPRITE[0]; break; }
+        case 0 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).SPRITE[0]; break; }
+        case 1 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.TRANSFORM, high).SPRITE[0]; break; }
+        case 2 : { this.sprite = this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.tfmTarget).SPRITE[0]; break; }
       }
     }
     else {
       this.power = this.tfmTarget;
       this.tfmTarget = -1;
-      this.setState(CheepCheepObject.SNAME.STAND);
-      if(this.collisionTest(this.pos, this.dim)) { this.setState(CheepCheepObject.SNAME.DOWN); }
-      this.damageTimer = CheepCheepObject.DAMAGE_TIME;
+      this.setState(PlayerObject.SNAME.STAND);
+      if(this.collisionTest(this.pos, this.dim)) { this.setState(PlayerObject.SNAME.DOWN); }
+      this.damageTimer = PlayerObject.DAMAGE_TIME;
     }
     return;
   }
@@ -370,10 +370,10 @@ CheepCheepObject.prototype.step = function() {
       this.weedeat();
       this.pipeWarp = undefined;
       switch(this.pipeExt) {
-        case 1 : { this.pos.y -= ((30-1)*0.06); this.setState(CheepCheepObject.SNAME.STAND); this.pos = vec2.add(this.pos, CheepCheepObject.PIPE_EXT_OFFSET); break; }
-        case 2 : { this.pos.y += ((30-1)*0.06); this.setState(CheepCheepObject.SNAME.STAND); this.pos = vec2.add(this.pos, CheepCheepObject.PIPE_EXT_OFFSET); break; }
-        case 3 : { this.pos.x -= ((30-1)*0.06); this.setState(CheepCheepObject.SNAME.RUN); break; }
-        case 4 : { this.pos.x += ((30-1)*0.06); this.setState(CheepCheepObject.SNAME.RUN); break; }
+        case 1 : { this.pos.y -= ((30-1)*0.06); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 2 : { this.pos.y += ((30-1)*0.06); this.setState(PlayerObject.SNAME.STAND); this.pos = vec2.add(this.pos, PlayerObject.PIPE_EXT_OFFSET); break; }
+        case 3 : { this.pos.x -= ((30-1)*0.06); this.setState(PlayerObject.SNAME.RUN); break; }
+        case 4 : { this.pos.x += ((30-1)*0.06); this.setState(PlayerObject.SNAME.RUN); break; }
         default : { return; }
       }
       this.pipeTimer = 30;
@@ -387,7 +387,7 @@ CheepCheepObject.prototype.step = function() {
   this.lastPos = this.pos;
   
   if(this.damageTimer > 0) { this.damageTimer--; }
-  if(this.attackCharge < CheepCheepObject.MAX_CHARGE) { this.attackCharge++; }
+  if(this.attackCharge < PlayerObject.MAX_CHARGE) { this.attackCharge++; }
   if(this.attackTimer > 0) { this.attackTimer--; }
   
   if(this.autoTarget) { this.autoMove(); }  
@@ -401,14 +401,14 @@ CheepCheepObject.prototype.step = function() {
 };
 
 /* Handles player input */
-CheepCheepObject.prototype.input = function(dir, a, b) {
+PlayerObject.prototype.input = function(dir, a, b) {
   this.btnD = dir;
   this.btnA = a;
   this.btnB = b;
 };
 
 /* Handles auto input */
-CheepCheepObject.prototype.autoMove = function() {
+PlayerObject.prototype.autoMove = function() {
   this.btnD = [0,0];
   this.btnA = false; this.btnB = false;
   
@@ -420,46 +420,46 @@ CheepCheepObject.prototype.autoMove = function() {
   }
 };
 
-CheepCheepObject.prototype.control = function() {
+PlayerObject.prototype.control = function() {
   if(this.grounded) { this.btnBg = this.btnB; }
   
-  if(this.isState(CheepCheepObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(CheepCheepObject.SNAME.STAND, this.power).DIM)) {
+  if(this.isState(PlayerObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).DIM)) {
     if(this.btnD[1] !== -1) {
-      this.moveSpeed = (this.moveSpeed + CheepCheepObject.STUCK_SLIDE_SPEED) * .5; // Rirp
+      this.moveSpeed = (this.moveSpeed + PlayerObject.STUCK_SLIDE_SPEED) * .5; // Rirp
     }
-    this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed)-CheepCheepObject.MOVE_SPEED_DECEL, 0);
+    this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed)-PlayerObject.MOVE_SPEED_DECEL, 0);
     return;
   }
   
   if(this.btnD[0] !== 0) {
     if(Math.abs(this.moveSpeed) > 0.01 && !(this.btnD[0] >= 0 ^ this.moveSpeed < 0)) {
-      this.moveSpeed += CheepCheepObject.MOVE_SPEED_DECEL * this.btnD[0];
-      this.setState(CheepCheepObject.SNAME.SLIDE);
+      this.moveSpeed += PlayerObject.MOVE_SPEED_DECEL * this.btnD[0];
+      this.setState(PlayerObject.SNAME.SLIDE);
     }
     else {
       this.moveSpeed = this.btnD[0] * Math.min(Math.abs(this.moveSpeed) + 0.0125, this.btnBg?0.315:0.215);
-      this.setState(CheepCheepObject.SNAME.RUN);
+      this.setState(PlayerObject.SNAME.RUN);
     }
     if(this.grounded) { this.reverse = this.btnD[0] >= 0; }
   }
   else {
     if(Math.abs(this.moveSpeed) > 0.01) {
-      this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed)-CheepCheepObject.MOVE_SPEED_DECEL, 0);
-      this.setState(CheepCheepObject.SNAME.RUN);
+      this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed)-PlayerObject.MOVE_SPEED_DECEL, 0);
+      this.setState(PlayerObject.SNAME.RUN);
     }
     else {
       this.moveSpeed = 0;
-      this.setState(CheepCheepObject.SNAME.STAND);
+      this.setState(PlayerObject.SNAME.STAND);
     }
     if(this.btnD[1] === -1) {
-      this.setState(CheepCheepObject.SNAME.DOWN);
+      this.setState(PlayerObject.SNAME.DOWN);
     }
   }
   
   var jumpMax = this.isSpring?14:7;
-  var jumpMin = this.isSpring?CheepCheepObject.SPRING_LENGTH_MIN:(this.isBounce?CheepCheepObject.BOUNCE_LENGTH_MIN:CheepCheepObject.JUMP_LENGTH_MIN);
+  var jumpMin = this.isSpring?PlayerObject.SPRING_LENGTH_MIN:(this.isBounce?PlayerObject.BOUNCE_LENGTH_MIN:PlayerObject.JUMP_LENGTH_MIN);
   
-  for(var i=0;i<CheepCheepObject.JUMP_SPEED_INC_THRESHOLD.length&&Math.abs(this.moveSpeed)>=CheepCheepObject.JUMP_SPEED_INC_THRESHOLD[i];i++) { jumpMax++; }
+  for(var i=0;i<PlayerObject.JUMP_SPEED_INC_THRESHOLD.length&&Math.abs(this.moveSpeed)>=PlayerObject.JUMP_SPEED_INC_THRESHOLD[i];i++) { jumpMax++; }
   
   if(this.btnA) {
     if(this.grounded) {
@@ -476,20 +476,20 @@ CheepCheepObject.prototype.control = function() {
     }
   }
   
-  if(!this.grounded) { this.setState(CheepCheepObject.SNAME.FALL); }
+  if(!this.grounded) { this.setState(PlayerObject.SNAME.FALL); }
   
-  if(this.btnB && !this.btnBde && this.power === 2 && !this.isState(CheepCheepObject.SNAME.DOWN) && !this.isState(CheepCheepObject.SNAME.SLIDE) && this.attackTimer < 1 && this.attackCharge >= CheepCheepObject.ATTACK_CHARGE) {
+  if(this.btnB && !this.btnBde && this.power === 2 && !this.isState(PlayerObject.SNAME.DOWN) && !this.isState(PlayerObject.SNAME.SLIDE) && this.attackTimer < 1 && this.attackCharge >= PlayerObject.ATTACK_CHARGE) {
     this.attack();
     this.game.out.push(NET013.encode(0x01));
   }
   this.btnBde = this.btnB;
   
-  if(this.attackTimer > 0 && this.power === 2 && (this.isState(CheepCheepObject.SNAME.STAND) || this.isState(CheepCheepObject.SNAME.RUN))) {
-    this.setState(CheepCheepObject.SNAME.ATTACK);
+  if(this.attackTimer > 0 && this.power === 2 && (this.isState(PlayerObject.SNAME.STAND) || this.isState(PlayerObject.SNAME.RUN))) {
+    this.setState(PlayerObject.SNAME.ATTACK);
   }
 };
 
-CheepCheepObject.prototype.physics = function() {
+PlayerObject.prototype.physics = function() {
   if(this.jumping !== -1) {
     this.fallSpeed = 0.45 - (this.jumping*0.005);
     this.jumping++;
@@ -564,7 +564,7 @@ CheepCheepObject.prototype.physics = function() {
   for(var i=0;i<hit.length;i++) {
     var tile = hit[i];
     if(squar.intersection(tile.pos, tdim, mov, this.dim)) {
-      if(this.fallSpeed > CheepCheepObject.BLOCK_BUMP_THRESHOLD) { bmp.push(tile); }
+      if(this.fallSpeed > PlayerObject.BLOCK_BUMP_THRESHOLD) { bmp.push(tile); }
       if(this.fallSpeed < 0 && this.pos.y >= tile.pos.y) { on.push(tile); }
     }
   }
@@ -590,7 +590,7 @@ CheepCheepObject.prototype.physics = function() {
   
   for(var i=0;i<platforms.length;i++) {
     var plat = platforms[i];
-    if(this.pos.y >= mov.y && (plat.pos.y + plat.dim.y) - this.pos.y < CheepCheepObject.PLATFORM_SNAP_DIST) {
+    if(this.pos.y >= mov.y && (plat.pos.y + plat.dim.y) - this.pos.y < PlayerObject.PLATFORM_SNAP_DIST) {
       mov.y = plat.pos.y + plat.dim.y;
       grounded = true;
       platform = plat;
@@ -618,7 +618,7 @@ CheepCheepObject.prototype.physics = function() {
   }
   
   /* Tile Down events */
-  if(this.isState(CheepCheepObject.SNAME.DOWN) && this.moveSpeed < 0.05) {
+  if(this.isState(PlayerObject.SNAME.DOWN) && this.moveSpeed < 0.05) {
     for(var i=0;i<on.length;i++) {
       var tile = on[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.DOWN);
@@ -626,7 +626,7 @@ CheepCheepObject.prototype.physics = function() {
   }
   
   /* Tile Push events */
-  if(this.isState(CheepCheepObject.SNAME.RUN)) {
+  if(this.isState(PlayerObject.SNAME.RUN)) {
     for(var i=0;i<psh.length;i++) {
       var tile = psh[i];
       tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.PUSH);
@@ -639,13 +639,13 @@ CheepCheepObject.prototype.physics = function() {
     var bty = this.power>0?td32.TRIGGER.TYPE.BIG_BUMP:td32.TRIGGER.TYPE.SMALL_BUMP;
     tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, bty);
     this.jumping = -1;
-    this.fallSpeed = -CheepCheepObject.BLOCK_BUMP_THRESHOLD;
+    this.fallSpeed = -PlayerObject.BLOCK_BUMP_THRESHOLD;
   }
 };
 
 /* Does a collision test in place, returns true if hits something */
 /* Used to check if it's okay to standup as big mario */
-CheepCheepObject.prototype.collisionTest = function(pos, dim) {
+PlayerObject.prototype.collisionTest = function(pos, dim) {
   var tdim = vec2.make(1., 1.);
   var tiles = this.game.world.getZone(this.level, this.zone).getTiles(pos, dim);
   for(var i=0;i<tiles.length;i++) {
@@ -658,7 +658,7 @@ CheepCheepObject.prototype.collisionTest = function(pos, dim) {
 };
 
 /* Checks if this object has touched or interacted with any other object */
-CheepCheepObject.prototype.interaction = function() {
+PlayerObject.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
     if(obj === this || this.dead) { continue; }
@@ -670,7 +670,7 @@ CheepCheepObject.prototype.interaction = function() {
           obj.bonk();
           this.game.out.push(NET020.encode(obj.level, obj.zone, obj.oid, 0x01));
         }
-        if(obj instanceof CheepCheepObject && obj.starTimer > 0 && !this.autoTarget) {
+        if(obj instanceof PlayerObject && obj.starTimer > 0 && !this.autoTarget) {
           /* Touch other player who has Star */
           this.damage(obj);
           if(this.dead) { this.game.out.push(NET017.encode(obj.pid)); }
@@ -693,51 +693,51 @@ CheepCheepObject.prototype.interaction = function() {
 };
 
 /* Shows or hides the YOU arrow over the player based on crowdedness */
-CheepCheepObject.prototype.arrow = function() {
+PlayerObject.prototype.arrow = function() {
   var pts = 0;
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj !== this && obj instanceof CheepCheepObject && obj.level === this.level && obj.zone === this.zone) {
-      pts += 1.-(Math.min(CheepCheepObject.ARROW_RAD_OUT, Math.max(0., vec2.distance(this.pos, obj.pos)-CheepCheepObject.ARROW_RAD_IN))/CheepCheepObject.ARROW_RAD_OUT);
+    if(obj !== this && obj instanceof PlayerObject && obj.level === this.level && obj.zone === this.zone) {
+      pts += 1.-(Math.min(PlayerObject.ARROW_RAD_OUT, Math.max(0., vec2.distance(this.pos, obj.pos)-PlayerObject.ARROW_RAD_IN))/PlayerObject.ARROW_RAD_OUT);
     } 
   }
-  this.arrowFade = Math.min(CheepCheepObject.ARROW_THRESHOLD_MAX, Math.max(0., pts-CheepCheepObject.ARROW_THRESHOLD_MIN))/CheepCheepObject.ARROW_THRESHOLD_MAX;
+  this.arrowFade = Math.min(PlayerObject.ARROW_THRESHOLD_MAX, Math.max(0., pts-PlayerObject.ARROW_THRESHOLD_MIN))/PlayerObject.ARROW_THRESHOLD_MAX;
 };
 
-CheepCheepObject.prototype.sound = GameObject.prototype.sound;
+PlayerObject.prototype.sound = GameObject.prototype.sound;
 
-CheepCheepObject.prototype.attack = function() {
-  this.attackTimer = CheepCheepObject.ATTACK_DELAY;
-  this.attackCharge -= CheepCheepObject.ATTACK_CHARGE;
-  var p = this.reverse?vec2.add(this.pos, CheepCheepObject.PROJ_OFFSET):vec2.add(this.pos, vec2.multiply(CheepCheepObject.PROJ_OFFSET, vec2.make(-1., 1.)));
+PlayerObject.prototype.attack = function() {
+  this.attackTimer = PlayerObject.ATTACK_DELAY;
+  this.attackCharge -= PlayerObject.ATTACK_CHARGE;
+  var p = this.reverse?vec2.add(this.pos, PlayerObject.PROJ_OFFSET):vec2.add(this.pos, vec2.multiply(PlayerObject.PROJ_OFFSET, vec2.make(-1., 1.)));
   this.game.createObject(FireballProj.ID, this.level, this.zone, p, [this.reverse, this.pid]);
   this.play("sfx/fireball.wav", 1., .04);
 };
 
-CheepCheepObject.prototype.bounce = function() {
+PlayerObject.prototype.bounce = function() {
   this.jumping = 0;
   this.isBounce = true;
 };
 
-CheepCheepObject.prototype.damage = function(obj) {
+PlayerObject.prototype.damage = function(obj) {
   if(
     this.damageTimer > 0 || this.starTimer > 0 ||
-    this.isState(CheepCheepObject.SNAME.TRANSFORM) ||
-    this.isState(CheepCheepObject.SNAME.CLIMB) ||
-    this.isState(CheepCheepObject.SNAME.POLE) ||
+    this.isState(PlayerObject.SNAME.TRANSFORM) ||
+    this.isState(PlayerObject.SNAME.CLIMB) ||
+    this.isState(PlayerObject.SNAME.POLE) ||
     this.pipeWarp || this.pipeTimer > 0 || this.pipeDelay > 0 ||
     this.autoTarget
   ) { return; }
-  if(this.power > 0) { this.tfm(0); this.damageTimer = CheepCheepObject.DAMAGE_TIME; }
+  if(this.power > 0) { this.tfm(0); this.damageTimer = PlayerObject.DAMAGE_TIME; }
   else { this.kill(); }
 };
 
 /* Temp invuln. Called when player loads into a level to prevent instant spawn kill */
-CheepCheepObject.prototype.invuln = function() {
-  this.damageTimer = CheepCheepObject.DAMAGE_TIME;
+PlayerObject.prototype.invuln = function() {
+  this.damageTimer = PlayerObject.DAMAGE_TIME;
 };
 
-CheepCheepObject.prototype.powerup = function(obj) {
+PlayerObject.prototype.powerup = function(obj) {
   if(obj instanceof MushroomObject && this.power < 1) { this.tfm(1); this.rate = 0x73; return; }
   if(obj instanceof FlowerObject && this.power < 2) { this.tfm(2); this.rate = 0x71; return; }
   if(obj instanceof StarObject) { this.star(); this.game.out.push(NET013.encode(0x02)); this.rate = 0x43; return; }
@@ -749,29 +749,29 @@ CheepCheepObject.prototype.powerup = function(obj) {
 
 /* This essentially is the win state. */
 /* Result is the numerical place we came in. 1 being the best (first place) */
-CheepCheepObject.prototype.axe = function(result) {
+PlayerObject.prototype.axe = function(result) {
   var txt = this.game.getText(this.level, this.zone, result.toString());
   if(!txt) { txt = this.game.getText(this.level, this.zone, "too bad"); }
   
   if(txt) { this.autoTarget = vec2.add(txt.pos, vec2.make(0., -1.6)); }
 };
 
-CheepCheepObject.prototype.star = function() {
+PlayerObject.prototype.star = function() {
   if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; }
-  this.starTimer = CheepCheepObject.STAR_LENGTH;
+  this.starTimer = PlayerObject.STAR_LENGTH;
   this.starMusic = this.play("music/star.mp3", 1., .04);
   if(this.starMusic) { this.starMusic.loop(true); }
 };
 
-CheepCheepObject.prototype.tfm = function(to) {
+PlayerObject.prototype.tfm = function(to) {
   if(this.power<to) { this.play("sfx/powerup.wav", 1., .04); }
   else { this.play("sfx/pipe.wav", 1., .04); }
   this.tfmTarget = to;
-  this.tfmTimer = CheepCheepObject.TRANSFORM_TIME;
-  this.setState(CheepCheepObject.SNAME.TRANSFORM);
+  this.tfmTimer = PlayerObject.TRANSFORM_TIME;
+  this.setState(PlayerObject.SNAME.TRANSFORM);
 };
 
-CheepCheepObject.prototype.warp = function(wid) {
+PlayerObject.prototype.warp = function(wid) {
   var wrp = this.game.world.getLevel(this.level).getWarp(wid);
   if(!wrp) { return; } /* Error */
     
@@ -784,8 +784,8 @@ CheepCheepObject.prototype.warp = function(wid) {
 };
 
 /* ent/ext = null, up, down, left, right [0,1,2,3,4] */
-CheepCheepObject.prototype.pipe = function(ent, wid, delay) {
-  if(ent === 1 || ent === 2) { this.setState(CheepCheepObject.SNAME.STAND); }
+PlayerObject.prototype.pipe = function(ent, wid, delay) {
+  if(ent === 1 || ent === 2) { this.setState(PlayerObject.SNAME.STAND); }
   var wrp = this.game.world.getLevel(this.level).getWarp(wid);
   this.pipeWarp = wid;
   this.pipeTimer = 30;
@@ -795,20 +795,20 @@ CheepCheepObject.prototype.pipe = function(ent, wid, delay) {
 };
 
 /* Kills any plants that would be in the pipe we are coming out of */
-CheepCheepObject.prototype.weedeat = function() {
+PlayerObject.prototype.weedeat = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
     if(obj instanceof PlantObject && !obj.dead) {
-      if(vec2.distance(this.pos, obj.pos) < CheepCheepObject.WEED_EAT_RADIUS) {
+      if(vec2.distance(this.pos, obj.pos) < PlayerObject.WEED_EAT_RADIUS) {
         obj.destroy();
       }
     }
   }
 };
 
-CheepCheepObject.prototype.pole = function(p) {
+PlayerObject.prototype.pole = function(p) {
   if(this.autoTarget) { return; }
-  this.setState(CheepCheepObject.SNAME.POLE);
+  this.setState(PlayerObject.SNAME.POLE);
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.pos.x = p.x;
@@ -816,8 +816,8 @@ CheepCheepObject.prototype.pole = function(p) {
   this.poleSound = false;
 };
 
-CheepCheepObject.prototype.vine = function(p, wid) {
-  this.setState(CheepCheepObject.SNAME.CLIMB);
+PlayerObject.prototype.vine = function(p, wid) {
+  this.setState(PlayerObject.SNAME.CLIMB);
   this.moveSpeed = 0;
   this.fallSpeed = 0;
   this.pos.x = p.x;
@@ -825,36 +825,36 @@ CheepCheepObject.prototype.vine = function(p, wid) {
 };
 
 /* Make the player invisible, intangible, and frozen until show() is called. */
-CheepCheepObject.prototype.hide = function() {
-  this.setState(CheepCheepObject.SNAME.HIDE);
+PlayerObject.prototype.hide = function() {
+  this.setState(PlayerObject.SNAME.HIDE);
 };
 
-CheepCheepObject.prototype.show = function() {
-  this.setState(CheepCheepObject.SNAME.STAND);
+PlayerObject.prototype.show = function() {
+  this.setState(PlayerObject.SNAME.STAND);
 };
 
-CheepCheepObject.prototype.kill = function() {
+PlayerObject.prototype.kill = function() {
   if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; this.starTimer = 0; }
-  if(this.isState(CheepCheepObject.SNAME.GHOST)) { this.setState(CheepCheepObject.SNAME.DEADGHOST); }
-  else { this.setState(CheepCheepObject.SNAME.DEAD); }
+  if(this.isState(PlayerObject.SNAME.GHOST)) { this.setState(PlayerObject.SNAME.DEADGHOST); }
+  else { this.setState(PlayerObject.SNAME.DEAD); }
   
   this.dead = true;
-  this.deadTimer = CheepCheepObject.DEAD_TIME;
-  this.deadFreezeTimer = CheepCheepObject.DEAD_FREEZE_TIME;
-  this.fallSpeed = CheepCheepObject.DEAD_UP_FORCE;
+  this.deadTimer = PlayerObject.DEAD_TIME;
+  this.deadFreezeTimer = PlayerObject.DEAD_FREEZE_TIME;
+  this.fallSpeed = PlayerObject.DEAD_UP_FORCE;
   
   if(this.game.getPlayer() === this) { this.game.out.push(NET011.encode()); }
 };
 
-CheepCheepObject.prototype.destroy = function() {
+PlayerObject.prototype.destroy = function() {
   if(this.starMusic) { this.starMusic.stop(); this.starMusic = undefined; this.starTimer = 0; }
   GameObject.prototype.destroy.call(this);
 };
-CheepCheepObject.prototype.isTangible = function() {
-  return GameObject.prototype.isTangible.call(this) && !this.isState(CheepCheepObject.SNAME.HIDE) && this.pipeDelay <= 0;
+PlayerObject.prototype.isTangible = function() {
+  return GameObject.prototype.isTangible.call(this) && !this.isState(PlayerObject.SNAME.HIDE) && this.pipeDelay <= 0;
 };
 
-CheepCheepObject.prototype.setState = function(SNAME) {
+PlayerObject.prototype.setState = function(SNAME) {
   var STATE = this.getStateByPowerIndex(SNAME, this.power);
   if(STATE === this.state) { return; }
   this.state = STATE;
@@ -864,62 +864,62 @@ CheepCheepObject.prototype.setState = function(SNAME) {
 };
 
 /* Lmoa */
-CheepCheepObject.prototype.getStateByPowerIndex = function(SNAME, pind) {
-  for(var i=0;i<CheepCheepObject.STATE.length;i++) {
-    var ste = CheepCheepObject.STATE[i];
+PlayerObject.prototype.getStateByPowerIndex = function(SNAME, pind) {
+  for(var i=0;i<PlayerObject.STATE.length;i++) {
+    var ste = PlayerObject.STATE[i];
     if(ste.NAME !== SNAME) { continue; }
-    if(ste.ID >= CheepCheepObject.GENERIC_INDEX) { return ste; }
-    if(ste.ID >= CheepCheepObject.POWER_INDEX_SIZE*pind && ste.ID < CheepCheepObject.POWER_INDEX_SIZE*(pind+1)) { return ste; }
+    if(ste.ID >= PlayerObject.GENERIC_INDEX) { return ste; }
+    if(ste.ID >= PlayerObject.POWER_INDEX_SIZE*pind && ste.ID < PlayerObject.POWER_INDEX_SIZE*(pind+1)) { return ste; }
   }
 };
 
-CheepCheepObject.prototype.isState = function(SNAME) {
+PlayerObject.prototype.isState = function(SNAME) {
   return SNAME === this.state.NAME;
 };
 
-CheepCheepObject.prototype.draw = function(sprites) {
-  if(this.isState(CheepCheepObject.SNAME.HIDE) || this.pipeDelay > 0) { return; } // Don't render when hidden or when in a pipe
+PlayerObject.prototype.draw = function(sprites) {
+  if(this.isState(PlayerObject.SNAME.HIDE) || this.pipeDelay > 0) { return; } // Don't render when hidden or when in a pipe
   if(this.damageTimer > 0 && this.damageTimer % 3 > 1) { return; } // Post damage timer blinking
     
   var mod; // Special draw mode
   if(this.starTimer > 0) { mod = 0x02; }
-  else if(this.isState(CheepCheepObject.SNAME.GHOST) || this.isState(CheepCheepObject.SNAME.DEADGHOST)) { mod = 0x01; }
+  else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { mod = 0x01; }
   else { mod = 0x00; }
 
   if(this.sprite.INDEX instanceof Array) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        if(mod === 0x02) { sprites.push({pos: vec2.add(vec2.add(this.pos, CheepCheepObject.DIM_OFFSET), vec2.make(j,i)), reverse: this.reverse, index: s[i][j], mode: 0x00}); }
-        sprites.push({pos: vec2.add(vec2.add(this.pos, CheepCheepObject.DIM_OFFSET), vec2.make(j,i)), reverse: this.reverse, index: s[i][j], mode: mod});
+        if(mod === 0x02) { sprites.push({pos: vec2.add(vec2.add(this.pos, PlayerObject.DIM_OFFSET), vec2.make(j,i)), reverse: this.reverse, index: s[i][j], mode: 0x00}); }
+        sprites.push({pos: vec2.add(vec2.add(this.pos, PlayerObject.DIM_OFFSET), vec2.make(j,i)), reverse: this.reverse, index: s[i][j], mode: mod});
       }
     }
   }
   else {
-    if(mod === 0x02) { sprites.push({pos: vec2.add(this.pos, CheepCheepObject.DIM_OFFSET), reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00}); }
-    sprites.push({pos: vec2.add(this.pos, CheepCheepObject.DIM_OFFSET), reverse: this.reverse, index: this.sprite.INDEX, mode: mod});
+    if(mod === 0x02) { sprites.push({pos: vec2.add(this.pos, PlayerObject.DIM_OFFSET), reverse: this.reverse, index: this.sprite.INDEX, mode: 0x00}); }
+    sprites.push({pos: vec2.add(this.pos, PlayerObject.DIM_OFFSET), reverse: this.reverse, index: this.sprite.INDEX, mode: mod});
   }
   
   var mod;
   if(this.arrowFade > 0.) {
     mod = 0xA0 + parseInt(this.arrowFade*32.);
-    sprites.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), CheepCheepObject.ARROW_OFFSET), reverse: false, index: CheepCheepObject.ARROW_SPRITE, mode: mod});
+    sprites.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.ARROW_OFFSET), reverse: false, index: PlayerObject.ARROW_SPRITE, mode: mod});
   }
   else if(this.name) {
     
   }
 };
 
-CheepCheepObject.prototype.write = function(texts) {
+PlayerObject.prototype.write = function(texts) {
   if(this.arrowFade > 0.) {
-    texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), CheepCheepObject.TEXT_OFFSET), size: CheepCheepObject.TEXT_SIZE, color: "rgba(255,255,255,"+this.arrowFade+")", text: CheepCheepObject.ARROW_TEXT});
+    texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.dim.y)), PlayerObject.TEXT_OFFSET), size: PlayerObject.TEXT_SIZE, color: "rgba(255,255,255,"+this.arrowFade+")", text: PlayerObject.ARROW_TEXT});
   }
   else if(this.name) { /* Hacky thing for ghost dim @TODO: */
-    texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.sprite.INDEX instanceof Array?2.:1.)), CheepCheepObject.TEAM_OFFSET), size: CheepCheepObject.TEAM_SIZE, color: CheepCheepObject.TEAM_COLOR, text: this.name});
+    texts.push({pos: vec2.add(vec2.add(this.pos, vec2.make(0., this.sprite.INDEX instanceof Array?2.:1.)), PlayerObject.TEAM_OFFSET), size: PlayerObject.TEAM_SIZE, color: PlayerObject.TEAM_COLOR, text: this.name});
   }
 };
 
-CheepCheepObject.prototype.play = GameObject.prototype.play;
+PlayerObject.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
-GameObject.REGISTER_OBJECT(CheepCheepObject);
+GameObject.REGISTER_OBJECT(PlayerObject);

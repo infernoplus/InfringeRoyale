@@ -1,6 +1,6 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, CheepCheepObject */
+/* global GameObject, PlayerObject */
 /* global NET011, NET020 */
 
 /* Hammer Bros Hammer Projectile Object */

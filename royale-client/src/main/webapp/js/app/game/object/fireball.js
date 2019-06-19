@@ -1,13 +1,13 @@
 "use strict";
 /* global util, vec2, squar */
-/* global GameObject, CheepCheepObject */
+/* global GameObject, PlayerObject */
 /* global NET011, NET020 */
 
 /* Player Fireball Projectile Object */
 function FireballProj(game, level, zone, pos, dir, owner) {
   GameObject.call(this, game, level, zone, pos);
   
-  this.owner = owner;   // PID of the CheepCheepObject that created this fireball
+  this.owner = owner;   // PID of the PlayerObject that created this fireball
   
   this.state = FireballProj.STATE.IDLE;
   this.sprite = this.state.SPRITE[0];
@@ -163,7 +163,7 @@ FireballProj.prototype.physics = function() {
 FireballProj.prototype.interaction = function() {
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj === this || obj.pid === this.owner || !obj.isTangible() || obj instanceof CheepCheepObject || !obj.damage) { continue; }  // Fireballs skip objects that lack a damage function to call, and their owners
+    if(obj === this || obj.pid === this.owner || !obj.isTangible() || obj instanceof PlayerObject || !obj.damage) { continue; }  // Fireballs skip objects that lack a damage function to call, and their owners
     if(obj.level === this.level && obj.zone === this.zone) {
       if(squar.intersection(obj.pos, obj.dim, this.pos, this.dim)) {
         if(this.owner === this.game.pid) { obj.damage(this); }             // Fireballs created by other players don't do damage. They are just ghosts.

@@ -3,7 +3,7 @@
 /* global util, shor2, vec2, td32, squar, MERGE_BYTE, Cookies */
 /* global NETX, NET001, NET010, NET011, NET012 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
-/* global Display, GameObject, CheepCheepObject, GoombaObject, PlatformObject, BusObject, FlagObject, TextObject */
+/* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, BusObject, FlagObject, TextObject */
 
 // Air 30 00000000000000000000000000011110
 // Block 98306 00000000000000011000000000000010
@@ -183,8 +183,8 @@ Game.prototype.doNET001 = function(n) {
 /* CREATE_PLAYER_OBJECT [0x10] */
 Game.prototype.doNET010 = function(n) {
   if(n.pid === this.pid) { return; }
-  var obj = this.createObject(CheepCheepObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid]);
-  obj.setState(CheepCheepObject.SNAME.GHOST);
+  var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid]);
+  obj.setState(PlayerObject.SNAME.GHOST);
   
   /* Check if we need to apply a team name to this new mario */
   if(!this.team) { return; }
@@ -477,7 +477,7 @@ Game.prototype.doSpawn = function() {
   if(!ply) {
     var zon = this.getZone();
     var pos = zon.initial; // shor2
-    this.createObject(CheepCheepObject.ID, zon.level, zon.id, shor2.decode(pos), [this.pid]);
+    this.createObject(PlayerObject.ID, zon.level, zon.id, shor2.decode(pos), [this.pid]);
     this.out.push(NET010.encode(zon.level, zon, pos));
   }
   

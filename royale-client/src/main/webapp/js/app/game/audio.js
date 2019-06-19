@@ -1,7 +1,7 @@
 "use strict";
 /* global app */
 /* global util, vec2, Cookies */
-/* global CheepCheepObject */
+/* global PlayerObject */
 
 
 /* Yo! This class was basically copy pasted in here from 20xx. */
@@ -134,7 +134,7 @@ Audio.prototype.updateVolume = function() {
   var dist = 999;
   for(var i=0;i<this.game.objects.length;i++) {
     var obj = this.game.objects[i];
-    if(obj instanceof CheepCheepObject && obj.level === zon.level && obj.zone === zon.id && obj.starTimer > 0) {
+    if(obj instanceof PlayerObject && obj.level === zon.level && obj.zone === zon.id && obj.starTimer > 0) {
       var d = vec2.distance(ppos, obj.pos);
       if(d < dist) { dist = d; }
     }
