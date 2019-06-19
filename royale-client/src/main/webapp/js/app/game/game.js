@@ -460,7 +460,7 @@ Game.prototype.doStep = function() {
   /* Triggers game over if player is dead for 15 frames and has zero lives. If we have a life we respawn instead. */
   if(this.startDelta !== undefined && !this.gameOver && !ply) {
     if(this.lives > 0 && this.victory <= 0) { var rsp = this.getZone().level; this.doSpawn(); this.levelWarp(rsp); this.lives--; }
-    else if(++this.gameOverTimer > 30) { this.gameOver = true; this.gameOverTimer = 0; }
+    else if(++this.gameOverTimer > 45) { this.gameOver = true; this.gameOverTimer = 0; }
   }
   /* Triggers page refresh after 5 seconds of a game over. */
   else if(this.gameOver) { if(++this.gameOverTimer > Game.GAME_OVER_TIME) { app.close(); } }

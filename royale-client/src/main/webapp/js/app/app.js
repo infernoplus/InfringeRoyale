@@ -40,6 +40,7 @@ App.prototype.load = function(data) {
   switch(data.type) {
     case "game" : { this.game = new Game(data); break; }
     case "lobby": { this.game = new Lobby(data); break; }
+    case "jail": { this.game = new Jail(data); break; }
     default : { this.menu.error.show("Critical error! Game file missing type!"); break; }
   }
 };
