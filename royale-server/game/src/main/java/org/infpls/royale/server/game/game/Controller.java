@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 import org.infpls.royale.server.game.session.*;
+import org.infpls.royale.server.game.util.VirginSlayer;
 import org.infpls.royale.server.util.Oak;
 
 public class Controller {
@@ -29,8 +30,8 @@ public class Controller {
   private static final int AC_STAR_MAX_COUNT = 3;    // If a player gets more than this number of stars they are cheating.
   private static final int AC_MIN_WIN_TIME = 2700;   // Minimum time for a player to win a game. 90 seconds atm
   
-  public boolean banlock; // If flagged, we stop sending player updates out for this player. Used at end of level for cheaters.
-  public boolean ban; // If flagged, this user will remain in the game but be essentially shadowbanned
+  public boolean strikelock; // If flagged, we stop sending player updates out for this player. Used at end of level for cheaters.
+  public boolean strike; // If flagged, this user will remain in the game but be essentially shadowstrikened
   private int starCount;
   private int acSequence; // If a player skips a level they are cheating
   
@@ -49,7 +50,7 @@ public class Controller {
     garbage = false;
     
     starCount = 0;
-    ban = false;
+    strike = false;
   }
   
   /* Handle data from client about their current playstate */
@@ -83,19 +84,19 @@ public class Controller {
         switch(n.designation) {
           case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
           case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
-          case 0x12 : { process012((ByteMe.NET012)n);  if(!banlock) { loc.add(n); } break; }
-          case 0x13 : { process013((ByteMe.NET013)n); if(!ban) { glo.add(n); } break; }
+          case 0x12 : { process012((ByteMe.NET012)n);  if(!strikelock) { loc.add(n); } break; }
+          case 0x13 : { process013((ByteMe.NET013)n); if(!strike) { glo.add(n); } break; }
           case 0x17 : { process017((ByteMe.NET017)n); break; }
           case 0x18 : {
             final ByteMe.NET018 wr = process018((ByteMe.NET018)n);
             if(wr == null) { break; }
-            else if(!ban) { glo.add(wr); }
+            else if(!strike) { glo.add(wr); }
             else { send(wr.encode().array()); }
             break;
           }
           case 0x19 : { process019((ByteMe.NET019)n); break; }
-          case 0x20 : { process020((ByteMe.NET020)n); if(!ban) { glo.add(n); } break; }
-          case 0x30 : { process030((ByteMe.NET030)n); if(!ban) { glo.add(n); } break; }
+          case 0x20 : { process020((ByteMe.NET020)n); if(!strike) { glo.add(n); } break; }
+          case 0x30 : { process030((ByteMe.NET030)n); if(!strike) { glo.add(n); } break; }
         }
       }
     }
@@ -121,7 +122,7 @@ public class Controller {
     position = n.pos;
     sprite = n.sprite;
     
-    if(level - acSequence > 1) { ban("Level Sequence Skip"); }
+    if(level - acSequence > 1) { strike("Level Sequence Skip"); }
     
     acSequence = n.level;
   }
@@ -130,9 +131,9 @@ public class Controller {
   public void process013(ByteMe.NET013 n) {
     /* Anti Cheat */
     if(n.type == 0x02) {
-      if(game instanceof RoyaleLobby) { ban("Star In Lobby"); }
-      if(game.frame < AC_STAR_MIN_TIME) { ban("Star Early"); }
-      if(starCount++ > AC_STAR_MAX_COUNT) { ban("Too Many Stars"); }
+      if(game instanceof RoyaleLobby) { strike("Star In Lobby"); }
+      if(game.frame < AC_STAR_MIN_TIME) { strike("Star Early"); }
+      if(starCount++ > AC_STAR_MAX_COUNT) { strike("Too Many Stars"); }
     }
   }
   
@@ -145,18 +146,18 @@ public class Controller {
   /* PLAYER_RESULT_REQUEST */
   public ByteMe.NET018 process018(ByteMe.NET018 n) {
     /* Anti Cheat */
-    if(game.frame < AC_MIN_WIN_TIME) { ban("Completion too Early"); }
+    if(game.frame < AC_MIN_WIN_TIME) { strike("Completion too Early"); }
     if(result != 0) { return null; }
-    result = game.winRequest(!ban);
-    if(ban) { banlock = true; }
+    result = game.winRequest(!strike);
+    if(strike) { strikelock = true; }
     
-    return new ByteMe.NET018(n.pid, result, ban);
+    return new ByteMe.NET018(n.pid, result, strike);
   }
   
   /* PLAYER_SNITCH */
   public void process019(ByteMe.NET019 n) {
     /* Anti Cheat */
-    ban("Snitched");
+    strike("Snitched");
   }
   
   /* OBJECT_EVENT_TRIGGER */
@@ -170,9 +171,12 @@ public class Controller {
   }
   
   /* Essentially a shadow ban. The player is able to keep playing but their actions no longer affect the game. They are also barred from winning. */
-  public void ban(String rsn) {
-    if(!ban) { Oak.log(Oak.Level.WARN, "Player banned for '" + rsn + "' : '" + getName() +"', F: " + game.frame + ", IP: " + session.getIP()); }
-    ban = true;
+  /* The user is also given a strike in virginslayer. if you get to many virginslayer strikes... you get slain. */
+  public void strike(String rsn) {
+    if(strike) { return; }
+    strike = true;
+    Oak.log(Oak.Level.WARN, "Player strikened for '" + rsn + "' : '" + getName() +"', F: " + game.frame + ", IP: " + session.getIP());
+    VirginSlayer.strike(session.getIP());
   }
   
   public void send(Packet p) {

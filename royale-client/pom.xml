@@ -127,16 +127,17 @@
                     <jsSourceFile>app/game/effect/break.js</jsSourceFile>
                     <jsSourceFile>app/game/effect/coin.js</jsSourceFile>
                     <jsSourceFile>app/game/input.js</jsSourceFile>
-                    <jsSourceFile>app/util/snitch.js</jsSourceFile>
                     <jsSourceFile>app/game/display/resource.js</jsSourceFile>
                     <jsSourceFile>app/game/display/camera.js</jsSourceFile>
                     <jsSourceFile>app/game/audio/data.js</jsSourceFile>
                     <jsSourceFile>app/game/audio/instance.js</jsSourceFile>
                     <jsSourceFile>app/game/audio.js</jsSourceFile>
+                    <jsSourceFile>app/util/snitch.js</jsSourceFile>
                     <jsSourceFile>app/game/display.js</jsSourceFile>
                     <jsSourceFile>app/game/world.js</jsSourceFile>
                     <jsSourceFile>app/game/game.js</jsSourceFile>
                     <jsSourceFile>app/game/lobby.js</jsSourceFile>
+                    <jsSourceFile>app/game/jail.js</jsSourceFile>
 
                     <!-- Main Exec -->
                     <jsSourceFile>app/app.js</jsSourceFile>

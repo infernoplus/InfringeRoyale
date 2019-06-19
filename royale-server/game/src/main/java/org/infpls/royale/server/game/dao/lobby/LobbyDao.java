@@ -7,9 +7,14 @@ import org.infpls.royale.server.util.Oak;
 
 public class LobbyDao {
   private final List<GameLobby> lobbies;
+  private GameLobby jail;
   
   public LobbyDao() {
     lobbies = new ArrayList();
+    try { jail = new JailLobby(); jail.start(); }
+    catch(IOException ioex) {
+      Oak.log(Oak.Level.CRIT, "Failed to start jail lobby!");
+    }
   }
   
   public GameLobby createLobby() throws IOException {
@@ -28,6 +33,10 @@ public class LobbyDao {
     }
     final GameLobby lobby = createLobby();
     return lobby;
+  }
+  
+  public GameLobby getJail() {
+    return jail;
   }
  
   /* This method deletes any user created lobbies that are flagged as closed. */

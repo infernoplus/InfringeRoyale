@@ -101,7 +101,7 @@ public abstract class GameLobby {
     }
   }
   
-  private void joinEvent(RoyaleSession session) {
+  protected void joinEvent(RoyaleSession session) {
     try { if(isClosed() || loading.contains(session) || players.contains(session)) { session.close("Error joining lobby."); return; } }
     catch(IOException ioex) { Oak.log(Oak.Level.ERR, "Error during player disconnect.", ioex); return; }
     loading.add(session);
@@ -156,7 +156,7 @@ public abstract class GameLobby {
   }
   
   /* When called, locks this lobby, tells clients to load the game data, and starts the battle royale match */
-  private void whereWeDroppin() {
+  protected void whereWeDroppin() {
     startTimer = -1;
     
     game.destroy();

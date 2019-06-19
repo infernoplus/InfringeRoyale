@@ -10,6 +10,7 @@ import org.infpls.royale.server.game.dao.lobby.*;
 import org.infpls.royale.server.game.session.error.*;
 import org.infpls.royale.server.game.session.login.Login;
 import org.infpls.royale.server.game.session.game.Game;
+import org.infpls.royale.server.game.util.VirginSlayer;
 import org.infpls.royale.server.util.*;
 
 public final class RoyaleSession {
@@ -20,6 +21,7 @@ public final class RoyaleSession {
   private final String sid;
   private final SessionThread sessionThread;
   private SessionState sessionState;
+  public final boolean banned;
   
   public boolean readyVote;   // Kinda messy. Should really be a linked list in GameLobby instead.
  
@@ -31,6 +33,8 @@ public final class RoyaleSession {
     sessionThread = new SessionThread(this);
     
     readyVote = false;
+    
+    banned = VirginSlayer.isBanned(getIP());
     
     changeState("l");
   }
