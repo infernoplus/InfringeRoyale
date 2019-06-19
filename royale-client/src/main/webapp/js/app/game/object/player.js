@@ -738,9 +738,9 @@ PlayerObject.prototype.invuln = function() {
 };
 
 PlayerObject.prototype.powerup = function(obj) {
-  if(obj instanceof MushroomObject && this.power < 1) { this.transform(1); return; }
-  if(obj instanceof FlowerObject && this.power < 2) { this.transform(2); return; }
-  if(obj instanceof StarObject) { this.star(); this.game.out.push(NET013.encode(0x02)); return; }
+  if(obj instanceof MushroomObject && this.power < 1) { this.transform(1); this.rate = 0x73; return; } /* this.rate is a disguised anti cheat value */
+  if(obj instanceof FlowerObject && this.power < 2) { this.transform(2); this.rate = 0x71; return; }
+  if(obj instanceof StarObject) { this.star(); this.game.out.push(NET013.encode(0x02)); this.rate = 0x43; return; }
   if(obj instanceof LifeObject) { this.game.lifeage(); return; }
   if(obj instanceof CoinObject) { this.game.coinage(); return; }
   if(obj instanceof AxeObject) { this.game.out.push(NET018.encode()); return; }  // Asks server what result to get from picking up the axe and 'winning'

@@ -648,26 +648,28 @@ Game.prototype.lifeage = function() {
 };
 
 Game.prototype.loop = function() {
-  if(this.ready && this.startDelta !== undefined) {
-    var now = util.time.now();
-    var target = parseInt((now-this.startDelta)/Game.TICK_RATE);  // Frame we should be on
-    
-    if(target > this.frame) {
-      var initial = true;
-      while(this.buffer.length > Game.FDLC_TARGET || (initial && this.buffer.length > 0)) {
-        var data = this.buffer.shift();
-        this.doUpdate(data);
-        initial = false;
+  try {
+    if(this.ready && this.startDelta !== undefined) {
+      var now = util.time.now();
+      var target = parseInt((now-this.startDelta)/Game.TICK_RATE);  // Frame we should be on
+
+      if(target > this.frame) {
+        var initial = true;
+        while(this.buffer.length > Game.FDLC_TARGET || (initial && this.buffer.length > 0)) {
+          var data = this.buffer.shift();
+          this.doUpdate(data);
+          initial = false;
+        }
+
+        this.doDetermine();
+        while(target > this.frame) { this.doStep(); }
+        this.doPush();
+
+        this.delta = now;
       }
-      
-      this.doDetermine();
-      while(target > this.frame) { this.doStep(); }
-      this.doPush();
-      
-      this.delta = now;
     }
   }
-  
+  catch(error) { }
   var that = this;
   this.loopReq = setTimeout(function( ){ that.loop(); }, 2);
 };
