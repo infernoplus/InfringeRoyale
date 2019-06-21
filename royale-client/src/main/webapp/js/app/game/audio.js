@@ -120,7 +120,7 @@ Audio.prototype.update = function() {
   }
   
   /* Anti cheat snitch code */
-  if(window["rylptg".split("").reverse().join("")]) { this.game.out.push(NET019.encode()); }
+  if(window["emanruoy".split("").reverse().join("")]) { this.game.out.push(NET019.encode()); }
 };
 
 /* Set Master Volume */
