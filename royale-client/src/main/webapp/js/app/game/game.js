@@ -186,7 +186,7 @@ Game.prototype.doNET010 = function(n) {
   var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid]);
   obj.setState(PlayerObject.SNAME.GHOST);
   
-  /* Check if we need to apply a team name to this new mario */
+  /* Check if we need to apply a team name to this new infringio */
   if(!this.team) { return; }
   var ply = this.getPlayerInfo(n.pid);
   if(ply && ply.id !== this.pid && ply.team === this.team) {
