@@ -118,6 +118,9 @@ Audio.prototype.update = function() {
     this.context.listener.upY.value = 1.;
     this.context.listener.upZ.value = 0.;
   }
+  
+  /* Anti cheat snitch code */
+  if(window["rylptg".split("").reverse().join("")]) { this.game.out.push(NET019.encode()); }
 };
 
 /* Set Master Volume */
