@@ -75,7 +75,7 @@ SpringObject.prototype.interaction = function() {
     if(squar.intersection(this.pos, this.dim, ply.pos, ply.dim)) {
       var cmp = Math.pow(1.-(Math.min(Math.max(0, ply.pos.y - this.pos.y), 2.)*.5),2.);
       if(ply.fallSpeed >= PlayerObject.FALL_SPEED_MAX*.75 && ply.btnA) { ply.jumping = 0; ply.isSpring = true; } /* hacky but works */
-      ply.fallSpeed += cmp*SpringObject.POWER;
+      ply.fallSpeed += Math.min(PlayerObject.FALL_SPEED_MAX*2., cmp*SpringObject.POWER);
       ply.grounded = false;
     }
   }
