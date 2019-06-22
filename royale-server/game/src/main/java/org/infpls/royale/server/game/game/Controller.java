@@ -26,14 +26,18 @@ public class Controller {
   public boolean garbage;  // If flagged, we will delete this controler on next update.
   
   /* Anti Cheat Vars*/
-  private static final int AC_STAR_MIN_TIME = 600;   // Minimum time from start of game before you could feasibly get a star.
+  private static final int AC_STAR_MIN_TIME = 300;   // Minimum time from start of game before you could feasibly get a star. /* False bans have happened so i lowered it to 10 seconds */
   private static final int AC_STAR_MAX_COUNT = 3;    // If a player gets more than this number of stars they are cheating.
   private static final int AC_MIN_WIN_TIME = 2700;   // Minimum time for a player to win a game. 90 seconds atm
+  private static final int AC_MAX_INVALID_MOVES = 60; // If a client moves invalidly for this many frames we ban them.
+  private static final int AC_MAX_MOVE_DISTANCE = 50; // If a client moves farther than this in 1 frame we ban them.
   
   public boolean strikelock; // If flagged, we stop sending player updates out for this player. Used at end of level for cheaters.
   public boolean strike; // If flagged, this user will remain in the game but be essentially shadowstrikened
   private int starCount;
   private int acSequence; // If a player skips a level they are cheating
+  private int acInvalidMoves;
+  private boolean acLag;
   
   public Controller(RoyaleCore game, RoyaleSession session, short pid) {
     this.game = game;
@@ -50,6 +54,9 @@ public class Controller {
     garbage = false;
     
     starCount = 0;
+    acSequence = 0;
+    acInvalidMoves = 0;
+    acLag = false;
     strike = false;
   }
   
@@ -74,7 +81,7 @@ public class Controller {
   /* Sends information to the client about the current gamestate */
   public void update(List<ByteMe.NETX> loc, List<ByteMe.NETX> glo) {
     if(updates.size() < 1) { return; }
-    if(updates.size() > 120) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); updates.clear(); }
+    if(updates.size() > 120) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); updates.clear(); acLag = true; }
     /* Process client input, if there is more than 3 updates in the queue we 'catch up' by processing 2 updates per tick instead of 1 */
     int lm = Math.max(1, Math.min(2, updates.size()-1));
     for(int j=0;j<updates.size()&&j<lm;j++) {
@@ -86,6 +93,7 @@ public class Controller {
           case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
           case 0x12 : { if(process012((ByteMe.NET012)n)) { break; } if(!strikelock) { loc.add(n); } break; }
           case 0x13 : { process013((ByteMe.NET013)n); if(!strike) { glo.add(n); } break; }
+          case 0x15 : { process015((ByteMe.NET015)n); break; }
           case 0x17 : { process017((ByteMe.NET017)n); break; }
           case 0x18 : {
             final ByteMe.NET018 wr = process018((ByteMe.NET018)n);
@@ -118,16 +126,18 @@ public class Controller {
   /* UPDATE_PLAYER_OBJECT */
   /* Returns true if something cheat related is detected. */
   public boolean process012(ByteMe.NET012 n) {
+    if(position.distance(n.pos) > AC_MAX_MOVE_DISTANCE && level == n.level && zone == n.zone && !acLag) { strike("Teleported Excessive Distance"); }
+    
     level = n.level;
     zone = n.zone;
     position = n.pos;
     sprite = n.sprite;
     
     /* Anti Cheat */
-    if(level - acSequence > 1) { strike("Level Sequence Skip"); return true; }
+    if(level - acSequence > 1) { strike("Level Sequence Skip"); }
     if(level > 3) { strike("Invalid Level"); return true; }
     if(zone > 5) { strike("Invalid Zone"); return true; }
-    if(position.y > 30) { strike("Y position greater than 30"); return true; }
+    if(position.y > 30) { strike("Y position greater than 30"); }
     boolean valid = false;
     for(int i=0;i<VALID_SPRITES.length;i++) {
       if(sprite == VALID_SPRITES[i]) { valid = true; }
@@ -180,6 +190,12 @@ private static final byte[] VALID_SPRITES = new byte[] {
       if(game.frame < AC_STAR_MIN_TIME) { strike("Star Early"); }
       if(starCount++ > AC_STAR_MAX_COUNT) { strike("Too Many Stars"); }
     }
+  }
+  
+  /* PLAYER_INVALID_MOVE */
+  public void process015(ByteMe.NET015 n) {
+    /* Anti Cheat */
+    if(++acInvalidMoves >= AC_MAX_INVALID_MOVES) { strike("Excessive Invalid Moves"); }
   }
   
   /* PLAYER_KILL_EVENT */

@@ -120,7 +120,7 @@ Display.prototype.drawObject = function() {
     var obj = this.game.objects[i];
     if(obj.level === zone.level && obj.zone === zone.id && obj.pid !== this.game.pid) {
       if(obj.pos.x >= cx0 && obj.pos.x <= cx1) {
-        if(obj.write) { obj.write(texts); }
+        if(obj.write && !this.game.disableText) { obj.write(texts); }
         if(obj.draw) { obj.draw(sprites); }
       }
     }
@@ -214,6 +214,7 @@ Display.prototype.drawUI = function() {
   var PLAY = 0x000D;
   var SFX = [0x00FC, 0x00FA];
   var MUSIC = [0x00FB, 0x00F9];
+  var TEXT = [0x00CB, 0x00CA];
   var PAD = 0x00F8;
   var c = COIN[parseInt(this.game.frame/3) % COIN.length];
   var tex = this.resource.getTexture("obj");
@@ -282,9 +283,11 @@ Display.prototype.drawUI = function() {
     context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8, 40, 24, 24);
     var st = util.sprite.getSprite(tex, SFX[this.game.audio.muteSound?1:0]);
     context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8, 40, 24, 24);
+    var st = util.sprite.getSprite(tex, TEXT[this.game.disableText?1:0]);
+    context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8-24-8, 40, 24, 24);
     if(this.game.input.pad.connected()) {
       var st = util.sprite.getSprite(tex, PAD);
-      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8-24-8, 40, 24, 24);
+      context.drawImage(tex, st[0], st[1], Display.TEXRES, Display.TEXRES, W-24-8-24-8-24-8-24-8, 40, 24, 24);
     }
   }
 };

@@ -410,7 +410,7 @@ td32.TILE_PROPERTIES = {
             else if(r.definition === this) { cx = x+1; }
             else { return; }
             
-            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) { ply.pipe(2, td.data, 85); }
+            if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) { ply.pipe(2, td.data, 50); }
           }
         }
       }
@@ -427,7 +427,7 @@ td32.TILE_PROPERTIES = {
         /* Push */
         case 0x02 : {
           if(game.pid === pid) {
-            game.getPlayer().pipe(4, td.data, 85);
+            game.getPlayer().pipe(4, td.data, 50);
           }
         }
       }
@@ -725,6 +725,16 @@ NET013.decode = function(/* NET013_SERV */ a) {
     pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
     type: a[2]
   };
+};
+
+var NET015 = {}; // PLAYER_INVALID_MOVE [0x15] // As Uint8Array
+/* ======================================================================================== */
+NET015.DESIGNATION = 0x15;
+NET015.BYTES = 3;
+
+/* Client->Server */
+NET015.encode = function() {
+  return new Uint8Array([NET015.DESIGNATION]);
 };
 
 var NET017 = {}; // PLAYER_KILL_EVENT [0x17] // As Uint8Array

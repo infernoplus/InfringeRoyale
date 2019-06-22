@@ -14,7 +14,7 @@ module.exports = {
     renameGlobals: true,
     reservedNames: [],
     rotateStringArray: true,
-    seed: 99,
+    seed: 101,
     selfDefending: true,
     sourceMap: false,
     sourceMapBaseUrl: '',

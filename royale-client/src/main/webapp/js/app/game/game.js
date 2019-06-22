@@ -1,7 +1,7 @@
 "use strict";
 /* global app */
 /* global util, shor2, vec2, td32, squar, MERGE_BYTE, Cookies */
-/* global NETX, NET001, NET010, NET011, NET012 */
+/* global NETX, NET001, NET010, NET011, NET012, NET015 */
 /* global Function, requestAnimFrameFunc, cancelAnimFrameFunc */
 /* global Display, GameObject, PlayerObject, GoombaObject, PlatformObject, BusObject, FlagObject, TextObject */
 
@@ -40,6 +40,10 @@ function Game(data) {
   this.thumbOrigin = undefined;
   this.thumbPos = undefined;
   this.touchRun = false;
+  this.cullSS = undefined;       // Anti cheat value that's disguised.
+  this.fillSS = undefined;
+  
+  this.disableText = parseInt(Cookies.get("text"))===1;      // Disables game space text rendering
   
   this.remain = 0;               // Number of players still alive
   
@@ -315,7 +319,8 @@ Game.prototype.doTouch = function(imp) {
     {pos: vec2.make(W-S, H-(S*2)), dim: vec2.make(S, S), press: function() { b = true; }},
     {pos: vec2.make(W-S, H-(S*3)), dim: vec2.make(S, S), click: function() { tmp.touchRun = !tmp.touchRun; }},
     {pos: vec2.make(W-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteMusic = !tmp.audio.muteMusic; tmp.audio.saveSettings(); }},
-    {pos: vec2.make(W-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteSound = !tmp.audio.muteSound; tmp.audio.saveSettings(); }}
+    {pos: vec2.make(W-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteSound = !tmp.audio.muteSound; tmp.audio.saveSettings(); }},
+    {pos: vec2.make(W-24-8-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { this.disableText = !this.disableText; }}
   ];
   
   /* Check to see if we touched any of the on screen buttons */
@@ -405,7 +410,8 @@ Game.prototype.doInput = function(imp) {
   var W = this.display.canvas.width;
   var btns = [
     {pos: vec2.make(W-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteMusic = !tmp.audio.muteMusic; tmp.audio.saveSettings(); }},
-    {pos: vec2.make(W-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteSound = !tmp.audio.muteSound; tmp.audio.saveSettings(); }}
+    {pos: vec2.make(W-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.audio.muteSound = !tmp.audio.muteSound; tmp.audio.saveSettings(); }},
+    {pos: vec2.make(W-24-8-24-8-24-8, 40), dim: vec2.make(24, 24), click: function() { tmp.disableText = !tmp.disableText; Cookies.set("text", this.disableText?1:0, {expires: 30}); }}
   ];
   for(var i=0;i<imp.mouse.length;i++) {
     var m = imp.mouse[i];
@@ -435,12 +441,19 @@ Game.prototype.doStep = function() {
     }
   }
   
+  /* Anti cheat check */
+  if(ply && this.cullSS && !vec2.equals(ply.pos, this.cullSS)) { this.out.push(NET015.encode()); }
+  if(ply && this.fillSS && this.fillSS !== ply.fallSpeed) { this.out.push(NET015.encode()); }
+  
   /* Step & delete garbage */
   for(var i=0;i<this.objects.length;i++) {
     var obj = this.objects[i];
     obj.step();
     if(obj.garbage) { this.objects.splice(i--, 1); }
   }
+  
+  this.cullSS = ply?vec2.copy(ply.pos):undefined;
+  this.fillSS = ply?ply.fallSpeed:undefined;
   
   /* Update Camera Position */
   var zone = this.getZone();
