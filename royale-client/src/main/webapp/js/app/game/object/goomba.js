@@ -62,7 +62,8 @@ GoombaObject.SPRITE = {};
 GoombaObject.SPRITE_LIST = [
   {NAME: "RUN0", ID: 0x00, INDEX: 0x000F},
   {NAME: "RUN1", ID: 0x01, INDEX: 0x001F},
-  {NAME: "DEAD", ID: 0x02, INDEX: 0x002F}
+  {NAME: "FALL", ID: 0x02, INDEX: 0x000E},
+  {NAME: "DEAD", ID: 0x03, INDEX: 0x002F}
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */
@@ -74,6 +75,7 @@ for(var i=0;i<GoombaObject.SPRITE_LIST.length;i++) {
 GoombaObject.STATE = {};
 GoombaObject.STATE_LIST = [
   {NAME: "RUN", ID: 0x00, SPRITE: [GoombaObject.SPRITE.RUN0,GoombaObject.SPRITE.RUN1]},
+  {NAME: "FALL", ID: 0x01, SPRITE: [GoombaObject.SPRITE.FALL]},
   {NAME: "DEAD", ID: 0x50, SPRITE: [GoombaObject.SPRITE.DEAD]},
   {NAME: "BONK", ID: 0x51, SPRITE: []}
 ];
@@ -132,6 +134,8 @@ GoombaObject.prototype.step = function() {
 
 GoombaObject.prototype.control = function() {
   this.moveSpeed = this.dir ? -GoombaObject.MOVE_SPEED_MAX : GoombaObject.MOVE_SPEED_MAX;
+  if(!this.grounded) { this.setState(GoombaObject.STATE.FALL); }
+  else { this.setState(GoombaObject.STATE.RUN); }
 };
 
 GoombaObject.prototype.physics = function() {

@@ -73,7 +73,7 @@ public abstract class GameLobby {
       game.update();
     }
     catch(Exception ex) {
-      Oak.log(Oak.Level.CRIT, "Game step exception ??? <INFO>", ex);
+      Oak.log(Oak.Level.CRIT, "Game step exception ??? ", ex);
       Oak.log(Oak.Level.ERR,"Attempting to close lobby nicely!");
       try { close("The Game Lobby encoutered an error and had to close. Sorry!"); Oak.log(Oak.Level.INFO, "Lobby closed correctly."); }
       catch(IOException ioex) {

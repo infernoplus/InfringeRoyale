@@ -105,7 +105,7 @@ PlayerObject.DAMAGE_TIME = 45;
 PlayerObject.TRANSFORM_TIME = 18;
 PlayerObject.TRANSFORM_ANIMATION_RATE = 2;
 PlayerObject.STAR_LENGTH = 360;
-PlayerObject.PROJ_OFFSET = vec2.make(0.75, 1.5);
+PlayerObject.PROJ_OFFSET = vec2.make(0.7, 1.1);
 PlayerObject.MAX_CHARGE = 60;
 PlayerObject.ATTACK_DELAY = 7;
 PlayerObject.ATTACK_CHARGE = 25;
@@ -162,16 +162,16 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "B_CLIMB1", ID: 0x28, INDEX: [[0x0026], [0x016]]},
   {NAME: "B_TRANSFORM", ID:0x29, INDEX:[[0x002E], [0x01E]]},
   /* [F]ire flower infringio */
-  {NAME: "F_STAND", ID: 0x40, INDEX: [[0x004D], [0x03D]]}, 
-  {NAME: "F_DOWN", ID: 0x41, INDEX: [[0x004C], [0x03C]]},
-  {NAME: "F_RUN0", ID: 0x42, INDEX: [[0x0049], [0x039]]},
-  {NAME: "F_RUN1", ID: 0x43, INDEX: [[0x004A], [0x03A]]},
-  {NAME: "F_RUN2", ID: 0x44, INDEX: [[0x004B], [0x03B]]},
-  {NAME: "F_SLIDE", ID: 0x45, INDEX: [[0x0048], [0x038]]},
-  {NAME: "F_FALL", ID: 0x46, INDEX: [[0x0047], [0x037]]},
-  {NAME: "F_CLIMB0", ID: 0x47, INDEX: [[0x0045], [0x035]]},
-  {NAME: "F_CLIMB1", ID: 0x48, INDEX: [[0x0046], [0x036]]},
-  {NAME: "F_ATTACK", ID: 0x49, INDEX: [[0x004F], [0x03F]]},
+  {NAME: "F_STAND", ID: 0x40, INDEX: [[0x004C, 0x004B], [0x03C, 0x03B]]}, 
+  {NAME: "F_DOWN", ID: 0x41, INDEX: [[0x004A], [0x03A]]},
+  {NAME: "F_RUN0", ID: 0x42, INDEX: [[0x0045, 0x0044], [0x035, 0x034]]},
+  {NAME: "F_RUN1", ID: 0x43, INDEX: [[0x0047, 0x0046], [0x037, 0x036]]},
+  {NAME: "F_RUN2", ID: 0x44, INDEX: [[0x0049, 0x0048], [0x039, 0x038]]},
+  {NAME: "F_SLIDE", ID: 0x45, INDEX: [[0x0043, 0x0042], [0x033, 0x032]]},
+  {NAME: "F_FALL", ID: 0x46, INDEX: [[0x0041, 0x0040], [0x031, 0x030]]},
+  {NAME: "F_CLIMB0", ID: 0x47, INDEX: [[0x0023], [0x013]]},
+  {NAME: "F_CLIMB1", ID: 0x48, INDEX: [[0x0024], [0x014]]},
+  {NAME: "F_ATTACK", ID: 0x49, INDEX: [[0x004F, 0x004E], [0x03F, 0x03E]]},
   {NAME: "F_TRANSFORM", ID:0x50, INDEX:[[0x004E], [0x03E]]},
   /* [G]eneric */
   {NAME: "G_DEAD", ID: 0x60, INDEX: 0x0000},
@@ -890,8 +890,8 @@ PlayerObject.prototype.draw = function(sprites) {
     var s = this.sprite.INDEX;
     for(var i=0;i<s.length;i++) {
       for(var j=0;j<s[i].length;j++) {
-        if(mod === 0x02) { sprites.push({pos: vec2.add(vec2.add(this.pos, PlayerObject.DIM_OFFSET), vec2.make(j,i)), reverse: this.reverse, index: s[i][j], mode: 0x00}); }
-        sprites.push({pos: vec2.add(vec2.add(this.pos, PlayerObject.DIM_OFFSET), vec2.make(j,i)), reverse: this.reverse, index: s[i][j], mode: mod});
+        if(mod === 0x02) { sprites.push({pos: vec2.add(vec2.add(this.pos, PlayerObject.DIM_OFFSET), vec2.make(this.reverse?j:-j,i)), reverse: this.reverse, index: s[i][j], mode: 0x00}); }
+        sprites.push({pos: vec2.add(vec2.add(this.pos, PlayerObject.DIM_OFFSET), vec2.make(this.reverse?j:-j,i)), reverse: this.reverse, index: s[i][j], mode: mod});
       }
     }
   }
