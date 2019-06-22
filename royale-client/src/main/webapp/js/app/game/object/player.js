@@ -18,7 +18,7 @@ function PlayerObject(game, level, zone, pos, pid) {
   this.deadTimer = 0;
   
   /* Physics */
-  this.lastPos = this.pos;   // Position of mario on previous frame
+  this.lastPos = this.pos;   // Position of infringio on previous frame
   this.dim = vec2.make(1., 1.);
   this.moveSpeed = 0;
   this.fallSpeed = 0;
@@ -141,7 +141,7 @@ PlayerObject.TEAM_COLOR = "rgba(255,255,255,0.75)";
 
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [
-  /* [S]mall mario */
+  /* [S]mall infringio */
   {NAME: "S_STAND", ID: 0x00, INDEX: 0x000D},
   {NAME: "S_RUN0", ID: 0x01, INDEX: 0x000A},
   {NAME: "S_RUN1", ID: 0x02, INDEX: 0x000B},
@@ -150,7 +150,7 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "S_FALL", ID: 0x05, INDEX: 0x0008},
   {NAME: "S_CLIMB0", ID: 0x06, INDEX: 0x0006},
   {NAME: "S_CLIMB1", ID: 0x07, INDEX: 0x0007},
-  /* [B]ig mario */
+  /* [B]ig infringio */
   {NAME: "B_STAND", ID: 0x20, INDEX: [[0x002D], [0x01D]]}, 
   {NAME: "B_DOWN", ID: 0x21, INDEX: [[0x002C], [0x01C]]},
   {NAME: "B_RUN0", ID: 0x22, INDEX: [[0x0029], [0x019]]},
@@ -161,7 +161,7 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "B_CLIMB0", ID: 0x27, INDEX: [[0x0025], [0x015]]},
   {NAME: "B_CLIMB1", ID: 0x28, INDEX: [[0x0026], [0x016]]},
   {NAME: "B_TRANSFORM", ID:0x29, INDEX:[[0x002E], [0x01E]]},
-  /* [F]ire flower mario */
+  /* [F]ire flower infringio */
   {NAME: "F_STAND", ID: 0x40, INDEX: [[0x004D], [0x03D]]}, 
   {NAME: "F_DOWN", ID: 0x41, INDEX: [[0x004C], [0x03C]]},
   {NAME: "F_RUN0", ID: 0x42, INDEX: [[0x0049], [0x039]]},
@@ -644,7 +644,7 @@ PlayerObject.prototype.physics = function() {
 };
 
 /* Does a collision test in place, returns true if hits something */
-/* Used to check if it's okay to standup as big mario */
+/* Used to check if it's okay to standup as big infringio */
 PlayerObject.prototype.collisionTest = function(pos, dim) {
   var tdim = vec2.make(1., 1.);
   var tiles = this.game.world.getZone(this.level, this.zone).getTiles(pos, dim);
