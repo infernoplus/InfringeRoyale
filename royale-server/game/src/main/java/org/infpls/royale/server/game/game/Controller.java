@@ -80,33 +80,39 @@ public class Controller {
   
   /* Sends information to the client about the current gamestate */
   public void update(List<ByteMe.NETX> loc, List<ByteMe.NETX> glo) {
-    if(updates.size() < 1) { return; }
-    if(updates.size() > 120) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); updates.clear(); acLag = true; }
-    /* Process client input, if there is more than 3 updates in the queue we 'catch up' by processing 2 updates per tick instead of 1 */
-    int lm = Math.max(1, Math.min(2, updates.size()-1));
-    for(int j=0;j<updates.size()&&j<lm;j++) {
-      final List<ByteMe.NETX> proc = updates.remove();
-      for(int i=0;i<proc.size();i++) {
-        final ByteMe.NETX n = proc.get(i);
-        switch(n.designation) {
-          case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
-          case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
-          case 0x12 : { if(process012((ByteMe.NET012)n)) { break; } if(!strikelock) { loc.add(n); } break; }
-          case 0x13 : { process013((ByteMe.NET013)n); if(!strike) { glo.add(n); } break; }
-          case 0x15 : { process015((ByteMe.NET015)n); break; }
-          case 0x17 : { process017((ByteMe.NET017)n); break; }
-          case 0x18 : {
-            final ByteMe.NET018 wr = process018((ByteMe.NET018)n);
-            if(wr == null) { break; }
-            else if(!strike) { glo.add(wr); }
-            else { send(wr.encode().array()); }
-            break;
+    try {
+      if(updates.size() < 1) { return; }
+      if(updates.size() > 120) { Oak.log(Oak.Level.INFO, "Buffer Oversize: " + updates.size()); updates.clear(); acLag = true; }
+      /* Process client input, if there is more than 3 updates in the queue we 'catch up' by processing 2 updates per tick instead of 1 */
+      int lm = Math.max(1, Math.min(2, updates.size()-1));
+      for(int j=0;j<updates.size()&&j<lm;j++) {
+        final List<ByteMe.NETX> proc = updates.remove();
+        for(int i=0;i<proc.size();i++) {
+          final ByteMe.NETX n = proc.get(i);
+          switch(n.designation) {
+            case 0x10 : { process010((ByteMe.NET010)n); glo.add(n); break; }
+            case 0x11 : { process011((ByteMe.NET011)n); glo.add(n); break; }
+            case 0x12 : { if(process012((ByteMe.NET012)n)) { break; } if(!strikelock) { loc.add(n); } break; }
+            case 0x13 : { process013((ByteMe.NET013)n); if(!strike) { glo.add(n); } break; }
+            case 0x15 : { process015((ByteMe.NET015)n); break; }
+            case 0x17 : { process017((ByteMe.NET017)n); break; }
+            case 0x18 : {
+              final ByteMe.NET018 wr = process018((ByteMe.NET018)n);
+              if(wr == null) { break; }
+              else if(!strike) { glo.add(wr); }
+              else { send(wr.encode().array()); }
+              break;
+            }
+            case 0x19 : { process019((ByteMe.NET019)n); break; }
+            case 0x20 : { process020((ByteMe.NET020)n); if(!strike) { glo.add(n); } break; }
+            case 0x30 : { process030((ByteMe.NET030)n); if(!strike) { glo.add(n); } break; }
           }
-          case 0x19 : { process019((ByteMe.NET019)n); break; }
-          case 0x20 : { process020((ByteMe.NET020)n); if(!strike) { glo.add(n); } break; }
-          case 0x30 : { process030((ByteMe.NET030)n); if(!strike) { glo.add(n); } break; }
         }
       }
+    }
+    catch(Exception ex) {
+      Oak.log(Oak.Level.CRIT, "Packet contains invalid data. Potential cheating. User: " + getName() + " IP: " + session.getIP());
+      try { session.close(); } catch(IOException ioex) { Oak.log(Oak.Level.CRIT, "Failed to close connection!", ioex); }
     }
   }
   

@@ -36,16 +36,16 @@ FireballProj.SOFFSET = vec2.make(-.25, -.25); // Difference between position of 
 FireballProj.DEAD_ANIM_LENGTH = 3;
 
 FireballProj.SPEED = 0.475;
-FireballProj.BOUNCE_SPEED = 0.425;
-FireballProj.FALL_SPEED_MAX = 0.525;
-FireballProj.FALL_SPEED_ACCEL = 0.075;
+FireballProj.BOUNCE_SPEED = 0.375;
+FireballProj.FALL_SPEED_MAX = 0.425;
+FireballProj.FALL_SPEED_ACCEL = 0.065;
 
 FireballProj.SPRITE = {};
 FireballProj.SPRITE_LIST = [
-  {NAME: "IDLE0", ID: 0x00, INDEX: 0x00D0},
-  {NAME: "IDLE1", ID: 0x01, INDEX: 0x00D1},
-  {NAME: "IDLE2", ID: 0x02, INDEX: 0x00D2},
-  {NAME: "IDLE3", ID: 0x03, INDEX: 0x00D3},
+  {NAME: "IDLE0", ID: 0x00, INDEX: 0x00BC},
+  {NAME: "IDLE1", ID: 0x01, INDEX: 0x00BD},
+  {NAME: "IDLE2", ID: 0x02, INDEX: 0x00BE},
+  {NAME: "IDLE3", ID: 0x03, INDEX: 0x00BF},
   {NAME: "DEAD0", ID: 0x04, INDEX: 0x00D4},
   {NAME: "DEAD1", ID: 0x05, INDEX: 0x00D5},
   {NAME: "DEAD2", ID: 0x06, INDEX: 0x00D6}
@@ -90,6 +90,7 @@ FireballProj.prototype.step = function() {
   this.control();
   this.physics();
   this.interaction();
+  this.sound();
   
   if(this.pos.y < 0.) { this.kill(); }
 };
@@ -173,12 +174,15 @@ FireballProj.prototype.interaction = function() {
   }
 };
 
+FireballProj.prototype.sound = GameObject.prototype.sound;
+
 FireballProj.prototype.playerCollide = function(p) { };
 FireballProj.prototype.playerStomp = function(p) { };
 FireballProj.prototype.playerBump = function(p) { };
 
 FireballProj.prototype.kill = function() {
   this.setState(FireballProj.STATE.DEAD);
+  this.play("sfx/firework.wav", 0.7, .04);
   this.dead = true;
 };
 
@@ -195,6 +199,8 @@ FireballProj.prototype.setState = function(STATE) {
 FireballProj.prototype.draw = function(sprites) {
   sprites.push({pos: vec2.add(this.pos, FireballProj.SOFFSET), reverse: false, index: this.sprite.INDEX, mode: 0x00});
 };
+
+FireballProj.prototype.play = GameObject.prototype.play;
 
 /* Register object class */
 GameObject.REGISTER_OBJECT(FireballProj);

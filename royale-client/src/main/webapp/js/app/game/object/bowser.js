@@ -55,7 +55,7 @@ BowserObject.JUMP_LENGTH = 6;        // Length of jump
 BowserObject.JUMP_DECEL = 0.009;     // Jump deceleration
 BowserObject.ATTACK_DELAY = 75;      // Time between attacks
 BowserObject.ATTACK_ANIM_LENGTH = 15;
-BowserObject.PROJ_OFFSET = vec2.make(-.25, 1.1);
+BowserObject.PROJ_OFFSET = vec2.make(-.25, 0.25);
     
 BowserObject.FALL_SPEED_MAX = 0.3;
 BowserObject.FALL_SPEED_ACCEL = 0.085;
