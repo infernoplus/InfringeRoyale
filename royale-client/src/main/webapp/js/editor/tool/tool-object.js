@@ -26,7 +26,7 @@ function ToolObject(editor) {
 ToolObject.prototype.input = function(imp, mous, keys) {
   
   /* Move selected object if wasd/arrowkeys are pressed. */
-  if(this.selected && this.moveTimer-- < 1) {
+  if(this.selected && --this.moveTimer < 1) {
     if(keys[87] || keys[38]) { this.move(0,1); return; } // W or UP
     if(keys[83] || keys[40]) { this.move(0,-1); return; } // S or DOWN
     if(keys[65] || keys[37]) { this.move(-1,0); return; } // A or LEFT

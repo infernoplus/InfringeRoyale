@@ -1,5 +1,6 @@
 "use strict";
 /* global app */
+/* global vec2 */
 
 /* Define Input Class */
 function Input(game, container) {
@@ -32,7 +33,9 @@ Input.prototype.mouse = {
 };
 
 Input.prototype.mouse.event = function(event, state) {
-  this.nxtMov = {x: this.nxtMov.x+(this.pos.x-event.offsetX), y: this.nxtMov.y+((this.pos.y-event.offsetY)*-1)};
+  var flp = vec2.subtract(this.pos, vec2.make(event.offsetX, event.offsetY));
+  flp.y *= -1;
+  this.nxtMov = vec2.add(this.nxtMov, flp);
   this.pos = {x: event.offsetX, y: event.offsetY};
   if(state === undefined) { return; }
   switch(event.button) {
