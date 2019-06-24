@@ -22,7 +22,7 @@ MenuMain.prototype.launch = function() {
 
 MenuMain.prototype.startPad = function() {
   var parent = this;
-  var btn = Cookies.get("g_a");
+  var btn = isNaN(parseInt(Cookies.get("g_a")))?0:parseInt(Cookies.get("g_a"));
   var p = false;
   
   var padCheck = function() {

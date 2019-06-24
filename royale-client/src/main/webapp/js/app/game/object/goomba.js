@@ -42,7 +42,7 @@ GoombaObject.ID = 0x11;
 GoombaObject.NAME = "GOOMBA"; // Used by editor
 
 GoombaObject.ANIMATION_RATE = 3;
-GoombaObject.VARIANT_OFFSET = 0x50;   //5 rows down in the sprite sheet
+GoombaObject.VARIANT_OFFSET = 0x70;   //5 rows down in the sprite sheet
 
 GoombaObject.ENABLE_FADE_TIME = 15;
 GoombaObject.ENABLE_DIST = 26;          // Distance to player needed for proximity to trigger and the enemy to be enabled
@@ -211,6 +211,7 @@ GoombaObject.prototype.proximity = function() {
 };
 
 GoombaObject.prototype.enable = function() {
+  if(!this.disabled) { return; } /* repeat this code to all others */
   this.disabled = false;
   this.disabledTimer = GoombaObject.ENABLE_FADE_TIME;
 };
