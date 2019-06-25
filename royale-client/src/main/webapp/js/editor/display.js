@@ -159,7 +159,7 @@ EditorDisplay.prototype.drawPallete = function() {
 };
 
 EditorDisplay.prototype.drawObjectTool = function() {
-  if(!this.game.tool || this.game.tool.obj === undefined) { return; }
+  if(!this.game.tool || this.game.tool.objct === undefined) { return; }
   
   var context = this.context;
   
