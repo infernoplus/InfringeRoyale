@@ -35,7 +35,7 @@ Resource.prototype.loadTexture = function(src) {
       tex.cache[src.id] = img;
       tex.load--;
     };
-    img.src = src.src;
+    img.src = src.src + "?v=2.1.0"; /* Should automatically break cache if we update. */
     tex.load++;
   }
 };
