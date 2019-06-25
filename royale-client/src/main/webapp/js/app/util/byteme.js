@@ -184,7 +184,7 @@ td32.TILE_PROPERTIES = {
         /* Small bump */
         case 0x10 : {
           if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -194,7 +194,7 @@ td32.TILE_PROPERTIES = {
         /* Big bump */
         case 0x11 : {
           if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -215,7 +215,7 @@ td32.TILE_PROPERTIES = {
         /* Small bump */
         case 0x10 : {
           if(game.pid === pid) { game.coinage(); game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).coin(x,y+1);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -224,7 +224,7 @@ td32.TILE_PROPERTIES = {
         /* Big bump */
         case 0x11 : {
           if(game.pid === pid) { game.coinage(); game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).coin(x,y+1);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -252,7 +252,7 @@ td32.TILE_PROPERTIES = {
             td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
           }
           else {
-            var rep = 98307; // Replacement td32 data for tile.
+            var rep = 98331; // Replacement td32 data for tile.
             game.world.getZone(level, zone).replace(x,y,rep);
             game.world.getZone(level, zone).coin(x,y+1);
             td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -270,7 +270,7 @@ td32.TILE_PROPERTIES = {
             td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
           }
           else {
-            var rep = 98307; // Replacement td32 data for tile.
+            var rep = 98331; // Replacement td32 data for tile.
             game.world.getZone(level, zone).replace(x,y,rep);
             game.world.getZone(level, zone).coin(x,y+1);
             td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -291,7 +291,7 @@ td32.TILE_PROPERTIES = {
         /* Small bump */
         case 0x10 : {
           if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           var vin = td32.data(10813796, td.data); // Vine td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).grow(x,y+1,vin);
@@ -302,7 +302,7 @@ td32.TILE_PROPERTIES = {
         /* Big bump */
         case 0x11 : {
           if(game.pid === pid) { game.coinage(); game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           var vin = td32.data(10813796, td.data); // Vine td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).grow(x,y+1,vin);
@@ -324,7 +324,7 @@ td32.TILE_PROPERTIES = {
         /* Small bump */
         case 0x10 : {
           if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -334,7 +334,7 @@ td32.TILE_PROPERTIES = {
         /* Big bump */
         case 0x11 : {
           if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -355,7 +355,7 @@ td32.TILE_PROPERTIES = {
         /* Small bump */
         case 0x10 : {
           if(game.pid === pid) { game.coinage(); game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).coin(x,y+1);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -364,7 +364,7 @@ td32.TILE_PROPERTIES = {
         /* Big bump */
         case 0x11 : {
           if(game.pid === pid) { game.coinage(); game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.world.getZone(level, zone).coin(x,y+1);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -540,7 +540,7 @@ td32.TILE_PROPERTIES = {
         /* Small bump */
         case 0x10 : {
           if(game.pid === pid) { game.send({type: "g50"}); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(CheckObject.ID, level, zone, vec2.make(x,y+1), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -549,7 +549,7 @@ td32.TILE_PROPERTIES = {
         /* Big bump */
         case 0x11 : {
           if(game.pid === pid) { game.send({type: "g50"}); }
-          var rep = 98307; // Replacement td32 data for tile.
+          var rep = 98331; // Replacement td32 data for tile.
           game.world.getZone(level, zone).replace(x,y,rep);
           game.createObject(CheckObject.ID, level, zone, vec2.make(x,y+1), [shor2.encode(x,y)]);
           td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);

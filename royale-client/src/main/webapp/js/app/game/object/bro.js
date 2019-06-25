@@ -245,6 +245,7 @@ HammerObject.prototype.face = function() {
 HammerObject.prototype.sound = GameObject.prototype.sound;
 
 HammerObject.prototype.enable = function() {
+  if(!this.disabled) { return; }
   this.disabled = false;
   this.disabledTimer = HammerObject.ENABLE_FADE_TIME;
 };

@@ -28,7 +28,7 @@ TextObject.ANIMATION_RATE = 3;
 
 TextObject.SPRITE = {};
 TextObject.SPRITE_LIST = [
-  {NAME: "IDLE", ID: 0x00, INDEX: 0x000E}
+  {NAME: "IDLE", ID: 0x00, INDEX: 0x00FF}
 ];
 
 /* Makes sprites easily referenceable by NAME. For sanity. */

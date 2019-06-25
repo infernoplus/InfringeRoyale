@@ -255,6 +255,7 @@ KoopaObject.prototype.proximity = function() {
 KoopaObject.prototype.sound = GameObject.prototype.sound;
 
 KoopaObject.prototype.enable = function() {
+  if(!this.disabled) { return; }
   this.disabled = false;
   this.disabledTimer = KoopaObject.ENABLE_FADE_TIME;
 };
