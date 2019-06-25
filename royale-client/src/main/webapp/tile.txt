@@ -1,0 +1,61 @@
+This spec defines all the tile definitions. It lists their name followed by their id value.
+<NAME::ID>
+It also explains what they do and how they should be used.
+
+==========================================================================================================
+
+AIR::0
+
+SOLID STANDARD::1
+
+SOLID BUMPABLE::2
+ - Can't be broken, only bumps.
+
+SOLID BREAKABLE NORMAL::3
+ - Standard breakable block. Used very often.
+
+ITEM BLOCK STANDARD::17
+ - You must set an extra data value for this that corresponds to the object id you want it to contain.
+ - Standard values are (81,82,83,84,86) for (mushroom,fireflower,life,star,poison mushroom)
+
+COIN BLOCK STANDARD::18
+ - Used for blocks containing coins.
+
+COIN BLOCK MULTI::19
+ - Same as above but set the extra data value to the number of coins you want.
+
+ITEM BLOCK INVISIBLE::21
+ - Like a regular item block but invisible till hit.
+
+COIN BLOCK INVISIBLE::22
+ - I'm not repeating myself again.
+
+VINE BLOCK::24
+ - Creates a vine when hit, extra data value correponds to the id of the warp point you want it to go to.
+
+WARP TILE::81
+ - When touched it will warp you. Extra data value correponds to the id of the warp point you want it to go to.
+
+WARP PIPE SLOW::82
+ - Warp pipe with a few seconds delay. Extra data value correponds to the id of the warp point you want it to go to.
+
+WARP PIPE RIGHT SLOW::83
+ - Same but sideways. Extra data value correponds to the id of the warp point you want it to go to.
+
+WARP PIPE FAST::84
+ - No delay. Extra data value correponds to the id of the warp point you want it to go to.
+
+WARP PIPE RIGHT FAST::85
+ - Reeee. Extra data value correponds to the id of the warp point you want it to go to.
+
+LEVEL END WARP::86
+ - When touched it ends the level and takes you to the next. Extra data value correpond to the id of the level this goes to.
+
+FLAGPOLE::160
+ - When touched mario slides down and then walks right.
+
+VINE::165
+- Don't use this.
+
+VOTE BLOCK::240
+- Don't use this.

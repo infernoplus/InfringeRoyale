@@ -59,7 +59,7 @@ Editor.prototype.compile = function() {
       var zone = level.zones[j];
       
       var zdat = {};
-      id: zone.id;
+      zdat.id = zone.id;
       zdat.initial = zone.initial;
       zdat.color = zone.color;
       zdat.music = zone.music;

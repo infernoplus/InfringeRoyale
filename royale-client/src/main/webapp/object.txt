@@ -1,0 +1,138 @@
+This spec defines all the object types. It lists their name followed by their id value.
+<NAME::ID>
+Below that in [] is the names of the parameters. These must be set in the parameter field.
+
+==========================================================================================================
+
+PLAYER::1
+[]
+ - Dont place this. It will not work.
+
+GOOMBA::17
+[color]
+ - Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.
+
+KOOPA::18
+[fly,color]
+ - Fly should be set to 0 or 1. 1 is flying.
+ - Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.
+
+KOOPA TROOPA::19
+[fly,color]
+ - Fly should be set to 0 or 1. 1 is flying.
+ - Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.
+
+UNSPELLABLE PLANT::22
+[color]
+ - Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.
+
+FLYING FISH::21
+[delay,impulse]
+ - Delay is a positive integer in seconds for how the fish should wait before jumping again.
+ - Impulse is a float value for how much force the fish should jump with
+ - See my maps for examples of what to set these values to
+
+HAMMER BRO::49
+[reverse]
+ - Reverse should be 0 or 1. 1 Makes him move backwards instaed of forwards.
+
+BOWSER::25
+[]
+ - No params
+
+PLATFORM::145
+[width,movx,movy,speed,loop,delay,reverse]
+ - Positive int, width of the platform
+ - Float, how far to move on x axis
+ - Float, how far to move on y axis
+ - Float, speed
+ - 0 or 1, if set to 1 it will loop instantly instead of returning
+ - positive int, inital delay on platform. used to offset 2 platforms moving on same path
+ - 0 or 1, starts at end point
+ - SEE MY LEVELS FOR EXAMPLES, THESE ARE KINDA TRICKY TO DO RIGHT
+
+BUS PLATFORM::146
+[width,movx,movy,speed]
+ - Positive int, width of the platform
+ - Float, how far to move on x axis
+ - Float, how far to move on y axis
+ - Float, speed
+ - These are mostly indentical to PLATFORM but they only start once someone lands on them. Then they stop at the end.
+
+SPRING::149
+[]
+- No params. Boingy.
+
+FLAG::177
+[]
+- No params.
+- Always place one of these at the top of the flagpole. See my levels for examples.
+
+FIRE TRAP::33
+[start,size]
+ - 0 or 1, start position. Just offsets it a bit.
+ - positive int, how big the fire trap should be. default is 6
+
+FIRE BLAST::34
+[delay,impulse]
+ - positive int, how long to wait before next jump
+ - float, impulse is how much force we jump with
+
+LAUNCHER::35
+[delay]
+ - positive int, how long we wait to shoot again
+
+BULLET::36
+[]
+ - No params. don't use this, use the launcher
+
+FIREBALL PROJECTILE::161
+[]
+ - No params. Don't use this.
+
+FIRE BREATH PROJECTILE::162
+[]
+ - No params. Don't use this.
+
+HAMMER PROJECTILE::163
+[]
+ - No params. Don't use this.
+
+MUSHROOM::81
+[]
+ - No params. It's better to use item block tiles for items.
+
+FIRE FLOWER::82
+[]
+ - No params. It's better to use item block tiles for items.
+
+STAR::84
+[]
+ - No params. It's better to use item block tiles for items.
+
+ONEUP::83
+[]
+ - No params. It's better to use item block tiles for items.
+
+COIN::97
+[]
+ - No params.
+
+AXE::85
+[]
+ - No params.
+
+POISON MUSHROOM::86
+[]
+ - No params.
+
+CHECKMARK::254
+[]
+ - No params. Don't use this.
+
+TEXT::253
+[offset,size,color,text]
+ - float, vertical offset for text position
+ - float 1.0 = the size of 1 tile
+ - html color code, #FFFFFF for white
+ - string, just a text string after this

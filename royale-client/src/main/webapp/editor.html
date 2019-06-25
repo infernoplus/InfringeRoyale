@@ -20,6 +20,25 @@
         <b>Open Game File...</b>
         <div><input type="file" id="file-input"/></div>
         <div class="file-error" id="file-error">...</div>
+        <div class="ek-info">
+          <b>This EK is provided as is for anyone interested in it.</b><br>
+          You can download and open any of the existing levels from the site like this:<br>
+          <a>http://www.infernoplus.com/royale/game/world-1</a><br>
+          <a>http://www.infernoplus.com/royale/game/world-l1</a><br>
+          <a>http://www.infernoplus.com/royale/game/world-p</a><br>
+          <br>
+          A fairly blank map is provided for you to start from if you wish to try and make a map:<br>
+          <a>http://www.infernoplus.com/royale/game/blank</a><br><br>
+          This EK is intended for those somewhat knowledgeable of programming/modding.<br>
+          All values listed as 'byte' or 'bit' are in unsigned decimal format.<br>
+          Which means a byte is a value from 0 to 255 and so on.<br><br>
+          All zones should have a height of 16. This is a general style rule for the game.<br>
+          If you plan to try and make a map, please study my maps carefully!<br><br>
+          If you manage to make a level that looks solid, tweet it at me.<br>
+          I will only be adding the best ones. Remember to save often and good luck!<br><br>
+          Oh and please don't directly recreate any levels from <i>other games</i>.<br>
+          Make your creations your own.
+        </div>
       </div>
       
       <!-- Editor -->
@@ -162,6 +181,16 @@
               <div class='tool-var'>Extra Data</div><div class='tool-type'>byte</div>
               <input id='editor-tool-tile-data' type='text' class="tool-val"/>
             </div>
+            <div class='tool-div'></div>
+            <div class='tool-box' style='font-size: 80%'>
+              <div class="tool-val-im">Middle click copies a tiles data, left click paints</div>
+              <div class="tool-val-im">Sprite index defines the visual of the tile.</div>
+              <div class="tool-val-im">Bump state should always be 0 unless you have some insane reason.</div>
+              <div class="tool-val-im">Depth 0 is background, Depth 1 is foreground. Warp pipe/item blocks should generally be foreground.</div>
+              <div class="tool-val-im">Tile Definition defines the physical/interactive properties of a tile. Solid ground is 1, item block is 17, etc...</div>
+              <div class="tool-val-im">Some blocks need 'extra data' to function. An item block for example, needs the extra data 81 to put a mushroom in it.</div>
+              <div class="tool-val-im">See doc for more info: <a href='./tile.txt'>tile.txt</a></div>
+            </div>
           </div>
           
           <!-- Object Tool -->
@@ -183,6 +212,11 @@
               <div class='tool-var'>Params</div><div class='tool-type'>string[]</div>
               <input id='editor-tool-object-param' type='text' class="tool-val"/>
             </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class="tool-val-im">Left click selects, middle click creates new, wasd keys to move, delete to delete.</div>
+              <div class="tool-val-im">See doc for more info: <a href='./object.txt'>object.txt</a></div>
+            </div>
           </div>
             
           <!-- Warp Tool -->
@@ -199,6 +233,14 @@
             <div class='tool-box'>
               <div class='tool-var'>Extra Data</div><div class='tool-type'>byte</div>
               <input id='editor-tool-warp-data' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class="tool-val-im">Left click selects, middle click creates new, wasd keys to move, delete to delete.</div>
+              <div class="tool-val-im">For tiles that have a warp, the extra data of that tile should match the id of the warp point.</div>
+              <div class="tool-val-im">Example: A warp pipe with extra data 32 will warp to the warp point in that level with the id 32.</div>
+              <div class="tool-val-im">The extra data of the warp point defines the animation state.</div>
+              <div class="tool-val-im">0 is default, (1, 2, 3, 4) are warp pipe (up, down, left, right) respectively.</div>
             </div>
           </div>
           
@@ -223,8 +265,9 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class="tool-val-im">Right click to copy an area, left click to paste.</div>
-              <div class="tool-val-im">If overwrite is set, pasting will only overwrite tiles of the given td32.</div>
+              <div class="tool-val-im">Middle click to copy an area, left click to paste.</div>
+              <div class="tool-val-im">Pasting will only overwrite tiles with the given 'ovewrite value'.</div>
+              <div class="tool-val-im">Default td32 value for air is 30 so set overwrite to 30 generally.</div>
             </div>
           </div>
           

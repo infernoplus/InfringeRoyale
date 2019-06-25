@@ -267,3 +267,10 @@ html,body {
   transform: translateX(-50%) translateY(-50%);
   white-space: nowrap;
 }
+
+.ek-info {
+  display: block;
+  background-color: #999999;
+  margin: 12px;
+  font-size: 12px;
+}

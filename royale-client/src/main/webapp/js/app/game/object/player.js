@@ -172,7 +172,7 @@ PlayerObject.SPRITE_LIST = [
   {NAME: "F_CLIMB0", ID: 0x47, INDEX: [[0x0023], [0x013]]},
   {NAME: "F_CLIMB1", ID: 0x48, INDEX: [[0x0024], [0x014]]},
   {NAME: "F_ATTACK", ID: 0x49, INDEX: [[0x004F, 0x004E], [0x03F, 0x03E]]},
-  {NAME: "F_TRANSFORM", ID:0x50, INDEX:[[0x004E], [0x03E]]},
+  {NAME: "F_TRANSFORM", ID:0x50, INDEX:[[0x004D], [0x003D]]},
   /* [G]eneric */
   {NAME: "G_DEAD", ID: 0x60, INDEX: 0x0000},
   {NAME: "G_HIDE", ID: 0x70, INDEX: 0x000E}

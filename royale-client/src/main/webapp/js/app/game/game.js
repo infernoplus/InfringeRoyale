@@ -652,6 +652,8 @@ Game.prototype.coinage = function() {
   this.coins = Math.min(99, this.coins+1);
   if(this.coins >= Game.COINS_TO_LIFE) { this.lifeage(); this.coins = 0; }
   this.play("sfx/coin.wav",.4,0.);
+  var c = Cookies.get("dosh");
+  Cookies.set("dosh", c?parseInt(c)+1:1, {expires: 365});
 };
 
 /* When the client player collects a life */

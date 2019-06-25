@@ -41,7 +41,7 @@ GoombaObject.ASYNC = false;
 GoombaObject.ID = 0x11;
 GoombaObject.NAME = "GOOMBA"; // Used by editor
 
-GoombaObject.ANIMATION_RATE = 3;
+GoombaObject.ANIMATION_RATE = 5;
 GoombaObject.VARIANT_OFFSET = 0x70;   //5 rows down in the sprite sheet
 
 GoombaObject.ENABLE_FADE_TIME = 15;
@@ -211,7 +211,7 @@ GoombaObject.prototype.proximity = function() {
 };
 
 GoombaObject.prototype.enable = function() {
-  if(!this.disabled) { return; } /* repeat this code to all others */
+  if(!this.disabled) { return; }
   this.disabled = false;
   this.disabledTimer = GoombaObject.ENABLE_FADE_TIME;
 };
