@@ -25,7 +25,7 @@ function ToolWarp(editor) {
 ToolWarp.prototype.input = function(imp, mous, keys) {
   
   /* Move selected object if we have one and press wasd/arrowkeys. */
-  if(this.selected && this.moveTimer-- < 1) {
+  if(this.selected && (this.moveTimer--) < 1) {
     if(keys[87] || keys[38]) { this.move(0,1); return; } // W or UP
     if(keys[83] || keys[40]) { this.move(0,-1); return; } // S or DOWN
     if(keys[65] || keys[37]) { this.move(-1,0); return; } // A or LEFT
@@ -54,7 +54,13 @@ ToolWarp.prototype.input = function(imp, mous, keys) {
   if(mous.mmb && !this.mmbx) {
     this.mmbx = true;
     var pos = shor2.encode(g.x, g.y);
-    var wrp = {id: parseInt(Math.random()*255), pos: pos, data: 0};
+    
+    /* Have to do it this way for production sdk to still work */
+    var wrp = {};
+    wrp.id = parseInt(Math.random()*255);
+    wrp.pos = pos;
+    wrp.data = 0;
+      
     this.zone.warp.push(wrp);
     this.select(wrp);
     return;
