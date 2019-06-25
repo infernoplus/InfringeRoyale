@@ -20,7 +20,7 @@ function ToolObject(editor) {
   this.moveTimer = 0;
   this.mmbx = false;
   
-  this.obj = {type: 17, param: []};
+  this.objct = {type: 17, param: []};
 }
 
 ToolObject.prototype.input = function(imp, mous, keys) {
@@ -77,7 +77,7 @@ ToolObject.prototype.update = function() {
     if(isNaN(type) || param === undefined) { throw "oof"; }
     
     if(this.selected) { this.selected.type = type; this.selected.param = param; }
-    this.obj.type = type; this.obj.param = param;
+    this.objct.type = type; this.objct.param = param;
     
     var cls = GameObject.OBJECT(type);
     if(cls && cls.NAME) { this.valName.innerHTML = cls.NAME; }
@@ -87,8 +87,8 @@ ToolObject.prototype.update = function() {
 
 ToolObject.prototype.select = function(object) {
   this.selected = object;
-  this.obj.type = object.type;
-  this.obj.param = object.param;
+  this.objct.type = object.type;
+  this.objct.param = object.param;
   
   this.valType.value = object.type;
   this.valPos.innerHTML = object.pos;
