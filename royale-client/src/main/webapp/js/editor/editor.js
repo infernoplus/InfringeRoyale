@@ -39,32 +39,34 @@ Editor.prototype.load = function(data) {
 };
 
 Editor.prototype.compile = function() {
-  var data = {
-    type: this.dataRaw.type,
-    resource: this.dataRaw.resource,
-    initial: this.world.initial,
-    world: []
-  };
+  /* Have to do it this way for production sdk to still work */
+  var data = {};
+  data.type = this.dataRaw.type;
+  data.resource = this.dataRaw.resource;
+  data.initial = this.world.initial;
+  data.world = [];
   
   for(var i=0;i<this.world.levels.length;i++) {
     var level = this.world.levels[i];
-    var ldat = {
-      id: level.id,
-      name: level.name,
-      initial: level.initial,
-      zone: []
-    };
+    
+    var ldat = {};
+    ldat.id = level.id;
+    ldat.name = level.name;
+    ldat.initial = level.initial;
+    ldat.zone = [];
+    
     for(var j=0;j<level.zones.length;j++) {
       var zone = level.zones[j];
-      var zdat = {
-        id: zone.id,
-        initial: zone.initial,
-        color: zone.color,
-        music: zone.music,
-        data: zone.data,
-        obj: zone.obj,
-        warp: zone.warp
-      };
+      
+      var zdat = {};
+      id: zone.id;
+      zdat.initial = zone.initial;
+      zdat.color = zone.color;
+      zdat.music = zone.music;
+      zdat.data = zone.data;
+      zdat.obj = zone.obj;
+      zdat.warp = zone.warp;
+      
       ldat.zone.push(zdat);
     }
     data.world.push(ldat);

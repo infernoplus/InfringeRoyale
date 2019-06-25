@@ -55,7 +55,13 @@ ToolObject.prototype.input = function(imp, mous, keys) {
   if(mous.mmb && !this.mmbx) {
     this.mmbx = true;
     var pos = shor2.encode(g.x, g.y);
-    var obj = {type: this.obj.type, pos: pos, param: this.obj.param};
+    
+    /* Have to do it this way for production sdk to still work */
+    var obj = {};
+    obj.type = this.objct.type;
+    obj.pos = pos;
+    obj.param = this.objct.param;
+    
     this.zone.obj.push(obj);
     this.select(obj);
     return;

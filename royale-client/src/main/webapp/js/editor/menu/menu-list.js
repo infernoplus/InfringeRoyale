@@ -16,11 +16,25 @@ MenuList.prototype.generate = function() {
     html += "<div class='list-world'>" + level.name + " :: " + level.id + "</div>";
     for(var j=0;j<level.zones.length;j++) {
       var zone = level.zones[j];
-      html += "<div class='list-zone' onclick='app.menu.list.select(" + level.id + ", " + zone.id + ")'>" + zone.id + "</div>";
+      var id = "list-gen-" + i + "-" + j;
+      html += "<div class='list-zone' id='" + id + "'>" + zone.id + "</div>";
     }
   }
   
   this.element.innerHTML = html;
+  
+  /* Have to do it this way for production sdk to still work */
+  for(var i=0;i<world.levels.length;i++) {
+    var level = world.levels[i];
+    for(var j=0;j<level.zones.length;j++) {
+      var zone = level.zones[j];
+      var id = "list-gen-" + i + "-" + j;
+      var ele = document.getElementById(id);
+      var that = this;
+      ele.lid = level.id; ele.zid = zone.id;
+      ele.onclick = function() { that.select(this.lid,this.zid); };
+    }
+  }
 };
 
 MenuList.prototype.select = function(level, zone) {
